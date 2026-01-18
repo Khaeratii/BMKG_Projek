@@ -1,0 +1,388 @@
+{% extends "base.html" %} {% block title %}Detail Usulan | BMKG Wilayah IV{%
+endblock %} {% block body_class %}view-proposal-page{% endblock %} {% block
+extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/view_proposal.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-12">
+      <!-- Navigation Button -->
+      <div class="mb-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+          <i class="fas fa-arrow-left me-2"></i>Kembali ke Dashboard
+        </a>
+      </div>
+
+      <!-- Document Container -->
+      <div class="document-wrapper">
+        <div class="document-container">
+          <!-- Kop Surat dalam Tabel -->
+          <table class="kop-bmkg">
+            <tr>
+              <!-- LOGO -->
+              <td class="kop-logo-cell">
+                <img
+                  src="{{ url_for('static', filename='images/logo_bmkg.png') }}"
+                  alt="Logo BMKG"
+                  class="kop-logo"
+                />
+              </td>
+
+              <!-- JUDUL -->
+              <td class="kop-title-cell">USULAN PERUBAHAN</td>
+
+              <!-- INFO DOKUMEN -->
+              <td class="kop-info-cell">
+                <div class="kop-org">
+                  BALAI BESAR METEOROLOGI KLIMATOLOGI<br />
+                  DAN GEOFISIKA WILAYAH IV
+                </div>
+
+                <table class="kop-info-table">
+                  <tr>
+                    <td class="label">No. Dokumen</td>
+                    <td>:</td>
+                    <td>
+                      {{ proposal.nomor_dokumen or 'SOP/12/IMS/VII/2021/01' }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="label">Revisi</td>
+                    <td>:</td>
+                    <td>{{ proposal.revisi or '01' }}</td>
+                  </tr>
+                  <tr>
+                    <td class="label">Tgl. Efektif</td>
+                    <td>:</td>
+                    <td>{{ proposal.tgl_efektif or '12 Oktober 2023' }}</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Judul Dokumen -->
+          <div class="document-title text-center mt-4 mb-4">
+            USULAN PERUBAHAN
+          </div>
+
+          <!-- Section 1: Deskripsi Perubahan -->
+          <div class="document-section">
+            <div class="section-title">
+              Deskripsi Perubahan (diisi oleh Pemohon - Pegawai)
+            </div>
+            <div class="section-content">
+              <table class="form-table" width="100%">
+                <tr>
+                  <td width="15%" class="label-cell">No:</td>
+                  <td width="35%" class="empty-cell">
+                    {{ proposal.no_usulan or proposal.nomor_dokumen or '' }}
+                  </td>
+                  <td width="15%" class="label-cell">Tanggal :</td>
+                  <td width="35%" class="empty-cell">
+                    {{ proposal.tanggal or '' }}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label-cell">Diminta oleh :</td>
+                  <td class="filled-cell">{{ proposal.diminta_oleh or '' }}</td>
+                  <td class="label-cell">Jabatan :</td>
+                  <td class="filled-cell">{{ proposal.jabatan or '' }}</td>
+                </tr>
+                <tr>
+                  <td class="label-cell" colspan="4">Deskripsi Perubahan :</td>
+                </tr>
+                <tr>
+                  <td colspan="4" class="filled-cell">
+                    {{ proposal.deskripsi_perubahan or '' }}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label-cell">
+                    Hasil Perubahan dibutuhkan pada tanggal:
+                  </td>
+                  <td colspan="3" class="filled-cell">
+                    {{ proposal.hasil_dibutuhkan_tgl or '' }}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label-cell">Alasan perubahan:</td>
+                  <td colspan="3" class="filled-cell">
+                    {{ proposal.alasan_perubahan or '' }}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label-cell">Tanda tangan<br />Pemohon:</td>
+                  <td colspan="3" class="signature-cell">
+                    {% if proposal.signature_filename %}
+                    <img
+                      src="{{ url_for('serve_signature_file', filename=proposal.signature_filename) }}"
+                      alt="Tanda Tangan"
+                      class="signature-image"
+                    />
+                    {% else %}
+                    <div class="empty-placeholder">[Kosong]</div>
+                    {% endif %}
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- Section 2: Evaluasi Dampak -->
+          <div class="document-section">
+            <div class="section-title">
+              Evaluasi Dampak Perubahan (diisi oleh Penanggung Jawab - Ketua Tim
+              Kerja)
+            </div>
+            <div class="section-content">
+              <table class="form-table" width="100%">
+                <tr>
+                  <td width="20%" class="label-cell">Tipe Perubahan</td>
+                  <td width="80%">
+                    <div class="checkbox-wrapper">
+                      {# ============ PERBAIKAN DI SINI ============ #} {% if
+                      evaluation and evaluation.tipe_perubahan %} {% if
+                      evaluation.tipe_perubahan is string %} {% set tipe_changes
+                      = evaluation.tipe_perubahan.split(',') %} {% elif
+                      evaluation.tipe_perubahan is iterable %} {% set
+                      tipe_changes = evaluation.tipe_perubahan %} {% else %} {%
+                      set tipe_changes = [] %} {% endif %} {% else %} {% set
+                      tipe_changes = [] %} {% endif %} {# ============ AKHIR
+                      PERBAIKAN ============ #}
+
+                      <div class="checkbox-option">
+                        <input type="checkbox" {% if 'Perangkat Keras' in
+                        tipe_changes %}checked{% endif %} disabled>
+                        <span class="checkbox-label">Perangkat Keras</span>
+                      </div>
+                      <div class="checkbox-option">
+                        <input type="checkbox" {% if 'Database' in tipe_changes
+                        %}checked{% endif %} disabled>
+                        <span class="checkbox-label">Database</span>
+                      </div>
+                      <div class="checkbox-option">
+                        <input type="checkbox" {% if 'Konfigurasi' in
+                        tipe_changes %}checked{% endif %} disabled>
+                        <span class="checkbox-label">Konfigurasi</span>
+                      </div>
+                      <div class="checkbox-option">
+                        <input type="checkbox" {% if 'Utilities' in tipe_changes
+                        %}checked{% endif %} disabled>
+                        <span class="checkbox-label">Utilities</span>
+                      </div>
+                      <div class="checkbox-option">
+                        <input type="checkbox" {% if 'Software / Aplikasi' in
+                        tipe_changes %}checked{% endif %} disabled>
+                        <span class="checkbox-label">Software / Aplikasi</span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label-cell">Prioritas Perubahan</td>
+                  <td>
+                    <div class="checkbox-wrapper">
+                      <div class="checkbox-option">
+                        <input type="checkbox" {% if evaluation and
+                        evaluation.prioritas == 'Normal' %}checked{% endif %}
+                        disabled>
+                        <span class="checkbox-label">Normal</span>
+                      </div>
+                      <div class="checkbox-option">
+                        <input type="checkbox" {% if evaluation and
+                        evaluation.prioritas == 'Emergency' %}checked{% endif %}
+                        disabled>
+                        <span class="checkbox-label">Emergency</span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label-cell">
+                    Dampak terhadap lingkungan produksi:
+                  </td>
+                  <td class="empty-cell">
+                    {{ evaluation.dampak_lingkungan if evaluation and
+                    evaluation.dampak_lingkungan else '' }}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label-cell">Upaya / Tindakan yang diperlukan :</td>
+                  <td class="empty-cell">
+                    {{ evaluation.upaya_dibutuhkan if evaluation and
+                    evaluation.upaya_dibutuhkan else '' }}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label-cell">
+                    Kebutuhan Sumber daya: (personil, h/w, s/w)
+                  </td>
+                  <td class="empty-cell">
+                    {{ evaluation.sumber_daya if evaluation and
+                    evaluation.sumber_daya else '' }}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label-cell">Penjelasan Rencana Pengujian :</td>
+                  <td class="empty-cell">
+                    {{ evaluation.rencana_pengujian if evaluation and
+                    evaluation.rencana_pengujian else '' }}
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- Section 3: Approval -->
+          <div class="document-section">
+            <div class="section-title">
+              Change Approval or Rejection (diisi oleh Pemberi Persetujuan)
+            </div>
+            <div class="section-content">
+              <table class="form-table" width="100%">
+                <tr>
+                  <td width="25%" class="label-cell">
+                    Status Permintaan perubahan
+                  </td>
+                  <td width="75%">
+                    <div class="checkbox-wrapper">
+                      <div class="checkbox-option">
+                        <input type="checkbox" {% if approval and
+                        approval.status == 'Diterima' %}checked{% endif %}
+                        disabled>
+                        <span class="checkbox-label">Diterima</span>
+                      </div>
+                      <div class="checkbox-option">
+                        <input type="checkbox" {% if approval and
+                        approval.status == 'Ditolak' %}checked{% endif %}
+                        disabled>
+                        <span class="checkbox-label">Ditolak</span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label-cell">Tanggal pelaksanaan perubahan:</td>
+                  <td class="empty-cell">
+                    {{ approval.tanggal_pelaksanaan if approval and
+                    approval.tanggal_pelaksanaan else '' }}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label-cell">PIC Pelaksana perubahan:</td>
+                  <td class="empty-cell">
+                    {{ approval.pic_pelaksana if approval and
+                    approval.pic_pelaksana else '' }}
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Implementation Section (if exists) -->
+              {% if implementation %}
+              <div class="document-section mt-4">
+                <div class="section-title">Implementasi Perubahan (Rilis)</div>
+                <div class="section-content">
+                  <table class="form-table" width="100%">
+                    <tr>
+                      <td width="25%" class="label-cell">
+                        Hasil Pengujian Implementasi:
+                      </td>
+                      <td width="75%" class="empty-cell">
+                        {{ implementation.hasil_pengujian if implementation and
+                        implementation.hasil_pengujian else '' }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="label-cell">
+                        Tanggal Rilis ke Lingkungan Operasional:
+                      </td>
+                      <td class="empty-cell">
+                        {{ implementation.tanggal_rilis if implementation and
+                        implementation.tanggal_rilis else '' }}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="label-cell">Catatan Implementasi:</td>
+                      <td class="empty-cell">
+                        {{ implementation.catatan_implementasi if implementation
+                        and implementation.catatan_implementasi else '' }}
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              {% endif %}
+
+              <div
+                class="document-footer text-center mt-3 pt-2 border-top border-dark"
+              >
+                Klasifikasi : Internal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Hal
+                : 1 / 1
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="document-actions mt-4 pt-3 border-top">
+            <button
+              onclick="window.print()"
+              class="btn btn-outline-secondary btn-sm"
+            >
+              <i class="fas fa-print me-1"></i> Print
+            </button>
+
+            {% if proposal.status == 'draft' and proposal.created_by ==
+            session.get('username') %}
+            <a
+              href="{{ url_for('edit_proposal', proposal_id=proposal.id) }}"
+              class="btn btn-primary btn-sm ms-2"
+            >
+              <i class="fas fa-edit me-1"></i> Edit
+            </a>
+            {% endif %}
+
+            <!-- PERBAIKAN: Ganti download_proposal_pdf dengan generate_document -->
+            <a
+              href="{{ url_for('generate_document', proposal_id=proposal.id) }}"
+              class="btn btn-success btn-sm ms-2"
+            >
+              <i class="fas fa-file-pdf me-1"></i> Cetak Dokumen
+            </a>
+
+            <!-- Role-specific actions -->
+            {% if session.user_role == 'penanggung_jawab' and proposal.status ==
+            'evaluasi' %}
+            <a
+              href="{{ url_for('evaluasi_proposal', proposal_id=proposal.id) }}"
+              class="btn btn-warning btn-sm ms-2"
+            >
+              <i class="fas fa-clipboard-check me-1"></i> Evaluasi
+            </a>
+            {% elif session.user_role == 'pemberi_persetujuan' and
+            proposal.status == 'approval' %}
+            <a
+              href="{{ url_for('approve_proposal', proposal_id=proposal.id) }}"
+              class="btn btn-info btn-sm ms-2"
+            >
+              <i class="fas fa-check-circle me-1"></i> Beri Persetujuan
+            </a>
+            {% elif session.user_role == 'pelaksana' and proposal.status ==
+            'implementation' %}
+            <a
+              href="{{ url_for('implement_proposal', proposal_id=proposal.id) }}"
+              class="btn btn-dark btn-sm ms-2"
+            >
+              <i class="fas fa-tools me-1"></i> Implementasi
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

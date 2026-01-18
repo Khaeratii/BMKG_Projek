@@ -1,0 +1,458 @@
+/* ================= ROOT ================= */
+:root {
+  --border-color: #222;
+  --muted: #444;
+  --paper-bg: #fff;
+}
+
+/* ================= GLOBAL ================= */
+body {
+  font-family: "Arial", sans-serif;
+  margin: 0;
+  padding: 20px;
+  line-height: 1.5;
+  color: #000;
+  background: #fff;
+  font-size: 12px;
+  background: #f0f0f0;
+}
+
+/* HEADER STYLES */
+.header {
+  text-align: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 3px double #000;
+}
+
+.logo-container {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.logo-container img {
+  max-height: 80px;
+  width: auto;
+}
+
+.agency-title {
+  font-size: 16px;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin: 5px 0;
+  letter-spacing: 1px;
+}
+
+.agency-subtitle {
+  font-size: 14px;
+  font-weight: bold;
+  margin: 5px 0 15px 0;
+}
+
+.form-title {
+  font-size: 18px;
+  font-weight: bold;
+  text-decoration: underline;
+  margin: 15px 0;
+  color: #000;
+}
+
+/* DOCUMENT INFO TABLE */
+.doc-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0 30px 0;
+  border: 2px solid #000;
+}
+
+.doc-info-table th {
+  background-color: #f0f0f0;
+  border: 1px solid #000;
+  padding: 8px 10px;
+  text-align: left;
+  font-weight: bold;
+  width: 30%;
+  font-size: 11px;
+}
+
+.doc-info-table td {
+  border: 1px solid #000;
+  padding: 8px 10px;
+  font-size: 11px;
+  word-break: break-word;
+}
+
+/* SECTION STYLES */
+.section {
+  margin: 25px 0;
+  page-break-inside: avoid;
+}
+
+.section-title {
+  font-weight: bold;
+  background-color: #e8e8e8;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  border-left: 4px solid #000;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.section-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+}
+
+.section-table th {
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  padding: 8px 10px;
+  text-align: left;
+  font-weight: bold;
+  width: 25%;
+  vertical-align: top;
+  font-size: 11px;
+}
+
+.section-table td {
+  border: 1px solid #ccc;
+  padding: 8px 10px;
+  font-size: 11px;
+  vertical-align: top;
+  line-height: 1.4;
+}
+
+/* SIGNATURE STYLES */
+.signature-section {
+  margin-top: 40px;
+  page-break-inside: avoid;
+}
+
+.signature-title {
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 13px;
+  text-transform: uppercase;
+  border-bottom: 2px solid #000;
+  padding-bottom: 5px;
+}
+
+.signature-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.signature-box {
+  width: 18%;
+  min-height: 150px;
+  text-align: center;
+  margin-bottom: 25px;
+  position: relative;
+}
+
+.signature-label {
+  font-weight: bold;
+  margin-bottom: 15px;
+  font-size: 11px;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.signature-image {
+  max-width: 150px;
+  max-height: 80px;
+  margin: 10px auto;
+  display: block;
+  border: 1px solid #ddd;
+  background-color: #fff;
+}
+
+.signature-line {
+  width: 100%;
+  height: 1px;
+  background-color: #000;
+  margin: 60px auto 10px auto;
+  display: block;
+}
+
+.signature-name {
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 11px;
+  min-height: 20px;
+}
+
+.signature-note {
+  font-size: 9px;
+  color: #666;
+  margin-top: 3px;
+  font-style: italic;
+}
+
+/* CONTENT SPECIFIC STYLES */
+.text-content {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.4;
+  font-size: 11px;
+}
+
+.empty-field {
+  color: #999;
+  font-style: italic;
+}
+
+.status-completed {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-pending {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+/* PRINT CONTROLS */
+.print-controls {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.95);
+  padding: 10px 15px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: flex;
+  gap: 10px;
+}
+
+.print-controls button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-print {
+  background: #007bff;
+  color: white;
+}
+
+.btn-close {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-download {
+  background: #28a745;
+  color: white;
+}
+
+/* FOOTER */
+.footer {
+  margin-top: 50px;
+  padding-top: 15px;
+  border-top: 1px solid #ccc;
+  font-size: 10px;
+  color: #666;
+  text-align: center;
+}
+
+/* PRINT MEDIA QUERIES */
+@media print {
+  @page {
+    margin: 15mm;
+    size: A4;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-size: 11px;
+    background: none;
+  }
+
+  .print-controls,
+  .no-print,
+  .debug-toggle,
+  .loading-overlay {
+    display: none !important;
+  }
+
+  .section {
+    margin: 15px 0;
+  }
+
+  .signature-box {
+    page-break-inside: avoid;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+
+  /* Force black and white for printing */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  .signature-image {
+    max-height: 60px !important;
+  }
+
+  #mainContent {
+    display: block !important;
+  }
+}
+
+/* SIGNATURE STATUS INDICATORS */
+.signature-status {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.status-available {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-manual {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-missing {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* LOADING AND ERROR STATES */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  text-align: center;
+}
+
+.loading-spinner i {
+  font-size: 3em;
+  color: #007bff;
+  margin-bottom: 20px;
+}
+
+.data-error {
+  text-align: center;
+  padding: 40px;
+  color: #dc3545;
+  border: 2px dashed #dc3545;
+  margin: 20px;
+  border-radius: 5px;
+}
+
+.signature-loading {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 11px;
+  font-style: italic;
+}
+
+/* DEBUG STYLES */
+.debug-info {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 10px;
+  z-index: 10000;
+  max-width: 300px;
+  display: none;
+}
+
+.debug-toggle {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 10000;
+  font-size: 12px;
+}
+
+/* RESPONSIVE */
+@media screen and (max-width: 1200px) {
+  .signature-container {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .signature-box {
+    width: 45%;
+    min-width: 180px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .print-controls {
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    width: 90%;
+  }
+
+  .signature-box {
+    width: 100%;
+    max-width: 250px;
+  }
+
+  .signature-container {
+    flex-direction: column;
+    align-items: center;
+  }
+}

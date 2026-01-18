@@ -1,0 +1,11 @@
+{
+  "name": "bmkg-system",
+  "version": "1.0.0",
+  "scripts": {
+    "build-css": "tailwindcss -i ./static/css/input.css -o ./static/css/style.css --watch",
+    "build-prod": "tailwindcss -i ./static/css/input.css -o ./static/css/style.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

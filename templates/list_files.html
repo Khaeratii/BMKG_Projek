@@ -1,0 +1,80 @@
+{% extends "base.html" %} {% block title %}Dokumen Output | BMKG{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-file-alt"></i> Dokumen Output</h1>
+    <a href="{{ url_for('main_dashboard') }}" class="btn btn-primary">
+      <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+    </a>
+  </div>
+
+  {% if files %}
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Daftar File Output</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>No</th>
+              <th>Nama File</th>
+              <th>Ukuran</th>
+              <th>Terakhir Diubah</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for file in files %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>
+                <i
+                  class="fas {% if file.name.endswith('.pdf') %}fa-file-pdf text-danger{% else %}fa-file-word text-primary{% endif %} me-2"
+                ></i>
+                {{ file.name }}
+              </td>
+              <td>
+                {% if file.size < 1024 %} {{ file.size }} B {% elif file.size <
+                1048576 %} {{ (file.size / 1024)|round(1) }} KB {% else %} {{
+                (file.size / 1048576)|round(1) }} MB {% endif %}
+              </td>
+              <td>{{ file.modified }}</td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  <a href="/download/{{ file.name }}" class="btn btn-success">
+                    <i class="fas fa-download"></i> Download
+                  </a>
+                  {% if file.name.endswith('.pdf') %}
+                  <a
+                    href="/download/{{ file.name }}"
+                    target="_blank"
+                    class="btn btn-info"
+                  >
+                    <i class="fas fa-eye"></i> View
+                  </a>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+    <h4 class="text-muted">Belum ada file output</h4>
+    <p class="text-muted">
+      File output akan muncul setelah Anda generate dokumen.
+    </p>
+    <a href="{{ url_for('main_dashboard') }}" class="btn btn-primary">
+      <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

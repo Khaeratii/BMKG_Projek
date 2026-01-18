@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Debug Signature - Proposal {{ proposal_id }}</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f5f5f5;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .header h1 {
+        font-size: 28px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .header h1 i {
+        color: #4fc3f7;
+      }
+
+      .proposal-info {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #1e3c72;
+      }
+
+      .proposal-info h2 {
+        color: #1e3c72;
+        margin-bottom: 15px;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .proposal-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+      }
+
+      .detail-item {
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 5px;
+      }
+
+      .detail-item strong {
+        color: #1e3c72;
+        display: block;
+        margin-bottom: 5px;
+        font-size: 14px;
+      }
+
+      .signature-sections {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+      }
+
+      .signature-section {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease;
+      }
+
+      .signature-section:hover {
+        transform: translateY(-5px);
+      }
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+      }
+
+      .section-title {
+        font-size: 20px;
+        color: #1e3c72;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .status-badge {
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .status-present {
+        background-color: #4caf50;
+        color: white;
+      }
+
+      .status-missing {
+        background-color: #f44336;
+        color: white;
+      }
+
+      .status-base64 {
+        background-color: #2196f3;
+        color: white;
+      }
+
+      .signature-details {
+        margin-bottom: 20px;
+      }
+
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .detail-row:last-child {
+        border-bottom: none;
+      }
+
+      .detail-label {
+        font-weight: 600;
+        color: #555;
+      }
+
+      .detail-value {
+        color: #333;
+        max-width: 60%;
+        word-break: break-all;
+      }
+
+      .signature-preview {
+        margin-top: 20px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .preview-title {
+        margin-bottom: 15px;
+        color: #1e3c72;
+        font-weight: 600;
+      }
+
+      .signature-image {
+        max-width: 100%;
+        max-height: 200px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 10px;
+        background: white;
+      }
+
+      .no-preview {
+        color: #666;
+        font-style: italic;
+        padding: 20px;
+      }
+
+      .actions {
+        margin-top: 30px;
+        text-align: center;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 12px 30px;
+        background: #1e3c72;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        margin: 0 10px;
+      }
+
+      .btn:hover {
+        background: #2a5298;
+      }
+
+      .btn-secondary {
+        background: #6c757d;
+      }
+
+      .btn-secondary:hover {
+        background: #5a6268;
+      }
+
+      .btn-success {
+        background: #28a745;
+      }
+
+      .btn-success:hover {
+        background: #218838;
+      }
+
+      .footer {
+        margin-top: 40px;
+        text-align: center;
+        color: #666;
+        font-size: 14px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+      }
+
+      .alert {
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+      }
+
+      .alert-info {
+        background: #e3f2fd;
+        color: #0d47a1;
+        border-left: 4px solid #2196f3;
+      }
+
+      .alert-warning {
+        background: #fff3e0;
+        color: #e65100;
+        border-left: 4px solid #ff9800;
+      }
+
+      .alert-success {
+        background: #e8f5e9;
+        color: #1b5e20;
+        border-left: 4px solid #4caf50;
+      }
+
+      .text-success {
+        color: #28a745;
+      }
+
+      .text-danger {
+        color: #dc3545;
+      }
+
+      @media (max-width: 768px) {
+        .signature-sections {
+          grid-template-columns: 1fr;
+        }
+
+        .header h1 {
+          font-size: 24px;
+        }
+
+        .btn {
+          display: block;
+          width: 100%;
+          margin: 10px 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>
+          <i class="fas fa-bug"></i> Debug Signature - Proposal {{ proposal_id
+          }}
+        </h1>
+        <p>Halaman untuk debugging masalah tanda tangan pada dokumen</p>
+      </div>
+
+      {% if proposal %}
+      <div class="proposal-info">
+        <h2><i class="fas fa-file-alt"></i> Informasi Proposal</h2>
+        <div class="proposal-details">
+          <div class="detail-item">
+            <strong>No. Dokumen</strong>
+            {{ proposal.nomor_dokumen or 'Tidak ada' }}
+          </div>
+          <div class="detail-item">
+            <strong>Diminta Oleh</strong>
+            {{ proposal.diminta_oleh or 'Tidak ada' }}
+          </div>
+          <div class="detail-item">
+            <strong>Status</strong>
+            {{ proposal.status or 'Tidak ada' }}
+          </div>
+          <div class="detail-item">
+            <strong>Tanggal</strong>
+            {{ proposal.tanggal or 'Tidak ada' }}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        Halaman ini menampilkan status tanda tangan untuk proposal {{
+        proposal_id }}. Gunakan informasi ini untuk debugging masalah tanda
+        tangan yang tidak muncul.
+      </div>
+
+      <div class="signature-sections">
+        <!-- Proposal Signature -->
+        <div class="signature-section">
+          <div class="section-header">
+            <h3 class="section-title">
+              <i class="fas fa-signature"></i> Tanda Tangan Pemohon
+            </h3>
+            <span
+              class="status-badge {% if info.proposal.has_signature %}status-present{% else %}status-missing{% endif %}"
+            >
+              {% if info.proposal.has_signature %} ADA {% else %} TIDAK ADA {%
+              endif %}
+            </span>
+          </div>
+
+          <div class="signature-details">
+            <div class="detail-row">
+              <span class="detail-label">Filename:</span>
+              <span class="detail-value"
+                >{{ info.proposal.filename or 'Tidak ada' }}</span
+              >
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">File Exists:</span>
+              <span
+                class="detail-value {% if info.proposal.exists %}text-success{% else %}text-danger{% endif %}"
+              >
+                {{ 'YA' if info.proposal.exists else 'TIDAK' }}
+              </span>
+            </div>
+
+            {% if info.proposal.exists %}
+            <div class="detail-row">
+              <span class="detail-label">Path:</span>
+              <span class="detail-value">{{ info.proposal.path }}</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Size:</span>
+              <span class="detail-value">{{ info.proposal.size }} bytes</span>
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="signature-preview">
+            <div class="preview-title">Preview</div>
+            {% if info.proposal.exists %}
+            <img
+              src="{{ url_for('serve_signature_file', filename=info.proposal.filename) }}"
+              alt="Tanda Tangan Pemohon"
+              class="signature-image"
+              onerror="this.style.display='none'; document.getElementById('pemohon-error').style.display='block';"
+            />
+            <div class="no-preview" id="pemohon-error" style="display: none">
+              <i class="fas fa-exclamation-triangle"></i>
+              Gambar tidak dapat ditampilkan
+            </div>
+            {% else %}
+            <div class="no-preview">
+              <i class="fas fa-times-circle"></i>
+              Tidak ada preview tersedia
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Approval Signature -->
+        <div class="signature-section">
+          <div class="section-header">
+            <h3 class="section-title">
+              <i class="fas fa-check-circle"></i> Tanda Tangan Persetujuan
+            </h3>
+            <span
+              class="status-badge {% if info.approval.has_signature %}status-present{% else %}status-missing{% endif %}"
+            >
+              {% if info.approval.has_signature %} ADA {% else %} TIDAK ADA {%
+              endif %}
+            </span>
+          </div>
+
+          <div class="signature-details">
+            <div class="detail-row">
+              <span class="detail-label">Filename:</span>
+              <span class="detail-value"
+                >{{ info.approval.filename or 'Tidak ada' }}</span
+              >
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">File Exists:</span>
+              <span
+                class="detail-value {% if info.approval.exists %}text-success{% else %}text-danger{% endif %}"
+              >
+                {{ 'YA' if info.approval.exists else 'TIDAK' }}
+              </span>
+            </div>
+
+            {% if info.approval.exists %}
+            <div class="detail-row">
+              <span class="detail-label">Path:</span>
+              <span class="detail-value">{{ info.approval.path }}</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Size:</span>
+              <span class="detail-value">{{ info.approval.size }} bytes</span>
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="signature-preview">
+            <div class="preview-title">Preview</div>
+            {% if info.approval.exists %}
+            <img
+              src="{{ url_for('serve_signature_file', filename=info.approval.filename) }}"
+              alt="Tanda Tangan Persetujuan"
+              class="signature-image"
+              onerror="this.style.display='none'; document.getElementById('approval-error').style.display='block';"
+            />
+            <div class="no-preview" id="approval-error" style="display: none">
+              <i class="fas fa-exclamation-triangle"></i>
+              Gambar tidak dapat ditampilkan
+            </div>
+            {% else %}
+            <div class="no-preview">
+              <i class="fas fa-times-circle"></i>
+              Tidak ada preview tersedia
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Implementation Signature -->
+        <div class="signature-section">
+          <div class="section-header">
+            <h3 class="section-title">
+              <i class="fas fa-tools"></i> Tanda Tangan Implementasi
+            </h3>
+            <span
+              class="status-badge {% if info.implementation.has_signature %}status-present{% else %}status-missing{% endif %}"
+            >
+              {% if info.implementation.has_signature %} ADA {% else %} TIDAK
+              ADA {% endif %}
+            </span>
+          </div>
+
+          <div class="signature-details">
+            <div class="detail-row">
+              <span class="detail-label">Filename:</span>
+              <span class="detail-value"
+                >{{ info.implementation.filename or 'Tidak ada' }}</span
+              >
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">File Exists:</span>
+              <span
+                class="detail-value {% if info.implementation.exists %}text-success{% else %}text-danger{% endif %}"
+              >
+                {{ 'YA' if info.implementation.exists else 'TIDAK' }}
+              </span>
+            </div>
+
+            {% if info.implementation.exists %}
+            <div class="detail-row">
+              <span class="detail-label">Path:</span>
+              <span class="detail-value">{{ info.implementation.path }}</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Size:</span>
+              <span class="detail-value"
+                >{{ info.implementation.size }} bytes</span
+              >
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="signature-preview">
+            <div class="preview-title">Preview</div>
+            {% if info.implementation.exists %}
+            <img
+              src="{{ url_for('serve_signature_file', filename=info.implementation.filename) }}"
+              alt="Tanda Tangan Implementasi"
+              class="signature-image"
+              onerror="this.style.display='none'; document.getElementById('implementation-error').style.display='block';"
+            />
+            <div
+              class="no-preview"
+              id="implementation-error"
+              style="display: none"
+            >
+              <i class="fas fa-exclamation-triangle"></i>
+              Gambar tidak dapat ditampilkan
+            </div>
+            {% else %}
+            <div class="no-preview">
+              <i class="fas fa-times-circle"></i>
+              Tidak ada preview tersedia
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a
+          href="{{ url_for('generate_document', proposal_id=proposal_id) }}"
+          class="btn btn-success"
+        >
+          <i class="fas fa-file-word"></i> Test Generate Document
+        </a>
+        <a
+          href="{{ url_for('view_proposal', proposal_id=proposal_id) }}"
+          class="btn"
+        >
+          <i class="fas fa-eye"></i> Lihat Proposal
+        </a>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+          <i class="fas fa-home"></i> Kembali ke Dashboard
+        </a>
+      </div>
+
+      <div class="alert alert-warning" style="margin-top: 30px">
+        <h4><i class="fas fa-lightbulb"></i> Tips Debugging:</h4>
+        <ol style="margin-left: 20px; margin-top: 10px">
+          <li>
+            Jika tanda tangan adalah FILE tapi tidak muncul, pastikan file ada
+            di path yang ditampilkan
+          </li>
+          <li>
+            Jika tanda tangan tidak muncul di dokumen Word, cek terminal Flask
+            untuk pesan error
+          </li>
+          <li>
+            Pastikan folder <code>data/signatures/</code> ada dan memiliki
+            permission write
+          </li>
+          <li>
+            Cek apakah gambar signature dapat dibuka dengan image viewer biasa
+          </li>
+        </ol>
+      </div>
+
+      <div class="footer">
+        <p>Debug Signature Tool - Sistem BMKG</p>
+      </div>
+    </div>
+
+    <script>
+      // Menampilkan waktu saat ini
+      function showCurrentTime() {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString("id-ID", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        });
+        const timeStr = now.toLocaleTimeString("id-ID", {
+          hour12: false,
+        });
+
+        // Tambahkan waktu ke footer jika ada elemen
+        const footer = document.querySelector(".footer p");
+        if (footer) {
+          footer.innerHTML =
+            "Debug Signature Tool - Sistem BMKG | " + dateStr + " " + timeStr;
+        }
+      }
+
+      // Panggil saat halaman dimuat
+      document.addEventListener("DOMContentLoaded", function () {
+        showCurrentTime();
+      });
+    </script>
+  </body>
+</html>

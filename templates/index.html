@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Formulir Usulan Perubahan</title>
+  </head>
+  <body>
+    <h1>Formulir Pengisian Usulan Perubahan</h1>
+    <p>Silakan isi detail di bawah ini untuk menghasilkan dokumen PDF.</p>
+
+    <form action="/generate_usulan" method="POST">
+      <h2>Bagian Pemohon</h2>
+      <label for="pemohon">Diminta oleh (Nama):</label><br />
+      <input
+        type="text"
+        id="pemohon"
+        name="pemohon"
+        value="Budi Santoso"
+        required
+      /><br /><br />
+
+      <label for="jabatan">Jabatan:</label><br />
+      <input
+        type="text"
+        id="jabatan"
+        name="jabatan"
+        value="Analis Sistem"
+        required
+      /><br /><br />
+
+      <label for="deskripsi">Deskripsi Perubahan:</label><br />
+      <textarea id="deskripsi" name="deskripsi" rows="4" cols="50" required>
+Pembaruan server untuk meningkatkan keamanan.</textarea
+      ><br /><br />
+
+      <label for="alasan">Alasan Perubahan:</label><br />
+      <textarea id="alasan" name="alasan" rows="4" cols="50" required>
+Sesuai dengan kebijakan keamanan baru instansi.</textarea
+      ><br /><br />
+
+      <h2>Bagian Evaluasi (Contoh Checkbox)</h2>
+      <input
+        type="checkbox"
+        id="hardware"
+        name="tipe_perubahan_hardware"
+        value="1"
+      />
+      <label for="hardware">Tipe Perubahan: Perangkat Keras</label><br />
+
+      <input type="radio" id="normal" name="prioritas" value="Normal" checked />
+      <label for="normal">Prioritas: Normal</label><br />
+
+      <input type="radio" id="emergency" name="prioritas" value="Emergency" />
+      <label for="emergency">Prioritas: Emergency</label><br /><br />
+
+      <button type="submit">Buat & Unduh PDF</button>
+    </form>
+  </body>
+</html>

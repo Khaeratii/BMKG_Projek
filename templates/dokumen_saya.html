@@ -1,0 +1,416 @@
+{% extends "base.html" %} {% block title %}Dokumen Saya - BMKG{% endblock %} {%
+block body_class %}dashboard-page{% endblock %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dokumen_saya.css') }}"
+/>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dashboard.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="dashboard-wrapper">
+  <!-- Navbar -->
+  <nav class="dashboard-navbar">
+    <div class="navbar-content">
+      <!-- Brand -->
+      <a href="{{ url_for('dashboard') }}" class="navbar-brand">
+        <img
+          src="{{ url_for('static', filename='images/logo_bmkg.png') }}"
+          alt="BMKG"
+          class="navbar-logo"
+        />
+        <div class="navbar-title">
+          BMKG Wilayah IV
+          <small>Sistem Usulan Perubahan</small>
+        </div>
+      </a>
+
+      <!-- User Info dengan icon di KANAN -->
+      <div class="navbar-user">
+        <div class="user-info">
+          <div class="user-name">
+            {{ session.nama_lengkap or 'Pegawai BMKG' }}
+          </div>
+          <span class="user-role {{ session.user_role or 'pegawai' }}">
+            {{ (session.user_role or 'pegawai').replace('_', ' ').title() }}
+          </span>
+        </div>
+
+        <!-- PROFIL ICON DI KANAN USER INFO -->
+        <div class="profile-icon">
+          {% if session.jenis_kelamin == 'P' %}
+          <i class="fas fa-female"></i>
+          {% elif session.jenis_kelamin == 'L' %}
+          <i class="fas fa-male"></i>
+          {% else %}
+          <i class="fas fa-user-circle"></i>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="dashboard-main">
+    <!-- Sidebar -->
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-card">
+        <h3 class="sidebar-title">
+          <i class="fas fa-bars"></i>
+          Menu Utama
+        </h3>
+
+        <ul class="sidebar-menu">
+          <li>
+            <a href="{{ url_for('dashboard') }}">
+              <i class="fas fa-tachometer-alt"></i>
+              Dashboard
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('usulan_baru') }}">
+              <i class="fas fa-plus-circle"></i>
+              Buat Usulan Baru
+            </a>
+          </li>
+
+          <div class="sidebar-divider"></div>
+
+          <li>
+            <h4 class="sidebar-subtitle">
+              <i class="fas fa-folder"></i>
+              Usulan Saya
+            </h4>
+          </li>
+          <li>
+            <a href="#draft" class="sidebar-submenu">
+              <i class="fas fa-file-alt"></i>
+              Draft
+              <span class="sidebar-badge" id="draftCount">
+                {{ proposals|selectattr('status', 'equalto',
+                'draft')|list|length }}
+              </span>
+            </a>
+          </li>
+          <li>
+            <a href="#proses" class="sidebar-submenu">
+              <i class="fas fa-hourglass-half"></i>
+              Sedang Diproses
+              <span class="sidebar-badge" id="processCount">
+                {{ proposals|selectattr('status', 'in', ['evaluasi', 'approval',
+                'implementation'])|list|length }}
+              </span>
+            </a>
+          </li>
+          <li>
+            <a href="#selesai" class="sidebar-submenu">
+              <i class="fas fa-check-circle"></i>
+              Selesai
+              <span class="sidebar-badge" id="completedCount">
+                {{ proposals|selectattr('status', 'equalto',
+                'completed')|list|length }}
+              </span>
+            </a>
+          </li>
+
+          <div class="sidebar-divider"></div>
+
+          <li>
+            <a href="{{ url_for('dokumen_saya') }}" class="active">
+              <i class="fas fa-file-pdf"></i>
+              Dokumen Saya
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('logout') }}" class="btn-logout">
+              <i class="fas fa-sign-out-alt"></i>
+              Logout
+            </a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="dashboard-content">
+      <!-- Header Section -->
+      <div class="welcome-card">
+        <h1 class="welcome-title">
+          <i class="fas fa-file-alt"></i> Dokumen Saya
+        </h1>
+        <p class="welcome-subtitle">
+          Kelola semua usulan dan dokumen perubahan yang telah dibuat
+        </p>
+        <div class="welcome-actions">
+          <a href="{{ url_for('usulan_baru') }}" class="btn-primary">
+            <i class="fas fa-plus"></i>
+            Buat Usulan Baru
+          </a>
+          <button class="btn-secondary" onclick="refreshPage()">
+            <i class="fas fa-sync-alt"></i>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Simple Filter -->
+      <div class="table-container">
+        <div class="table-header">
+          <h3 class="table-title">
+            <i class="fas fa-filter"></i>
+            Filter Dokumen
+          </h3>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-row">
+            <div class="form-group">
+              <label for="filterStatus">Status:</label>
+              <select class="form-control" id="filterStatus">
+                <option value="all">Semua Status</option>
+                <option value="draft">Draft</option>
+                <option value="evaluasi">Evaluasi</option>
+                <option value="approval">Approval</option>
+                <option value="implementation">Implementasi</option>
+                <option value="completed">Selesai</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="searchDoc">Cari:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="searchDoc"
+                placeholder="Nomor dokumen atau deskripsi..."
+              />
+            </div>
+            <div class="form-group btn-group">
+              <button class="btn btn-primary" onclick="applyFilter()">
+                <i class="fas fa-search"></i> Filter
+              </button>
+              <button class="btn btn-secondary" onclick="resetFilter()">
+                <i class="fas fa-redo"></i> Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics Container -->
+      <div class="stats-container">
+        <h3><i class="fas fa-chart-bar"></i> Statistik Dokumen</h3>
+
+        <div class="stats-grid">
+          <div
+            class="stat-card"
+            onclick="filterByStatus('all')"
+            style="cursor: pointer"
+          >
+            <div class="stat-icon draft">
+              <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="stat-value">{{ proposals|length }}</div>
+            <div class="stat-label">Total Dokumen</div>
+          </div>
+          <div
+            class="stat-card"
+            onclick="filterByStatus('draft')"
+            style="cursor: pointer"
+          >
+            <div class="stat-icon draft">
+              <i class="fas fa-edit"></i>
+            </div>
+            <div class="stat-value">
+              {{ proposals|selectattr('status', 'equalto', 'draft')|list|length
+              }}
+            </div>
+            <div class="stat-label">Draft</div>
+          </div>
+          <div
+            class="stat-card"
+            onclick="filterByStatus('evaluasi')"
+            style="cursor: pointer"
+          >
+            <div class="stat-icon evaluasi">
+              <i class="fas fa-hourglass-half"></i>
+            </div>
+            <div class="stat-value">
+              {{ proposals|selectattr('status', 'equalto',
+              'evaluasi')|list|length }}
+            </div>
+            <div class="stat-label">Evaluasi</div>
+          </div>
+          <div
+            class="stat-card"
+            onclick="filterByStatus('approval')"
+            style="cursor: pointer"
+          >
+            <div class="stat-icon process">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-value">
+              {{ proposals|selectattr('status', 'equalto',
+              'approval')|list|length }}
+            </div>
+            <div class="stat-label">Approval</div>
+          </div>
+          <div
+            class="stat-card"
+            onclick="filterByStatus('implementation')"
+            style="cursor: pointer"
+          >
+            <div class="stat-icon process">
+              <i class="fas fa-cogs"></i>
+            </div>
+            <div class="stat-value">
+              {{ proposals|selectattr('status', 'equalto',
+              'implementation')|list|length }}
+            </div>
+            <div class="stat-label">Implementasi</div>
+          </div>
+          <div
+            class="stat-card"
+            onclick="filterByStatus('completed')"
+            style="cursor: pointer"
+          >
+            <div class="stat-icon completed">
+              <i class="fas fa-check"></i>
+            </div>
+            <div class="stat-value">
+              {{ proposals|selectattr('status', 'equalto',
+              'completed')|list|length }}
+            </div>
+            <div class="stat-label">Selesai</div>
+          </div>
+        </div>
+
+        <!-- Scroll indicator (jika banyak card) -->
+        <div class="stats-scroll-indicator" id="scrollIndicator">
+          <i class="fas fa-chevron-left"></i>
+          Geser untuk melihat lebih banyak
+          <i class="fas fa-chevron-right"></i>
+        </div>
+      </div>
+
+      <!-- Documents Table -->
+      <div class="table-container">
+        <div class="table-header">
+          <h3 class="table-title">
+            <i class="fas fa-list"></i>
+            Daftar Dokumen
+          </h3>
+          <div class="table-actions">
+            <button class="btn-action btn-view" onclick="refreshTable()">
+              <i class="fas fa-sync-alt"></i>
+              Refresh
+            </button>
+            <button class="btn-action btn-pdf" onclick="exportToExcel()">
+              <i class="fas fa-file-export"></i>
+              Export
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          {% if proposals and proposals|length > 0 %}
+          <table class="data-table" id="docsTable">
+            <thead>
+              <tr>
+                <th>No. Dokumen</th>
+                <th>Deskripsi Perubahan</th>
+                <th>Tanggal</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for proposal in proposals|sort(attribute='created_at',
+              reverse=true) %}
+              <tr class="doc-row" data-status="{{ proposal.status }}">
+                <td>
+                  <strong
+                    >{{ proposal.nomor_dokumen or 'DRAFT-' ~ proposal.id
+                    }}</strong
+                  >
+                </td>
+                <td>
+                  <div
+                    class="proposal-desc"
+                    data-tooltip="{{ proposal.deskripsi_perubahan }}"
+                  >
+                    {{ proposal.deskripsi_perubahan[:60] }} {% if
+                    proposal.deskripsi_perubahan|length > 60 %}...{% endif %}
+                  </div>
+                </td>
+                <td class="tanggal-indonesia">{{ proposal.tanggal or '-' }}</td>
+                <td>
+                  {% if proposal.status == 'draft' %}
+                  <span class="status-badge badge-draft">Draft</span>
+                  {% elif proposal.status == 'evaluasi' %}
+                  <span class="status-badge badge-evaluasi">Evaluasi</span>
+                  {% elif proposal.status == 'approval' %}
+                  <span class="status-badge badge-approval">Approval</span>
+                  {% elif proposal.status == 'implementation' %}
+                  <span class="status-badge badge-implementation"
+                    >Implementasi</span
+                  >
+                  {% elif proposal.status == 'completed' %}
+                  <span class="status-badge badge-completed">Selesai</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    {% if proposal.status == 'draft' %}
+                    <button
+                      class="btn-action btn-edit"
+                      onclick="editDoc({{ proposal.id }})"
+                      data-tooltip="Edit"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    {% else %}
+                    <button
+                      class="btn-action btn-view"
+                      onclick="viewDoc({{ proposal.id }})"
+                      data-tooltip="Lihat"
+                    >
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button
+                      class="btn-action btn-pdf"
+                      onclick="downloadPDF({{ proposal.id }})"
+                      data-tooltip="Unduh PDF"
+                    >
+                      <i class="fas fa-file-pdf"></i>
+                    </button>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <div class="empty-state">
+            <div class="empty-icon">
+              <i class="fas fa-folder-open"></i>
+            </div>
+            <h3 class="empty-title">Belum ada dokumen</h3>
+            <p class="empty-description">
+              Anda belum memiliki dokumen usulan. Buat usulan baru untuk
+              memulai.
+            </p>
+            <a href="{{ url_for('usulan_baru') }}" class="btn-primary">
+              <i class="fas fa-plus"></i> Buat Usulan Baru
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %} {% block extra_js %}
+<script src="{{ url_for('static', filename='js/dokumen_saya.js') }}"></script>
+{% endblock %}

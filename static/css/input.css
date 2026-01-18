@@ -1,0 +1,59 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans bg-gray-50;
+  }
+}
+
+@layer components {
+  .btn-bmkg {
+    @apply px-6 py-3 bg-bmkg-blue-600 text-white font-semibold rounded-lg 
+           hover:bg-bmkg-blue-700 transition-colors duration-200 
+           focus:outline-none focus:ring-2 focus:ring-bmkg-blue-500 focus:ring-opacity-50;
+  }
+
+  .input-bmkg {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg 
+           focus:outline-none focus:ring-2 focus:ring-bmkg-blue-500 focus:border-transparent
+           transition-all duration-200;
+  }
+
+  .select-bmkg {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg 
+           focus:outline-none focus:ring-2 focus:ring-bmkg-blue-500 focus:border-transparent
+           transition-all duration-200 bg-white;
+  }
+
+  .card-bmkg {
+    @apply bg-white rounded-xl shadow-lg p-8 border border-gray-100;
+  }
+
+  .badge-role {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
+  }
+
+  .badge-pegawai {
+    @apply bg-blue-100 text-blue-800;
+  }
+
+  .badge-penanggung_jawab {
+    @apply bg-amber-100 text-amber-800;
+  }
+
+  .badge-pemberi_persetujuan {
+    @apply bg-emerald-100 text-emerald-800;
+  }
+
+  .badge-pelaksana {
+    @apply bg-cyan-100 text-cyan-800;
+  }
+
+  .badge-admin {
+    @apply bg-rose-100 text-rose-800;
+  }
+}

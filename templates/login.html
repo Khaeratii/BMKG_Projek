@@ -1,0 +1,117 @@
+{% extends "base.html" %} {% block title %}Login Sistem | BMKG Wilayah IV{%
+endblock %} {% block body_class %}login-page{% endblock %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/login.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="login-wrapper">
+  <div class="login-card">
+    <!-- Header with Logo -->
+    <div class="login-header">
+      <div class="logo-container">
+        <img
+          src="{{ url_for('static', filename='images/logo_bmkg.png') }}"
+          alt="Logo BMKG Wilayah IV"
+          onerror="this.onerror=null; this.style.display='none'; 
+                              document.querySelector('.logo-fallback').style.display='flex';"
+        />
+      </div>
+      <h1 class="brand-title">BMKG Wilayah IV</h1>
+      <p class="brand-subtitle">Sistem Usulan Perubahan</p>
+    </div>
+
+    <!-- Login Form -->
+    <form
+      method="POST"
+      action="{{ url_for('login') }}"
+      class="login-form"
+      id="loginForm"
+    >
+      <!-- Username Field -->
+      <div class="form-group">
+        <label class="form-label">
+          <i class="fas fa-user-circle"></i>
+          Username / NIP
+        </label>
+        <input
+          type="text"
+          name="username"
+          class="form-input"
+          placeholder="Masukkan username atau NIP"
+          required
+          autocomplete="username"
+          autofocus
+          id="usernameInput"
+        />
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <label class="form-label">
+          <i class="fas fa-lock"></i>
+          Password
+        </label>
+        <input
+          type="password"
+          name="password"
+          class="form-input"
+          placeholder="Masukkan password"
+          required
+          autocomplete="current-password"
+          id="passwordInput"
+        />
+      </div>
+
+      <!-- Role Selection -->
+      <div class="form-group">
+        <label class="form-label">
+          <i class="fas fa-user-tag"></i>
+          Login Sebagai
+        </label>
+        <select name="login_as" class="form-select" required id="roleSelect">
+          <option value="" disabled selected>-- Pilih Peran Anda --</option>
+          <option value="pegawai">Pegawai</option>
+          <option value="penanggung_jawab">Penanggung Jawab</option>
+          <option value="pemberi_persetujuan">Pemberi Persetujuan</option>
+          <option value="pelaksana">Pelaksana</option>
+          <option value="admin">Administrator</option>
+        </select>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn-login" id="submitBtn">
+        <i class="fas fa-sign-in-alt"></i>
+        <span>Login ke Sistem</span>
+      </button>
+    </form>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <div class="flash-container">
+      {% for category, message in messages %}
+      <div class="flash-message flash-{{ category }}">
+        <i
+          class="fas {% if category == 'success' %}fa-check-circle {% elif category == 'error' %}fa-exclamation-circle {% else %}fa-info-circle{% endif %}"
+        >
+        </i>
+        <span>{{ message }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %} {% endwith %}
+
+    <!-- Footer -->
+    <div class="login-footer">
+      <p class="footer-text">
+        <strong>Balai Besar Meteorologi, Klimatologi dan Geofisika</strong
+        ><br />
+        Wilayah IV • Sistem Usulan Perubahan v1.0
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 - Halaman Tidak Ditemukan</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/dashboard.css') }}"
+    />
+    <style>
+      .error-container {
+        max-width: 600px;
+        margin: 100px auto;
+        padding: 40px;
+        text-align: center;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .error-code {
+        font-size: 120px;
+        color: #dc3545;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
+
+      .error-message {
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 20px;
+      }
+
+      .error-description {
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 16px;
+      }
+
+      .error-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .btn-home {
+        display: inline-block;
+        padding: 12px 30px;
+        background-color: #4e73df;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background-color 0.3s;
+      }
+
+      .btn-home:hover {
+        background-color: #2e59d9;
+      }
+
+      .btn-dashboard {
+        display: inline-block;
+        padding: 12px 30px;
+        background-color: #1cc88a;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background-color 0.3s;
+      }
+
+      .btn-dashboard:hover {
+        background-color: #17a673;
+      }
+
+      .error-icon {
+        font-size: 64px;
+        color: #dc3545;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body
+    style="
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+    "
+  >
+    <div class="error-container">
+      <div class="error-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <div class="error-code">404</div>
+      <div class="error-message">Halaman Tidak Ditemukan</div>
+      <p class="error-description">
+        Halaman yang Anda cari tidak tersedia atau telah dipindahkan.
+      </p>
+      <div class="error-actions">
+        <a href="{{ url_for('home') }}" class="btn-home">
+          <i class="fas fa-home"></i> Kembali ke Beranda
+        </a>
+        <a href="{{ url_for('main_dashboard') }}" class="btn-dashboard">
+          <i class="fas fa-tachometer-alt"></i> Ke Dashboard Utama
+        </a>
+      </div>
+    </div>
+
+    <script
+      src="https://kit.fontawesome.com/your-fontawesome-kit.js"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

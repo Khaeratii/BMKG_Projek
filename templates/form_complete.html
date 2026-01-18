@@ -1,0 +1,1247 @@
+{% extends "base.html" %} {% block title %}Form Usulan Perubahan | BMKG Wilayah
+IV{% endblock %} {% block body_class %}form-complete-page{% endblock %} {% block
+extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/form.css') }}"
+/>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/toast.css') }}"
+/>
+<style>
+  /* Additional styles for signature */
+  .signature-canvas-container {
+    position: relative;
+    margin-bottom: 15px;
+  }
+
+  .signature-pad-wrapper {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background: white;
+  }
+
+  .signature-pad {
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+  }
+
+  .signature-placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #6c757d;
+    font-style: italic;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .signature-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .signature-btn {
+    padding: 6px 12px;
+    border: 1px solid #dee2e6;
+    background: #f8f9fa;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+
+  .signature-btn:hover {
+    background: #e9ecef;
+  }
+
+  .btn-clear {
+    color: #dc3545;
+  }
+
+  .btn-undo {
+    color: #ffc107;
+  }
+
+  .upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    background: #f8f9fa;
+  }
+
+  .upload-area:hover {
+    border-color: #007bff;
+    background: #e9ecef;
+  }
+
+  .upload-icon {
+    font-size: 48px;
+    color: #6c757d;
+    margin-bottom: 15px;
+  }
+
+  .upload-area h4 {
+    margin-bottom: 10px;
+    color: #495057;
+  }
+
+  .upload-hint {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 5px;
+  }
+
+  .file-input {
+    display: none;
+  }
+
+  .preview-container {
+    margin-top: 20px;
+    display: none;
+  }
+
+  .preview-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+
+  .signature-preview {
+    max-width: 100%;
+    max-height: 200px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .remove-preview {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #dc3545;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .remove-preview:hover {
+    background: #c82333;
+  }
+
+  .signature-options {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+
+  .signature-option-btn {
+    padding: 8px 16px;
+    border: 1px solid #dee2e6;
+    background: #f8f9fa;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+
+  .signature-option-btn.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+
+  .signature-option-container {
+    display: none;
+  }
+
+  .signature-option-container.active {
+    display: block;
+  }
+
+  .has-signature .signature-section {
+    border-color: #28a745 !important;
+    background-color: rgba(40, 167, 69, 0.05) !important;
+  }
+
+  /* Make sure canvas is properly sized */
+  canvas[class*="signature"] {
+    display: block;
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="form-complete-wrapper">
+  <!-- Header -->
+  <header class="form-header">
+    <div class="header-content">
+      <a href="{{ url_for('main_dashboard') }}" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+        Kembali ke Dashboard
+      </a>
+      <h1 class="form-title">
+        <i class="fas fa-file-medical"></i>
+        Form Usulan Perubahan Lengkap
+      </h1>
+    </div>
+  </header>
+
+  <!-- Progress Steps (5 Steps) -->
+  <div class="progress-steps">
+    <div class="step active" data-step="1">
+      <div class="step-number">1</div>
+      <div class="step-label">Usulan</div>
+    </div>
+    <div class="step" data-step="2">
+      <div class="step-number">2</div>
+      <div class="step-label">Evaluasi</div>
+    </div>
+    <div class="step" data-step="3">
+      <div class="step-number">3</div>
+      <div class="step-label">Persetujuan</div>
+    </div>
+    <div class="step" data-step="4">
+      <div class="step-number">4</div>
+      <div class="step-label">Implementasi</div>
+    </div>
+    <div class="step" data-step="5">
+      <div class="step-number">5</div>
+      <div class="step-label">Review & Submit</div>
+    </div>
+  </div>
+
+  <!-- Main Form -->
+  <main class="form-main">
+    <form
+      method="POST"
+      class="complete-form"
+      id="completeForm"
+      enctype="multipart/form-data"
+    >
+      <!-- Step 1: Usulan Perubahan -->
+      <div class="form-section active" id="step1">
+        <div class="section-header">
+          <h2><i class="fas fa-id-card"></i> A. USULAN PERUBAHAN</h2>
+          <p class="section-description">Diisi oleh Pemohon - Pegawai</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label required">
+              <i class="fas fa-hashtag label-icon"></i>
+              No. Dokumen*
+            </label>
+            <input
+              type="text"
+              name="no_dokumen"
+              class="form-input"
+              required
+              id="noDokumenInput"
+              placeholder="SOP/XX/IMS/XX/XXXX/XX"
+              value="SOP/{{ '%.2f'|format(proposal_count+1) }}/IMS/{{ month_roman }}/{{ current_year }}/{{ '%.2f'|format(proposal_count+1) }}"
+            />
+            <div class="form-hint">
+              <i class="fas fa-info-circle"></i>
+              Format: SOP/No/IMS/Bulan/Tahun/No. Contoh: SOP/01/IMS/I/2024/01
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-redo label-icon"></i>
+              Revisi
+            </label>
+            <select name="revisi" class="form-select">
+              <option value="00">00</option>
+              <option value="01">01</option>
+              <option value="02">02</option>
+              <option value="03">03</option>
+              <option value="04">04</option>
+              <option value="05">05</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-calendar-check label-icon"></i>
+              Tgl. Efektif*
+            </label>
+            <input
+              type="date"
+              name="tgl_efektif"
+              class="form-input"
+              required
+              id="tglEfektif"
+              min="{{ tomorrow_date }}"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-calendar label-icon"></i>
+              Tanggal Usulan*
+            </label>
+            <input
+              type="date"
+              name="tanggal"
+              class="form-input"
+              required
+              id="tanggalInput"
+              value="{{ today_date }}"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label required">
+              <i class="fas fa-user-tie label-icon"></i>
+              Diminta Oleh*
+            </label>
+            <input
+              type="text"
+              name="diminta_oleh"
+              class="form-input"
+              required
+              id="dimintaOlehInput"
+              placeholder="Masukkan nama lengkap pemohon"
+              value="{{ session.nama_lengkap }}"
+            />
+            <div class="form-hint">
+              <i class="fas fa-edit"></i>
+              Nama lengkap orang yang mengajukan usulan perubahan
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label required">
+              <i class="fas fa-briefcase label-icon"></i>
+              Jabatan*
+            </label>
+            <input
+              type="text"
+              name="jabatan"
+              class="form-input"
+              required
+              id="jabatanInput"
+              placeholder="Masukkan jabatan pemohon"
+              value="{{ session.jabatan }}"
+            />
+            <div class="form-hint">
+              <i class="fas fa-edit"></i>
+              Jabatan/posisi pemohon dalam struktur organisasi
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">
+              <i class="fas fa-edit label-icon"></i>
+              Deskripsi Perubahan*
+            </label>
+            <textarea
+              name="deskripsi_perubahan"
+              class="form-textarea"
+              rows="4"
+              required
+              placeholder="Jelaskan perubahan yang diusulkan secara detail..."
+            ></textarea>
+            <div class="char-counter" id="deskripsiCounter">0 karakter</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-clock label-icon"></i>
+              Hasil Perubahan Dibutuhkan*
+            </label>
+            <input
+              type="date"
+              name="hasil_dibutuhkan_tgl"
+              class="form-input"
+              required
+              id="hasilDibutuhkan"
+              min="{{ next_week_date }}"
+            />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">
+              <i class="fas fa-comment-dots label-icon"></i>
+              Alasan Perubahan*
+            </label>
+            <textarea
+              name="alasan_perubahan"
+              class="form-textarea"
+              rows="4"
+              required
+              placeholder="Jelaskan alasan mengapa perubahan ini diperlukan..."
+            ></textarea>
+            <div class="char-counter" id="alasanCounter">0 karakter</div>
+          </div>
+
+          <!-- Tanda Tangan Pemohon -->
+          <div class="form-group full-width signature-section">
+            <label class="form-label">
+              <i class="fas fa-signature label-icon"></i>
+              Tanda Tangan Pemohon*
+            </label>
+
+            <div class="signature-options">
+              <button
+                type="button"
+                class="signature-option-btn active"
+                data-option="canvas"
+              >
+                <i class="fas fa-pen"></i> Tanda Tangan Manual
+              </button>
+              <button
+                type="button"
+                class="signature-option-btn"
+                data-option="upload"
+              >
+                <i class="fas fa-upload"></i> Upload Tanda Tangan
+              </button>
+            </div>
+
+            <!-- Canvas Signature -->
+            <div
+              class="signature-option-container signature-canvas-container active"
+              id="canvasSignature"
+            >
+              <div class="signature-pad-wrapper">
+                <canvas id="signatureCanvas" class="signature-pad"></canvas>
+                <div class="signature-placeholder">
+                  <i class="fas fa-signature"></i><br />
+                  Gambar tanda tangan Anda di area ini
+                </div>
+              </div>
+              <div class="signature-actions">
+                <button
+                  type="button"
+                  class="signature-btn btn-clear"
+                  id="clearSignatureBtn"
+                >
+                  <i class="fas fa-trash"></i> Hapus
+                </button>
+                <button
+                  type="button"
+                  class="signature-btn btn-undo"
+                  id="undoSignatureBtn"
+                >
+                  <i class="fas fa-undo"></i> Undo
+                </button>
+              </div>
+            </div>
+
+            <!-- Upload Signature -->
+            <div
+              class="signature-option-container upload-signature-container"
+              id="uploadSignature"
+            >
+              <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <h4>Upload Tanda Tangan</h4>
+                <p>Seret & lepas file gambar atau klik untuk memilih</p>
+                <p class="upload-hint">Format: JPG, PNG (maks. 5MB)</p>
+                <input
+                  type="file"
+                  id="signatureFile"
+                  class="file-input"
+                  accept="image/*"
+                />
+              </div>
+
+              <div class="preview-container" id="previewContainer">
+                <div class="preview-wrapper">
+                  <img
+                    id="signaturePreview"
+                    class="signature-preview"
+                    alt="Preview Tanda Tangan"
+                    style="display: none"
+                  />
+                  <button
+                    type="button"
+                    class="remove-preview"
+                    id="removePreviewBtn"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <input type="hidden" name="signature_data" id="signatureData" />
+            <div class="form-hint">
+              <i class="fas fa-info-circle"></i>
+              Tanda tangan wajib diisi, pilih metode manual atau upload
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-next" data-action="next">
+            Lanjut ke Evaluasi
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Evaluasi Dampak -->
+      <div class="form-section" id="step2">
+        <div class="section-header">
+          <h2>
+            <i class="fas fa-clipboard-check"></i> B. EVALUASI DAMPAK PERUBAHAN
+          </h2>
+          <p class="section-description">
+            Diisi oleh Penanggung Jawab - Ketua Tim Kerja
+          </p>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-tags label-icon"></i>
+              Tipe Perubahan*
+            </label>
+            <div class="checkbox-group">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="tipe_perubahan"
+                  value="Perangkat Keras"
+                />
+                <span class="checkmark"></span>
+                Perangkat Keras
+              </label>
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="tipe_perubahan"
+                  value="Konfigurasi"
+                />
+                <span class="checkmark"></span>
+                Konfigurasi
+              </label>
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="tipe_perubahan"
+                  value="Software/Aplikasi"
+                />
+                <span class="checkmark"></span>
+                Software/Aplikasi
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" name="tipe_perubahan" value="Database" />
+                <span class="checkmark"></span>
+                Database
+              </label>
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="tipe_perubahan"
+                  value="Utilities"
+                />
+                <span class="checkmark"></span>
+                Utilities
+              </label>
+              <div class="custom-checkbox">
+                <input
+                  type="text"
+                  name="tipe_lainnya"
+                  class="form-input-sm"
+                  placeholder="Lainnya (isi sendiri)"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-exclamation-triangle label-icon"></i>
+              Prioritas Perubahan*
+            </label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="prioritas" value="Normal" checked />
+                <span class="radiomark"></span>
+                Normal
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="prioritas" value="Emergency" />
+                <span class="radiomark"></span>
+                Emergency
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">
+              <i class="fas fa-industry label-icon"></i>
+              Dampak terhadap lingkungan produksi*
+            </label>
+            <textarea
+              name="dampak_lingkungan"
+              class="form-textarea"
+              rows="3"
+              required
+              placeholder="Jelaskan dampak perubahan terhadap lingkungan produksi..."
+            ></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">
+              <i class="fas fa-tasks label-icon"></i>
+              Upaya/Tindakan yang diperlukan*
+            </label>
+            <textarea
+              name="upaya_diperlukan"
+              class="form-textarea"
+              rows="3"
+              required
+              placeholder="Jelaskan upaya atau tindakan yang diperlukan untuk implementasi..."
+            ></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">
+              <i class="fas fa-cogs label-icon"></i>
+              Kebutuhan Sumber Daya (personal, h/w, s/w)*
+            </label>
+            <textarea
+              name="kebutuhan_sumber_daya"
+              class="form-textarea"
+              rows="3"
+              required
+              placeholder="Jelaskan kebutuhan sumber daya yang diperlukan..."
+            ></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">
+              <i class="fas fa-vial label-icon"></i>
+              Penjelasan Rencana Pengujian*
+            </label>
+            <textarea
+              name="rencana_pengujian"
+              class="form-textarea"
+              rows="3"
+              required
+              placeholder="Jelaskan rencana pengujian yang akan dilakukan..."
+            ></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">
+              <i class="fas fa-sticky-note label-icon"></i>
+              Catatan Evaluator
+            </label>
+            <textarea
+              name="catatan_evaluator"
+              class="form-textarea"
+              rows="2"
+              placeholder="Catatan tambahan dari evaluator..."
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-user-tie label-icon"></i>
+              Evaluator
+            </label>
+            <input
+              type="text"
+              class="form-input"
+              value="{{ session.nama_lengkap if session.user_role in ['penanggung_jawab', 'admin'] else '' }}"
+              readonly
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-calendar-alt label-icon"></i>
+              Tanggal Evaluasi
+            </label>
+            <input
+              type="date"
+              name="tanggal_evaluasi"
+              class="form-input"
+              value="{{ today_date }}"
+            />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-prev" data-action="prev">
+            <i class="fas fa-arrow-left"></i>
+            Kembali ke Usulan
+          </button>
+          <button type="button" class="btn btn-next" data-action="next">
+            Lanjut ke Persetujuan
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Persetujuan -->
+      <div class="form-section" id="step3">
+        <div class="section-header">
+          <h2><i class="fas fa-check-circle"></i> C. PERSETUJUAN PERUBAHAN</h2>
+          <p class="section-description">Diisi oleh Pemberi Persetujuan</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-clipboard-list label-icon"></i>
+              Status Permintaan Perubahan*
+            </label>
+            <div class="radio-group vertical">
+              <label class="radio-label">
+                <input
+                  type="radio"
+                  name="status_persetujuan"
+                  value="disetujui"
+                  checked
+                />
+                <span class="radiomark"></span>
+                Disetujui
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="status_persetujuan" value="ditolak" />
+                <span class="radiomark"></span>
+                Ditolak
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group" id="tanggalPelaksanaanGroup">
+            <label class="form-label">
+              <i class="fas fa-calendar-day label-icon"></i>
+              Tanggal pelaksanaan perubahan*
+            </label>
+            <input
+              type="date"
+              name="tanggal_pelaksanaan"
+              class="form-input"
+              id="tanggalPelaksanaan"
+              min="{{ tomorrow_date }}"
+            />
+          </div>
+
+          <div class="form-group" id="picPelaksanaGroup">
+            <label class="form-label">
+              <i class="fas fa-user-cog label-icon"></i>
+              PIC Pelaksana perubahan*
+            </label>
+            <input
+              type="text"
+              name="pic_pelaksana"
+              class="form-input"
+              placeholder="Nama PIC Pelaksana"
+            />
+          </div>
+
+          <div class="form-group full-width" id="catatanPersetujuanGroup">
+            <label class="form-label">
+              <i class="fas fa-sticky-note label-icon"></i>
+              Catatan Persetujuan
+            </label>
+            <textarea
+              name="catatan_persetujuan"
+              class="form-textarea"
+              rows="2"
+              placeholder="Catatan persetujuan..."
+            ></textarea>
+          </div>
+
+          <div
+            class="form-group full-width"
+            id="catatanPenolakanGroup"
+            style="display: none"
+          >
+            <label class="form-label">
+              <i class="fas fa-times-circle label-icon"></i>
+              Alasan Penolakan*
+            </label>
+            <textarea
+              name="catatan_penolakan"
+              class="form-textarea"
+              rows="3"
+              placeholder="Jelaskan alasan penolakan usulan..."
+            ></textarea>
+          </div>
+
+          <!-- Tanda Tangan Pemberi Persetujuan -->
+          <div class="form-group full-width signature-section">
+            <label class="form-label">
+              <i class="fas fa-signature label-icon"></i>
+              Tanda Tangan Pemberi Persetujuan*
+            </label>
+
+            <div class="signature-options">
+              <button
+                type="button"
+                class="signature-option-btn active"
+                data-option="canvas2"
+              >
+                <i class="fas fa-pen"></i> Tanda Tangan Manual
+              </button>
+              <button
+                type="button"
+                class="signature-option-btn"
+                data-option="upload2"
+              >
+                <i class="fas fa-upload"></i> Upload Tanda Tangan
+              </button>
+            </div>
+
+            <!-- Canvas Signature 2 -->
+            <div
+              class="signature-option-container signature-canvas-container active"
+              id="canvasSignature2"
+            >
+              <div class="signature-pad-wrapper">
+                <canvas id="signatureCanvas2" class="signature-pad"></canvas>
+                <div class="signature-placeholder">
+                  <i class="fas fa-signature"></i><br />
+                  Gambar tanda tangan Anda di area ini
+                </div>
+              </div>
+              <div class="signature-actions">
+                <button
+                  type="button"
+                  class="signature-btn btn-clear"
+                  id="clearSignatureBtn2"
+                >
+                  <i class="fas fa-trash"></i> Hapus
+                </button>
+                <button
+                  type="button"
+                  class="signature-btn btn-undo"
+                  id="undoSignatureBtn2"
+                >
+                  <i class="fas fa-undo"></i> Undo
+                </button>
+              </div>
+            </div>
+
+            <!-- Upload Signature 2 -->
+            <div
+              class="signature-option-container upload-signature-container"
+              id="uploadSignature2"
+            >
+              <div class="upload-area" id="uploadArea2">
+                <div class="upload-icon">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <h4>Upload Tanda Tangan</h4>
+                <p>Seret & lepas file gambar atau klik untuk memilih</p>
+                <p class="upload-hint">Format: JPG, PNG (maks. 5MB)</p>
+                <input
+                  type="file"
+                  id="signatureFile2"
+                  class="file-input"
+                  accept="image/*"
+                />
+              </div>
+
+              <div class="preview-container" id="previewContainer2">
+                <div class="preview-wrapper">
+                  <img
+                    id="signaturePreview2"
+                    class="signature-preview"
+                    alt="Preview Tanda Tangan"
+                    style="display: none"
+                  />
+                  <button
+                    type="button"
+                    class="remove-preview"
+                    id="removePreviewBtn2"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <input
+              type="hidden"
+              name="signature_approval"
+              id="signatureData2"
+            />
+            <div class="form-hint">
+              <i class="fas fa-info-circle"></i>
+              Tanda tangan wajib diisi, pilih metode manual atau upload
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-user-tie label-icon"></i>
+              Pemberi Persetujuan
+            </label>
+            <input
+              type="text"
+              class="form-input"
+              value="{{ session.nama_lengkap if session.user_role in ['pemberi_persetujuan', 'admin'] else '' }}"
+              readonly
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-calendar-alt label-icon"></i>
+              Tanggal Persetujuan
+            </label>
+            <input
+              type="date"
+              name="tanggal_persetujuan"
+              class="form-input"
+              value="{{ today_date }}"
+            />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-prev" data-action="prev">
+            <i class="fas fa-arrow-left"></i>
+            Kembali ke Evaluasi
+          </button>
+          <button type="button" class="btn btn-next" data-action="next">
+            Lanjut ke Implementasi
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 4: Implementasi -->
+      <div class="form-section" id="step4">
+        <div class="section-header">
+          <h2><i class="fas fa-tools"></i> D. IMPLEMENTASI PERUBAHAN</h2>
+          <p class="section-description">Diisi oleh Pelaksana</p>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">
+              <i class="fas fa-list-check label-icon"></i>
+              Hasil Tahapan Perubahan*
+            </label>
+            <textarea
+              name="hasil_tahapan"
+              class="form-textarea"
+              rows="3"
+              required
+              placeholder="Jelaskan hasil dari setiap tahapan perubahan yang dilakukan..."
+            ></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">
+              <i class="fas fa-vial-circle-check label-icon"></i>
+              Hasil pengujian Implementasi*
+            </label>
+            <textarea
+              name="hasil_pengujian"
+              class="form-textarea"
+              rows="3"
+              required
+              placeholder="Jelaskan hasil pengujian setelah implementasi..."
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-calendar-day label-icon"></i>
+              Tanggal rilis ke lingkungan operasional*
+            </label>
+            <input
+              type="date"
+              name="tanggal_rilis"
+              class="form-input"
+              required
+              id="tanggalRilis"
+              min="{{ tomorrow_date }}"
+            />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">
+              <i class="fas fa-sticky-note label-icon"></i>
+              Catatan Implementasi
+            </label>
+            <textarea
+              name="catatan_implementasi"
+              class="form-textarea"
+              rows="2"
+              placeholder="Catatan tambahan dari pelaksana..."
+            ></textarea>
+          </div>
+
+          <!-- Tanda Tangan Pelaksana -->
+          <div class="form-group full-width signature-section">
+            <label class="form-label">
+              <i class="fas fa-signature label-icon"></i>
+              Tanda Tangan Pelaksana*
+            </label>
+
+            <div class="signature-options">
+              <button
+                type="button"
+                class="signature-option-btn active"
+                data-option="canvas3"
+              >
+                <i class="fas fa-pen"></i> Tanda Tangan Manual
+              </button>
+              <button
+                type="button"
+                class="signature-option-btn"
+                data-option="upload3"
+              >
+                <i class="fas fa-upload"></i> Upload Tanda Tangan
+              </button>
+            </div>
+
+            <!-- Canvas Signature 3 -->
+            <div
+              class="signature-option-container signature-canvas-container active"
+              id="canvasSignature3"
+            >
+              <div class="signature-pad-wrapper">
+                <canvas id="signatureCanvas3" class="signature-pad"></canvas>
+                <div class="signature-placeholder">
+                  <i class="fas fa-signature"></i><br />
+                  Gambar tanda tangan Anda di area ini
+                </div>
+              </div>
+              <div class="signature-actions">
+                <button
+                  type="button"
+                  class="signature-btn btn-clear"
+                  id="clearSignatureBtn3"
+                >
+                  <i class="fas fa-trash"></i> Hapus
+                </button>
+                <button
+                  type="button"
+                  class="signature-btn btn-undo"
+                  id="undoSignatureBtn3"
+                >
+                  <i class="fas fa-undo"></i> Undo
+                </button>
+              </div>
+            </div>
+
+            <!-- Upload Signature 3 -->
+            <div
+              class="signature-option-container upload-signature-container"
+              id="uploadSignature3"
+            >
+              <div class="upload-area" id="uploadArea3">
+                <div class="upload-icon">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <h4>Upload Tanda Tangan</h4>
+                <p>Seret & lepas file gambar atau klik untuk memilih</p>
+                <p class="upload-hint">Format: JPG, PNG (maks. 5MB)</p>
+                <input
+                  type="file"
+                  id="signatureFile3"
+                  class="file-input"
+                  accept="image/*"
+                />
+              </div>
+
+              <div class="preview-container" id="previewContainer3">
+                <div class="preview-wrapper">
+                  <img
+                    id="signaturePreview3"
+                    class="signature-preview"
+                    alt="Preview Tanda Tangan"
+                    style="display: none"
+                  />
+                  <button
+                    type="button"
+                    class="remove-preview"
+                    id="removePreviewBtn3"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <input
+              type="hidden"
+              name="signature_implementation"
+              id="signatureData3"
+            />
+            <div class="form-hint">
+              <i class="fas fa-info-circle"></i>
+              Tanda tangan wajib diisi, pilih metode manual atau upload
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-user-cog label-icon"></i>
+              Pelaksana
+            </label>
+            <input
+              type="text"
+              class="form-input"
+              value="{{ session.nama_lengkap if session.user_role in ['pelaksana', 'admin'] else '' }}"
+              readonly
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-calendar-alt label-icon"></i>
+              Tanggal Implementasi
+            </label>
+            <input
+              type="date"
+              name="tanggal_implementasi"
+              class="form-input"
+              value="{{ today_date }}"
+            />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-prev" data-action="prev">
+            <i class="fas fa-arrow-left"></i>
+            Kembali ke Persetujuan
+          </button>
+          <button type="button" class="btn btn-next" data-action="next">
+            Lanjut ke Review
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 5: Review & Submit -->
+      <div class="form-section" id="step5">
+        <div class="section-header">
+          <h2><i class="fas fa-search"></i> E. REVIEW & SUBMIT</h2>
+          <p class="section-description">Review data sebelum submit</p>
+        </div>
+
+        <div class="review-container">
+          <!-- Loading State -->
+          <div class="review-loading" id="reviewLoading">
+            <div class="spinner-border text-primary" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+            <p class="mt-2">Mempersiapkan review...</p>
+          </div>
+
+          <!-- Review Content -->
+          <div
+            class="review-content"
+            id="reviewContent"
+            style="display: none"
+          ></div>
+
+          <!-- Review Actions -->
+          <div class="review-actions" id="reviewActions" style="display: none">
+            <div class="action-section">
+              <h4><i class="fas fa-save"></i> Opsi Draft</h4>
+              <div class="draft-options">
+                <button type="button" class="btn btn-draft" id="saveAsDraftBtn">
+                  <i class="fas fa-save"></i>
+                  Simpan sebagai Draft
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  id="loadDraftFromReviewBtn"
+                >
+                  <i class="fas fa-folder-open"></i>
+                  Muat Draft Lain
+                </button>
+
+                <div
+                  class="draft-info"
+                  id="currentDraftInfo"
+                  style="display: none"
+                >
+                  <p>
+                    <i class="fas fa-info-circle"></i> Sedang mengedit draft:
+                    <span id="draftNameDisplay"></span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="action-section">
+              <h4><i class="fas fa-paper-plane"></i> Submit Usulan</h4>
+              <div class="submit-options">
+                <div class="form-check mb-3">
+                  <input
+                    type="checkbox"
+                    id="confirmReview"
+                    class="form-check-input"
+                  />
+                  <label for="confirmReview" class="form-check-label">
+                    Saya telah memeriksa semua data dan menyatakan data benar
+                  </label>
+                </div>
+
+                <div class="submit-buttons">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="printReviewBtn"
+                  >
+                    <i class="fas fa-print"></i>
+                    Cetak Review
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn btn-submit"
+                    id="finalSubmitBtn"
+                    disabled
+                  >
+                    <i class="fas fa-paper-plane"></i>
+                    Submit Usulan Perubahan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-prev" data-action="prev">
+            <i class="fas fa-arrow-left"></i>
+            Kembali ke Implementasi
+          </button>
+        </div>
+      </div>
+    </form>
+  </main>
+</div>
+{% endblock %} {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/form.js') }}"></script>
+<script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+{% endblock %}

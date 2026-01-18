@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Preview Surat Pernyataan | BMKG Wilayah VI Makassar</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/form.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      .preview-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 0 24px;
+      }
+
+      .preview-header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .preview-header h1 {
+        color: #003366;
+        margin-bottom: 10px;
+      }
+
+      .preview-card {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+      }
+
+      .success-message {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .success-message i {
+        font-size: 24px;
+        color: #28a745;
+      }
+
+      .pdf-viewer {
+        width: 100%;
+        height: 700px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+
+      .pdf-placeholder {
+        padding: 40px;
+      }
+
+      .pdf-placeholder i {
+        font-size: 48px;
+        color: #0055a4;
+        margin-bottom: 15px;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      .btn-download {
+        background: linear-gradient(135deg, #0055a4, #003366);
+        color: white;
+        padding: 12px 30px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+      }
+
+      .btn-download:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 85, 164, 0.3);
+      }
+
+      .btn-back {
+        background: #f8f9fa;
+        color: #495057;
+        border: 2px solid #dee2e6;
+        padding: 12px 30px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .btn-back:hover {
+        background: #e9ecef;
+        border-color: #ced4da;
+      }
+
+      .info-box {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 30px;
+        border-left: 4px solid #0055a4;
+      }
+
+      .info-box h3 {
+        color: #0055a4;
+        margin-bottom: 10px;
+      }
+
+      .info-box ul {
+        padding-left: 20px;
+        margin-top: 10px;
+      }
+
+      .info-box li {
+        margin-bottom: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="form-complete-wrapper">
+      <header class="form-header">
+        <div class="header-content">
+          <a href="/" class="back-button">
+            <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+          </a>
+
+          <h1 class="form-title">
+            <i class="fas fa-file-pdf"></i>
+            Preview Surat Pernyataan
+          </h1>
+        </div>
+      </header>
+
+      <div class="preview-container">
+        <div class="preview-card">
+          <div class="success-message">
+            <i class="fas fa-check-circle"></i>
+            <div>
+              <h3>Surat Pernyataan Berhasil Dibuat!</h3>
+              <p>
+                Surat atas nama <strong>{{ nama }}</strong> telah berhasil
+                dibuat dan disimpan ke database.
+              </p>
+              <p>
+                <small
+                  >Tanggal dibuat: {{ created_at }} | File: {{ filename
+                  }}</small
+                >
+              </p>
+            </div>
+          </div>
+
+          <div class="pdf-viewer">
+            <div class="pdf-placeholder">
+              <i class="fas fa-file-pdf"></i>
+              <h3>Surat Pernyataan PDF Siap Didownload</h3>
+              <p>Klik tombol "Download PDF" di bawah untuk mengunduh file.</p>
+              <p><small>File: {{ filename }}</small></p>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <a href="{{ download_url }}" class="btn-download" download>
+              <i class="fas fa-download"></i> Download PDF
+            </a>
+            <a href="/" class="btn-back">
+              <i class="fas fa-plus"></i> Buat Surat Baru
+            </a>
+          </div>
+
+          <div class="info-box">
+            <h3><i class="fas fa-info-circle"></i> Informasi</h3>
+            <p>
+              • File PDF telah disimpan ke database dengan ID:
+              <strong>{{ surat_id }}</strong>
+            </p>
+            <p>• Nama file: <strong>{{ filename }}</strong></p>
+            <p>• Anda dapat mengunduh file kapan saja melalui halaman ini</p>
+            <p>
+              • Surat ini telah tercatat dalam sistem BMKG Wilayah VI Makassar
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

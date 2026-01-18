@@ -1,0 +1,280 @@
+/* ================= ROOT ================= */
+:root {
+  --border-color: #222;
+  --muted: #444;
+  --paper-bg: #fff;
+}
+
+/* ================= GLOBAL ================= */
+body {
+  font-family: "Times New Roman", Times, serif, Helvetica, sans-serif;
+  background: #f0f0f0;
+  padding: 20px;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+}
+
+/* ================= WRAPPER REVIEW ================= */
+.right {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ================= A4 PAPER ================= */
+#paper {
+  width: 210mm;
+  min-height: 297mm;
+  background: #fff;
+  padding: 15mm 20mm 10mm 20mm;
+  box-sizing: border-box;
+  border: none;
+  box-shadow: none;
+}
+
+/* ================= KOP SURAT ================= */
+.kop-surat {
+  border: 2px solid #000;
+  padding: 1px;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+}
+
+.kop-left {
+  display: flex;
+  align-items: center;
+  width: 90%;
+}
+
+.bmkg-logo {
+  width: 150px;
+  left: 5px;
+}
+
+.kop-left-title h2 {
+  font-size: 20px;
+  line-height: 1.1;
+  margin: 0;
+  position: relative;
+  padding-left: 15px;
+}
+
+.kop-left-title h2::before {
+  content: "";
+  position: absolute;
+  left: -9px;
+  top: -55px;
+  bottom: -55px;
+  width: 2px;
+  background: #000;
+}
+
+.kop-right {
+  width: 250px;
+  position: relative;
+  padding-left: 10px;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.kop-right::before {
+  content: "";
+  position: absolute;
+  right: 50px;
+  left: 10px;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: #000;
+}
+
+.kop-right h3 {
+  text-align: center;
+  font-size: 15px;
+  margin: 0;
+}
+
+.kop-line {
+  border: none;
+  height: 2px;
+  background: #000;
+  width: 252px;
+}
+
+.kop-info td {
+  padding: 2px;
+}
+
+/* ================= ISI DOKUMEN ================= */
+.box {
+  border: 2px solid #222;
+  margin-top: 10px;
+  padding: 8px;
+}
+
+.section-title {
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.rowline {
+  display: flex;
+  padding: 3px 3px;
+  border-bottom: 1px solid #ddd;
+  font-size: 15px;
+  align-items: flex-start;
+}
+
+.box > .rowline:first-child {
+  position: relative;
+}
+
+.box > .rowline:first-child::after {
+  content: "";
+  position: absolute;
+  left: -2.5mm;
+  bottom: 0;
+  width: 170mm;
+  border-bottom: 2px solid #000;
+}
+
+.label {
+  width: 40mm;
+  color: #000;
+  position: relative;
+  padding-right: 8px;
+}
+
+.label::after {
+  content: ":";
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.value {
+  flex: 1;
+  padding-left: 8px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  max-width: 115mm;
+}
+
+.rowline.garis-pemisah {
+  border-bottom: none;
+  position: relative;
+}
+
+.rowline.garis-pemisah::after {
+  content: "";
+  position: absolute;
+  left: -2.5mm;
+  right: -2.5mm;
+  bottom: 0;
+  border-bottom: 2px solid #000;
+}
+
+/* ================= TANDA TANGAN (DIPERKECIL) ================= */
+.sign-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2mm;
+  gap: 6mm;
+}
+
+.sign-box {
+  flex: 1;
+  border: 1px solid #000;
+  padding: 4px;
+  text-align: center;
+  border-radius: 4px;
+  min-height: 20mm;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  font-size: 13px;
+}
+
+/* gambar / canvas tanda tangan */
+.sign-box img,
+.sign-box canvas {
+  max-height: 65px; /* lebih jelas tapi tetap rapi */
+  max-width: 160px; /* proporsional kolom tanda tangan */
+  margin-top: 2mm;
+  margin-bottom: 2mm;
+  object-fit: contain;
+}
+
+/* nama penandatangan */
+.sign-name {
+  margin-top: auto;
+  font-size: 12px;
+  font-weight: bold;
+  width: 100%;
+  padding-top: 1mm;
+  min-height: 5mm;
+}
+
+/* ================= ACTION BAR ================= */
+.action-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.action-bar .btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.action-bar .btn-primary {
+  background-color: #0a6;
+  color: white;
+}
+
+.action-bar .btn-primary:hover {
+  background-color: #088;
+}
+
+.action-bar .btn-secondary {
+  background-color: #ccc;
+  color: #222;
+  font-weight: bold;
+}
+
+.action-bar .btn-secondary:hover {
+  background-color: #aaa;
+}
+
+/* ================= PRINT MODE ================= */
+@media print {
+  body {
+    background: none;
+    padding: 0;
+  }
+
+  .action-bar {
+    display: none;
+  }
+
+  #paper {
+    border: none;
+    box-shadow: none;
+  }
+}

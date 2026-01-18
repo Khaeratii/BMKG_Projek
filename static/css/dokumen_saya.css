@@ -1,0 +1,476 @@
+/* ================================================
+   DOKUMEN SAYA - STYLE KHUSUS
+   Menggunakan dashboard.css sebagai base
+   ================================================ */
+
+/* Welcome Card dengan margin bottom yang lebih besar */
+.welcome-card {
+  background: linear-gradient(135deg, white, rgba(255, 255, 255, 0.9));
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 51, 102, 0.1);
+  margin-bottom: 1.5rem; /* TAMBAH MARGIN BOTTOM */
+}
+
+/* Container untuk stats grid */
+.stats-container {
+  background: white;
+  border-radius: 16px;
+  padding: 1.25rem 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 51, 102, 0.1);
+  margin-bottom: 1.5rem;
+  overflow-x: auto; /* Untuk scroll horizontal jika perlu */
+}
+
+.stats-container h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 1rem;
+  padding-left: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stats-container h3 i {
+  color: #0055a4;
+}
+
+/* Stat Grid - SEMUA DALAM SATU BARIS */
+.stats-grid {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: nowrap; /* TIDAK ADA WRAP - SATU BARIS */
+  padding-bottom: 0.5rem;
+  min-width: min-content; /* Minimum width based on content */
+}
+
+/* Stat Card - UKURAN KONSISTEN */
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 51, 102, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-align: center;
+  flex: 0 0 auto; /* TIDAK FLEXIBLE, AUTO WIDTH */
+  min-width: 100px; /* MINIMUM WIDTH */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Active state untuk filter */
+.stat-card.filter-active {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 85, 164, 0.1),
+    rgba(0, 119, 204, 0.15)
+  );
+  border-color: #0055a4;
+  box-shadow: 0 4px 12px rgba(0, 85, 164, 0.15);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Stat icon - ukuran konsisten */
+.stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+/* Warna icon sesuai status */
+.stat-icon.draft {
+  background: #e5e7eb;
+  color: #6b7280;
+}
+
+.stat-icon.evaluasi {
+  background: #dbeafe;
+  color: #3b82f6;
+}
+
+.stat-icon.process {
+  background: #fef3c7;
+  color: #f59e0b;
+}
+
+.stat-icon.completed {
+  background: #d1fae5;
+  color: #10b981;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #003366;
+  margin-bottom: 0.125rem;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.6875rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Scroll indicator untuk stats (jika banyak) */
+.stats-scroll-indicator {
+  display: none;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.5rem;
+}
+
+/* Filter Section */
+.filter-section {
+  padding: 1.25rem;
+  background: #f9fafb;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.filter-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  flex: 1;
+  min-width: 180px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.375rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #0055a4;
+  box-shadow: 0 0 0 3px rgba(0, 85, 164, 0.1);
+}
+
+/* Button styles */
+.btn {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.8125rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 80px;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #0055a4, #003366);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #003366, #002244);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: white;
+  color: #003366;
+  border: 2px solid #0055a4;
+}
+
+.btn-secondary:hover {
+  background: rgba(0, 85, 164, 0.05);
+  transform: translateY(-1px);
+}
+
+/* Table Container dengan margin top */
+.table-container {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 51, 102, 0.1);
+  margin-top: 1.5rem; /* TAMBAH MARGIN TOP */
+}
+
+/* Table khusus dokumen saya */
+#docsTable {
+  min-width: 600px;
+  font-size: 0.8125rem;
+}
+
+#docsTable th {
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#docsTable td {
+  padding: 0.75rem 1rem;
+}
+
+/* Status badges */
+#docsTable .status-badge {
+  padding: 2px 8px;
+  font-size: 0.6875rem;
+}
+
+/* Deskripsi */
+.proposal-desc {
+  max-width: 250px;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+/* Action buttons */
+.action-buttons {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+.btn-action {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 30px;
+  justify-content: center;
+}
+
+.btn-view {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.btn-edit {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.btn-pdf {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.btn-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* No Results Message */
+.no-results {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6b7280;
+}
+
+.no-results i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+  color: #d1d5db;
+}
+
+.no-results h4 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+.no-results p {
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Result counter */
+.result-counter {
+  font-size: 0.75rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+
+/* Responsive Design */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .stats-grid {
+    gap: 0.625rem;
+  }
+
+  .stat-card {
+    min-width: 90px;
+    padding: 0.625rem;
+  }
+
+  .stat-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 0.875rem;
+  }
+
+  .stat-value {
+    font-size: 1.125rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .stats-container {
+    padding: 1rem 0.75rem;
+  }
+
+  .stats-grid {
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .stat-card {
+    min-width: 85px;
+    padding: 0.5rem;
+  }
+
+  .stat-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+    margin-bottom: 0.375rem;
+  }
+
+  .stat-value {
+    font-size: 1rem;
+  }
+
+  .stat-label {
+    font-size: 0.625rem;
+  }
+
+  .filter-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .form-group {
+    width: 100%;
+    min-width: unset;
+  }
+
+  #docsTable {
+    min-width: 500px;
+    font-size: 0.75rem;
+  }
+}
+
+/* Mobile kecil */
+@media (max-width: 480px) {
+  .welcome-card {
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .stats-container {
+    padding: 0.875rem 0.5rem;
+  }
+
+  .stats-grid {
+    gap: 0.375rem;
+  }
+
+  .stat-card {
+    min-width: 80px;
+    padding: 0.375rem;
+  }
+
+  .stat-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 0.625rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-value {
+    font-size: 0.875rem;
+  }
+
+  .stat-label {
+    font-size: 0.5625rem;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+
+  .btn-action {
+    width: 100%;
+    min-width: unset;
+  }
+}

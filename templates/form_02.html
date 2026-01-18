@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form Surat Pernyataan Kerahasiaan | BMKG Wilayah VI Makassar</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/form_02.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="form-complete-wrapper">
+      <!-- HEADER -->
+      <header class="form-header">
+        <div class="header-content">
+          <a href="{{ url_for('main_dashboard') }}" class="back-button">
+            <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+          </a>
+
+          <h1 class="form-title">
+            <i class="fas fa-file-signature"></i>
+            Surat Pernyataan Menjaga Kerahasiaan Informasi
+          </h1>
+
+          <div class="user-info">
+            <span class="user-name">
+              <i class="fas fa-user"></i> Sistem BMKG Wilayah VI
+            </span>
+            <span class="user-role pelapor">
+              <i class="fas fa-briefcase"></i> Form Online
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <!-- PROGRESS STEPS - 2 TAHAP -->
+      <div class="progress-steps">
+        <div class="step active" data-step="1">
+          <div class="step-number">1</div>
+          <span class="step-label">Isi Form</span>
+        </div>
+        <div class="step" data-step="2">
+          <div class="step-number">2</div>
+          <span class="step-label">Preview & Download</span>
+        </div>
+      </div>
+
+      <!-- MAIN FORM -->
+      <main class="form-main">
+        <!-- PERBAIKAN: Tambahkan action dan method pada form -->
+        <form id="suratForm" action="/surat-pernyataan/generate" method="POST">
+          <!-- PERBAIKAN: Tambahkan CSRF token -->
+          <input
+            type="hidden"
+            name="csrf_token"
+            value="{{ csrf_token() if csrf_token else '' }}"
+          />
+
+          <!-- STEP 1: Data Diri + Tanda Tangan -->
+          <section class="form-section active" id="step1">
+            <div class="section-header">
+              <h2><i class="fas fa-user-edit"></i> Data dan Tanda Tangan</h2>
+              <p class="section-description">
+                Isi data dengan lengkap dan buat tanda tangan digital Anda
+              </p>
+            </div>
+
+            <!-- TWO-COLUMN LAYOUT -->
+            <div class="two-column-layout">
+              <!-- KOLOM KIRI: Data Diri -->
+              <div class="left-column">
+                <h3 class="column-title">
+                  <i class="fas fa-user-circle"></i> Data Pribadi
+                </h3>
+
+                <!-- Nama -->
+                <div class="form-group">
+                  <label class="form-label required">
+                    <i class="fas fa-user label-icon"></i>
+                    Nama Lengkap
+                  </label>
+                  <input
+                    type="text"
+                    name="nama"
+                    class="form-input"
+                    placeholder="Masukkan nama lengkap"
+                    required
+                    autocomplete="name"
+                  />
+                  <div class="form-hint">
+                    <i class="fas fa-info-circle"></i> Isi sesuai dengan
+                    identitas resmi
+                  </div>
+                </div>
+
+                <!-- NIP/NIK -->
+                <div class="form-group">
+                  <label class="form-label required">
+                    <i class="fas fa-id-card label-icon"></i>
+                    NIP/NIK
+                  </label>
+                  <input
+                    type="text"
+                    name="nip"
+                    class="form-input"
+                    placeholder="Masukkan NIP atau NIK"
+                    required
+                    pattern="[0-9]+"
+                    title="Harus berupa angka"
+                  />
+                  <div class="form-hint">
+                    <i class="fas fa-info-circle"></i> Nomor induk pegawai atau
+                    kependudukan
+                  </div>
+                </div>
+
+                <!-- Instansi -->
+                <div class="form-group">
+                  <label class="form-label required">
+                    <i class="fas fa-building label-icon"></i>
+                    Instansi
+                  </label>
+                  <input
+                    type="text"
+                    name="instansi"
+                    class="form-input"
+                    placeholder="Contoh: BMKG Wilayah VI Makassar"
+                    required
+                  />
+                  <div class="form-hint">
+                    <i class="fas fa-info-circle"></i> Nama instansi tempat
+                    bekerja
+                  </div>
+                </div>
+
+                <!-- Kota -->
+                <div class="form-group">
+                  <label class="form-label required">
+                    <i class="fas fa-map-marker-alt label-icon"></i>
+                    Tempat Pembuatan Surat
+                  </label>
+                  <input
+                    type="text"
+                    name="kota"
+                    class="form-input"
+                    placeholder="Makassar"
+                    value="Makassar"
+                    required
+                  />
+                  <div class="form-hint">
+                    <i class="fas fa-info-circle"></i> Kota tempat surat dibuat
+                  </div>
+                </div>
+
+                <!-- Kegiatan -->
+                <div class="form-group">
+                  <label class="form-label required">
+                    <i class="fas fa-tasks label-icon"></i>
+                    Nama Kegiatan/Pekerjaan
+                  </label>
+                  <textarea
+                    name="kegiatan"
+                    class="form-textarea"
+                    placeholder="Deskripsikan kegiatan atau pekerjaan yang dilakukan..."
+                    rows="4"
+                    required
+                  ></textarea>
+                  <div class="form-hint">
+                    <i class="fas fa-info-circle"></i> Jelaskan secara rinci
+                    kegiatan yang memerlukan surat pernyataan
+                  </div>
+                </div>
+
+                <!-- Periode -->
+                <div class="form-group">
+                  <label class="form-label required">
+                    <i class="fas fa-calendar-alt label-icon"></i>
+                    Periode Penugasan
+                  </label>
+                  <input
+                    type="text"
+                    name="periode"
+                    class="form-input"
+                    placeholder="Contoh: 1 Januari 2024 - 31 Desember 2024"
+                    required
+                  />
+                  <div class="form-hint">
+                    <i class="fas fa-info-circle"></i> Periode waktu pelaksanaan
+                    kegiatan
+                  </div>
+                </div>
+              </div>
+
+              <!-- KOLOM KANAN: Tanda Tangan -->
+              <div class="right-column">
+                <h3 class="column-title">
+                  <i class="fas fa-signature"></i> Tanda Tangan Digital
+                </h3>
+
+                <!-- Container Tanda Tangan -->
+                <div class="signature-container">
+                  <label class="form-label required">
+                    <i class="fas fa-pen-nib label-icon"></i>
+                    Tandatangani di bawah ini
+                  </label>
+
+                  <!-- Canvas Signature Area -->
+                  <div class="signature-pad-wrapper">
+                    <canvas id="signature-pad" class="signature-pad"></canvas>
+                    <div
+                      class="signature-placeholder"
+                      id="signaturePlaceholder"
+                    >
+                      <i class="fas fa-pen-nib"></i>
+                      Tandatangani di area ini...
+                    </div>
+                  </div>
+
+                  <!-- Signature Actions -->
+                  <div class="signature-actions">
+                    <button
+                      type="button"
+                      class="signature-btn btn-clear-signature"
+                    >
+                      <i class="fas fa-eraser"></i> Hapus
+                    </button>
+                    <button
+                      type="button"
+                      class="signature-btn btn-save-signature"
+                    >
+                      <i class="fas fa-check"></i> Simpan Tanda Tangan
+                    </button>
+                  </div>
+
+                  <!-- Signature Preview -->
+                  <div
+                    class="signature-preview-container"
+                    id="signaturePreview"
+                    style="display: none"
+                  >
+                    <div class="signature-preview-inner">
+                      <img
+                        id="previewImage"
+                        src=""
+                        alt="Preview Tanda Tangan"
+                      />
+                      <div class="preview-text">
+                        <b
+                          ><i class="fas fa-check-circle"></i> Tanda tangan
+                          tersimpan</b
+                        >
+                        <small>Tanda tangan akan muncul di PDF</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Hidden Input for Signature -->
+                  <input type="hidden" name="ttd_base64" id="ttd_base64" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Navigation Step 1 -->
+            <div class="form-actions">
+              <div class="left-actions">
+                <button
+                  type="button"
+                  class="btn-secondary"
+                  onclick="resetForm()"
+                >
+                  <i class="fas fa-redo"></i> Reset Form
+                </button>
+              </div>
+              <div class="right-actions">
+                <button type="button" class="btn-next" onclick="goToStep(2)">
+                  Preview <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- STEP 2: Preview & Download -->
+          <section class="form-section" id="step2">
+            <div class="section-header">
+              <h2><i class="fas fa-eye"></i> Preview & Download</h2>
+              <p class="section-description">
+                Periksa kembali data sebelum membuat surat PDF
+              </p>
+            </div>
+
+            <!-- Loading State -->
+            <div class="review-loading" id="reviewLoading">
+              <i class="fas fa-spinner fa-spin"></i>
+              <h3>Memuat data review...</h3>
+            </div>
+
+            <!-- Review Content -->
+            <div
+              class="review-content"
+              id="reviewContent"
+              style="display: none"
+            >
+              <!-- Summary Card -->
+              <div class="review-summary">
+                <h3>
+                  <i class="fas fa-clipboard-check"></i> Data yang akan Diproses
+                </h3>
+                <div class="summary-grid">
+                  <div class="summary-item">
+                    <label>Nama</label>
+                    <span id="reviewNama">-</span>
+                  </div>
+                  <div class="summary-item">
+                    <label>NIP/NIK</label>
+                    <span id="reviewNip">-</span>
+                  </div>
+                  <div class="summary-item">
+                    <label>Instansi</label>
+                    <span id="reviewInstansi">-</span>
+                  </div>
+                  <div class="summary-item">
+                    <label>Status</label>
+                    <span class="highlight">Siap Diproses</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Detailed Review -->
+              <div class="two-column-review">
+                <div class="review-column">
+                  <h4><i class="fas fa-info-circle"></i> Detail Informasi</h4>
+                  <div class="review-details">
+                    <div class="detail-item">
+                      <strong>Kegiatan:</strong>
+                      <div class="text-data" id="reviewKegiatan">-</div>
+                    </div>
+                    <div class="detail-item">
+                      <strong>Periode:</strong>
+                      <div class="text-data" id="reviewPeriode">-</div>
+                    </div>
+                    <div class="detail-item">
+                      <strong>Lokasi:</strong>
+                      <div class="text-data" id="reviewKota">-</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="review-column">
+                  <h4><i class="fas fa-signature"></i> Tanda Tangan</h4>
+                  <div class="signature-review">
+                    <div id="reviewSignatureImg">
+                      <img
+                        src=""
+                        alt="Preview Tanda Tangan"
+                        id="reviewSignatureImage"
+                      />
+                    </div>
+                    <div class="signature-status">
+                      <i class="fas fa-check-circle"></i>
+                      <span>Tanda tangan telah tersimpan</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions Step 2 -->
+              <div class="review-actions">
+                <div class="action-section">
+                  <h4><i class="fas fa-paper-plane"></i> Opsi Penyimpanan</h4>
+                  <p class="action-description">
+                    Pilih salah satu opsi di bawah ini:
+                  </p>
+
+                  <div class="submit-options">
+                    <!-- Checkbox Persetujuan -->
+                    <div class="form-check">
+                      <input
+                        type="checkbox"
+                        id="agreeTerms"
+                        name="agree_terms"
+                        required
+                        class="form-check-input"
+                      />
+                      <label for="agreeTerms" class="form-check-label">
+                        <i class="fas fa-check-circle"></i> Saya menyetujui
+                        bahwa data yang diisi adalah benar dan siap diproses
+                      </label>
+                    </div>
+
+                    <!-- Tombol-tombol -->
+                    <div class="submit-buttons">
+                      <!-- Tombol Kembali ke Edit -->
+                      <button
+                        type="button"
+                        class="btn-secondary"
+                        onclick="goToStep(1)"
+                      >
+                        <i class="fas fa-edit"></i> Edit Data
+                      </button>
+
+                      <!-- Tombol Simpan Draft -->
+                      <button
+                        type="button"
+                        class="btn-draft"
+                        onclick="saveDraftAndExit()"
+                      >
+                        <i class="fas fa-save"></i> Simpan Draft
+                      </button>
+
+                      <!-- PERBAIKAN: Ganti type menjadi submit -->
+                      <button type="submit" class="btn-submit" id="submitBtn">
+                        <i class="fas fa-file-pdf"></i> Submit File
+                      </button>
+                    </div>
+
+                    <!-- PERBAIKAN: Tambahkan loading state -->
+                    <div
+                      class="submit-loading"
+                      id="submitLoading"
+                      style="display: none"
+                    >
+                      <i class="fas fa-spinner fa-spin"></i>
+                      <span>Menyimpan data dan membuat PDF...</span>
+                    </div>
+
+                    <!-- PERBAIKAN: Tambahkan error display -->
+                    <div
+                      class="submit-error"
+                      id="submitError"
+                      style="display: none"
+                    >
+                      <i class="fas fa-exclamation-circle"></i>
+                      <span id="errorMessage"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </form>
+      </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <!-- PERBAIKAN: Hapus style display:none -->
+    <div class="notification" id="notification">
+      <i class="fas fa-check-circle"></i>
+      <span id="notificationMessage">Pesan notifikasi</span>
+      <button class="notification-close" onclick="hideNotification()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/form_02.js') }}"></script>
+
+    <!-- PERBAIKAN: Tambahkan custom JavaScript untuk handle form submission -->
+    <script>
+      // Inisialisasi form submission handler
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("suratForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const loadingDiv = document.getElementById("submitLoading");
+        const errorDiv = document.getElementById("submitError");
+
+        if (form) {
+          form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            console.log("📤 Form submission started...");
+
+            // Validasi form terlebih dahulu
+            if (!validateForm()) {
+              showNotification(
+                "Harap lengkapi semua data dengan benar",
+                "error"
+              );
+              return false;
+            }
+
+            // Validasi checkbox persetujuan
+            const agreeCheckbox = document.getElementById("agreeTerms");
+            if (!agreeCheckbox || !agreeCheckbox.checked) {
+              showNotification(
+                "Harap centang persetujuan terlebih dahulu",
+                "error"
+              );
+              return false;
+            }
+
+            // Show loading state
+            if (loadingDiv) loadingDiv.style.display = "block";
+            if (errorDiv) errorDiv.style.display = "none";
+
+            // Disable submit button
+            if (submitBtn) {
+              submitBtn.disabled = true;
+              submitBtn.innerHTML =
+                '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            }
+
+            try {
+              // Kumpulkan data form
+              const formData = new FormData(form);
+
+              // Debug: lihat data yang dikirim
+              console.log("📋 Form data to be sent:");
+              for (let [key, value] of formData.entries()) {
+                console.log(
+                  `  ${key}:`,
+                  key === "ttd_base64" ? value.substring(0, 50) + "..." : value
+                );
+              }
+
+              // Kirim ke server
+              const response = await fetch("/surat-pernyataan/generate", {
+                method: "POST",
+                body: formData,
+                headers: {
+                  "X-Requested-With": "XMLHttpRequest",
+                },
+              });
+
+              // Parse response
+              const result = await response.json();
+              console.log("📥 Server response:", result);
+
+              if (result.status === "success") {
+                // Success
+                showNotification(
+                  result.message || "✅ Data berhasil disimpan!",
+                  "success"
+                );
+
+                if (submitBtn) {
+                  submitBtn.innerHTML =
+                    '<i class="fas fa-check"></i> Berhasil!';
+                  submitBtn.classList.add("success");
+                }
+
+                // Clear draft dari localStorage
+                localStorage.removeItem("suratDraft");
+
+                // Redirect setelah delay
+                setTimeout(() => {
+                  if (result.redirect) {
+                    window.location.href = result.redirect;
+                  } else {
+                    window.location.href = "/surat-pernyataan/dashboard";
+                  }
+                }, 2000);
+              } else {
+                // Error dari server
+                throw new Error(
+                  result.message || result.error || "Gagal menyimpan data"
+                );
+              }
+            } catch (error) {
+              console.error("❌ Form submission error:", error);
+
+              // Show error
+              if (errorDiv) {
+                errorDiv.style.display = "block";
+                document.getElementById("errorMessage").textContent =
+                  error.message;
+              }
+
+              showNotification(`❌ ${error.message}`, "error");
+            } finally {
+              // Hide loading
+              if (loadingDiv) loadingDiv.style.display = "none";
+
+              // Reset button state jika error
+              if (submitBtn && !submitBtn.classList.contains("success")) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML =
+                  '<i class="fas fa-file-pdf"></i> Cetak & Simpan ke Database';
+              }
+            }
+
+            return false;
+          });
+        }
+
+        // Fungsi validasi form
+        function validateForm() {
+          let isValid = true;
+
+          // Validasi required fields
+          const requiredFields = form.querySelectorAll("[required]");
+          requiredFields.forEach((field) => {
+            if (!field.value.trim()) {
+              isValid = false;
+              field.classList.add("error");
+
+              // Tambahkan pesan error
+              const parent = field.parentElement;
+              let errorDiv = parent.querySelector(".error-message");
+              if (!errorDiv) {
+                errorDiv = document.createElement("div");
+                errorDiv.className = "error-message";
+                errorDiv.innerHTML =
+                  '<i class="fas fa-exclamation-circle"></i> Field ini wajib diisi';
+                parent.appendChild(errorDiv);
+              }
+            } else {
+              field.classList.remove("error");
+              const errorDiv =
+                field.parentElement.querySelector(".error-message");
+              if (errorDiv) errorDiv.remove();
+            }
+          });
+
+          // Validasi signature
+          const signatureData = document.getElementById("ttd_base64").value;
+          if (!signatureData || !signatureData.startsWith("data:image")) {
+            showNotification(
+              "Harap buat dan simpan tanda tangan terlebih dahulu",
+              "warning"
+            );
+            isValid = false;
+          }
+
+          return isValid;
+        }
+
+        // Fungsi untuk show notification
+        function showNotification(message, type = "info") {
+          const notification = document.getElementById("notification");
+          const messageElement = document.getElementById("notificationMessage");
+          const icon = notification.querySelector("i");
+
+          messageElement.textContent = message;
+          notification.className = `notification ${type}`;
+
+          switch (type) {
+            case "success":
+              icon.className = "fas fa-check-circle";
+              break;
+            case "error":
+              icon.className = "fas fa-exclamation-circle";
+              break;
+            case "warning":
+              icon.className = "fas fa-exclamation-triangle";
+              break;
+            default:
+              icon.className = "fas fa-info-circle";
+          }
+
+          notification.style.display = "flex";
+          setTimeout(() => {
+            notification.style.display = "none";
+          }, 5000);
+        }
+      });
+    </script>
+
+    <!-- PERBAIKAN: Tambahkan CSS untuk button states -->
+    <style>
+      .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background-color: #6c757d !important;
+      }
+
+      .btn-submit.success {
+        background-color: #28a745 !important;
+      }
+
+      .submit-loading {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        text-align: center;
+        color: #6c757d;
+      }
+
+      .submit-error {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+        text-align: center;
+      }
+
+      .submit-error i {
+        margin-right: 8px;
+      }
+
+      /* Style untuk debug button dari form_02.js */
+      .btn-secondary.fixed-bottom-left {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        z-index: 9999;
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+
+      .btn-warning.fixed-bottom-left {
+        position: fixed;
+        bottom: 60px;
+        left: 20px;
+        z-index: 9999;
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+    </style>
+  </body>
+</html>

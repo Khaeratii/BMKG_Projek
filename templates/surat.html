@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>USULAN PERUBAHAN</title>
+    <style>
+      /* Ukuran Kertas A4 & Struktur Dasar */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        font-size: 10pt;
+        background-color: #f0f0f0;
+      }
+      .a4-page {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 20px auto;
+        background-color: white;
+        padding: 20mm 15mm 20mm 20mm;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        box-sizing: border-box;
+        position: relative;
+      }
+
+      /* Klasifikasi & Halaman (di luar tabel) */
+      .classification-header,
+      .pagination-header,
+      .classification-footer,
+      .pagination-footer {
+        position: absolute;
+        font-style: italic;
+        font-size: 9pt;
+      }
+      .classification-header {
+        top: 15mm;
+        left: 20mm;
+      }
+      .pagination-header {
+        top: 15mm;
+        right: 15mm;
+      }
+      .classification-footer {
+        bottom: 10mm;
+        left: 20mm;
+      }
+      .pagination-footer {
+        bottom: 10mm;
+        right: 15mm;
+      }
+
+      /* KOP/HEADER (Revisi) */
+      .header-section {
+        width: 100%;
+        border-collapse: collapse;
+        border: 2px solid black; /* Garis tepi luar yang tebal */
+        margin-top: 10px;
+      }
+      .header-section td {
+        padding: 0;
+        vertical-align: top;
+        border: 1px solid black; /* Default border untuk semua sel */
+      }
+
+      /* Kolom 1: Logo BMKG */
+      .logo-cell {
+        width: 100px;
+        text-align: center;
+        padding: 5px;
+        border-right: 2px solid black; /* Garis pemisah tebal vertikal */
+        border-top: none;
+        border-bottom: none;
+        border-left: none;
+      }
+      .logo-img {
+        width: 80px;
+        height: auto;
+        display: block;
+        margin: 0 auto 2px;
+      }
+      .logo-cell div {
+        font-weight: bold;
+        font-size: 10pt;
+      }
+
+      /* Kolom 2: USULAN PERUBAHAN */
+      .title-cell {
+        text-align: center;
+        font-size: 14pt;
+        font-weight: bold;
+        line-height: 1.2;
+        padding: 20px 10px;
+        border-right: 2px solid black; /* Garis pemisah tebal vertikal */
+        border-top: none;
+        border-bottom: none;
+      }
+
+      /* Kolom 3: Info Dokumen (Sub-tabel) */
+      .doc-info-container {
+        width: 300px; /* Lebar sisa kolom kanan */
+        border: none;
+      }
+      .doc-info-container table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .doc-info-container td {
+        border: none;
+        border-bottom: 1px solid black; /* Garis horizontal tipis pemisah baris info */
+        padding: 3px 5px;
+        font-size: 9pt;
+      }
+      .doc-info-container tr:last-child td {
+        border-bottom: none; /* Hilangkan garis bawah di baris terakhir */
+      }
+      .doc-info-container .doc-title-row td {
+        text-align: center;
+        font-size: 10pt;
+        font-weight: bold;
+        padding: 5px;
+        border-bottom: 2px solid black; /* Garis tebal pemisah Judul Info Dokumen */
+      }
+      .doc-info-container .doc-label {
+        width: 30%;
+      }
+      .doc-info-container .doc-value {
+        width: 70%;
+      }
+
+      /* KONTEN UTAMA */
+      .main-content-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 2px solid black;
+        margin-top: -2px; /* Dibuat overlap dengan header agar garisnya menyambung */
+      }
+      .main-content-table td {
+        padding: 4px 6px;
+        border: 1px solid black;
+        text-align: left;
+        vertical-align: top;
+      }
+      .section-title {
+        background-color: #f0f0f0;
+        text-align: center;
+        font-weight: bold;
+      }
+      .bold {
+        font-weight: bold;
+      }
+      .label-cell {
+        width: 25%;
+      }
+      .value-cell {
+        width: 25%;
+      }
+      .full-label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 2px;
+      }
+      .checkbox-cell {
+        width: 25%;
+        padding: 2px 6px;
+      }
+      .impl-label {
+        width: 30%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="a4-page">
+      <table class="header-section">
+        <tr>
+          <td class="logo-cell">
+            <img
+              src="/static/images/logo_bmkg.png"
+              alt="Logo BMKG"
+              class="logo-img"
+            />
+            <div>BMKG</div>
+          </td>
+          <td class="title-cell">USULAN PERUBAHAN</td>
+          <td class="doc-info-container">
+            <table>
+              <tr class="doc-title-row">
+                <td colspan="2">
+                  BALAI BESAR METEOROLOGI KLIMATOLOGI<br />DAN GEOFISIKA WILAYAH
+                  IV
+                </td>
+              </tr>
+              <tr>
+                <td class="doc-label">No. Dokumen</td>
+                <td class="doc-value">SOP/12/IMS/VII/2021/01</td>
+              </tr>
+              <tr>
+                <td class="doc-label">Revisi</td>
+                <td class="doc-value">01</td>
+              </tr>
+              <tr>
+                <td class="doc-label">Tgl. Efektif</td>
+                <td class="doc-value">12 Oktober 2023</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+      <table class="main-content-table">
+        <tr>
+          <td colspan="4" class="section-title">
+            Deskripsi Perubahan (diisi oleh Pemohon – Pegawai)
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell bold">No:</td>
+          <td class="value-cell">[Isi No.]</td>
+          <td class="label-cell bold">Tanggal:</td>
+          <td class="value-cell">[Isi Tanggal]</td>
+        </tr>
+        <tr>
+          <td class="label-cell bold">Diminta oleh:</td>
+          <td class="value-cell">[Nama Lengkap]</td>
+          <td class="label-cell bold">Jabatan:</td>
+          <td class="value-cell">[Nama Jabatan]</td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <span class="full-label">Deskripsi Perubahan:</span> [Deskripsi
+            Perubahan]
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <span class="full-label"
+              >Hasil Perubahan dibutuhkan pada tanggal:</span
+            >
+            [Tanggal Perubahan]
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <span class="full-label">Alasan perubahan:</span> [Alasan Perubahan]
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell bold">Tanda tangan Pemohon:</td>
+          <td colspan="3">[Tanda tangan Pemohon]</td>
+        </tr>
+
+        <tr>
+          <td colspan="4" class="section-title">
+            Evaluasi Dampak Perubahan (diisi oleh Penanggung Jawab – Ketua Tim
+            Kerja)
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell bold">Tipe Perubahan</td>
+          <td class="checkbox-cell">✓ Perangkat Keras</td>
+          <td class="checkbox-cell">✓ Database</td>
+          <td class="checkbox-cell">✓ Konfigurasi</td>
+        </tr>
+        <tr>
+          <td class="label-cell bold"></td>
+          <td class="checkbox-cell">✓ Software / Aplikasi</td>
+          <td class="checkbox-cell">Utilities</td>
+          <td class="checkbox-cell">[Isi Sendiri]</td>
+        </tr>
+        <tr>
+          <td class="label-cell bold">Prioritas Perubahan</td>
+          <td class="checkbox-cell">Normal</td>
+          <td class="checkbox-cell">✓ Emergency</td>
+          <td class="checkbox-cell">Konfigurasi</td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <span class="full-label">Dampak terhadap lingkungan produksi:</span>
+            [Deskripsi]
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <span class="full-label">Upaya / Tindakan yang diperlukan:</span>
+            [Deskripsi]
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <span class="full-label"
+              >Kebutuhan Sumber daya: (personal, h/w, s/w)</span
+            >
+            [Contoh: 6 Orang]
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <span class="full-label">Penjelasan Rencana Pengujian:</span>
+            [Deskripsi]
+          </td>
+        </tr>
+
+        <tr>
+          <td colspan="4" class="section-title">
+            Change Approval or/Rejection (diisi oleh Pemberi Persetujuan)
+          </td>
+        </tr>
+        <tr>
+          <td class="label-cell bold">Status Permintaan perubahan</td>
+          <td class="value-cell">Diterima</td>
+          <td class="value-cell">Ditolak</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td class="label-cell bold">Tanggal pelaksanaan perubahan:</td>
+          <td colspan="3">Sabtu, 21 Oktober 2023</td>
+        </tr>
+        <tr>
+          <td class="label-cell bold">PIC Pelaksana perubahan:</td>
+          <td colspan="3">[Nama PIC]</td>
+        </tr>
+        <tr>
+          <td class="label-cell bold">Tanda tangan persetujuan:</td>
+          <td colspan="3">[Tanda tangan persetujuan]</td>
+        </tr>
+
+        <tr>
+          <td colspan="4" class="section-title">
+            Implementasi Perubahan (rilis) (diisi oleh Pelaksana)
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <span class="full-label">Hasil pengujian Implementasi:</span>
+            [Deskripsi]
+          </td>
+        </tr>
+        <tr>
+          <td class="impl-label bold">
+            Tanggal rilis ke lingkungan operasional
+          </td>
+          <td>[Tanggal rilis]</td>
+          <td class="impl-label bold">Tanggal:</td>
+          <td>[Tanggal]</td>
+        </tr>
+        <tr>
+          <td class="impl-label bold">Tanda tangan PIC:</td>
+          <td colspan="3"></td>
+        </tr>
+      </table>
+
+      <div class="classification-footer">Klasifikasi: Internal</div>
+      <div class="pagination-footer">Hal: 1 / 1</div>
+    </div>
+  </body>
+</html>

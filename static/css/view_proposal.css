@@ -1,0 +1,346 @@
+/* Main Layout */
+.view-proposal-page {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+}
+
+.document-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.document-container {
+  background: white;
+  border: 1px solid #999;
+  border-radius: 4px;
+  padding: 25px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Kop Surat Table */
+.kop-table {
+  border-bottom: 2px solid #000;
+  margin-bottom: 10px;
+}
+
+.kop-logo {
+  width: 80px;
+  height: auto;
+}
+
+.org-name {
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: #000;
+  text-align: center;
+  padding-top: 10px;
+}
+
+.document-info {
+  padding: 5px 0;
+}
+
+.info-table {
+  font-size: 11px;
+  color: #000;
+}
+
+.info-table td {
+  padding: 2px 0;
+  vertical-align: top;
+}
+
+.info-label {
+  font-weight: bold;
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* Document Title */
+.document-title {
+  font-size: 16px;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #000;
+  margin: 20px 0;
+}
+
+/* Document Sections */
+.document-section {
+  margin-bottom: 25px;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: bold;
+  background-color: #e0e0e0;
+  padding: 6px 12px;
+  border: 1px solid #999;
+  margin-bottom: 10px;
+  border-radius: 2px;
+}
+
+.section-content {
+  overflow-x: auto;
+}
+
+/* Form Table */
+.form-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  table-layout: fixed;
+}
+
+.form-table td {
+  border: 1px solid #999;
+  padding: 8px 10px;
+  vertical-align: top;
+  min-height: 35px;
+  height: auto;
+}
+
+.form-table .label-cell {
+  font-weight: bold;
+  background-color: #f0f0f0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.form-table .filled-cell {
+  background-color: #f8f9fa;
+  font-weight: normal;
+  color: #000;
+}
+
+.form-table .empty-cell {
+  background-color: white;
+  color: #666;
+  font-style: italic;
+  min-height: 30px;
+}
+
+.form-table .signature-cell {
+  background-color: white;
+  text-align: center;
+  vertical-align: middle;
+  height: 70px;
+  padding: 10px !important;
+}
+
+/* Checkbox Styles */
+.checkbox-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.checkbox-option input[type="checkbox"] {
+  width: 12px;
+  height: 12px;
+  margin: 0;
+  cursor: default;
+}
+
+.checkbox-label {
+  font-size: 11px;
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+/* Signature */
+.signature-image {
+  max-width: 200px;
+  max-height: 50px;
+  border: 1px solid #ddd;
+  padding: 2px;
+  background-color: white;
+}
+
+.empty-placeholder {
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  padding: 15px 0;
+}
+
+/* Footer */
+.document-footer {
+  font-size: 11px;
+  font-weight: bold;
+  color: #000;
+}
+
+/* Action Buttons */
+.document-actions {
+  padding-top: 20px;
+  border-top: 1px solid #dee2e6;
+}
+
+/* Print Styles */
+@media print {
+  .view-proposal-page {
+    background: white !important;
+    padding: 0 !important;
+  }
+
+  .document-wrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .document-container {
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    page-break-inside: avoid;
+  }
+
+  .document-actions {
+    display: none !important;
+  }
+
+  .btn {
+    display: none !important;
+  }
+
+  .kop-table {
+    border-bottom: 2px solid #000 !important;
+  }
+
+  .form-table td {
+    border: 1px solid #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .section-title {
+    border: 1px solid #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .document-footer {
+    border-top: 1px solid #000 !important;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .document-wrapper {
+    padding: 10px;
+  }
+
+  .document-container {
+    padding: 15px;
+  }
+
+  .org-name {
+    font-size: 12px;
+  }
+
+  .kop-logo {
+    width: 60px;
+  }
+
+  .form-table .label-cell {
+    font-size: 10px;
+  }
+
+  .checkbox-wrapper {
+    gap: 8px;
+  }
+
+  .checkbox-label {
+    font-size: 10px;
+  }
+}
+/* === KOP SURAT BMKG – LURUS === */
+.kop-bmkg {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid #000;
+  margin-bottom: 10px;
+}
+
+.kop-bmkg td {
+  border: 1px solid #000;
+  vertical-align: middle;
+  padding: 10px;
+}
+
+/* Logo */
+.kop-logo-cell {
+  width: 90px;
+  text-align: center;
+}
+
+.kop-logo {
+  width: 70px;
+  height: auto;
+}
+
+/* Judul Tengah */
+.kop-middle {
+  text-align: center;
+  width: 35%;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.kop-title {
+  font-size: 15px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Informasi Dokumen */
+.kop-info-cell {
+  width: 45%;
+  font-size: 12px;
+  padding-left: 15px;
+}
+
+.kop-org {
+  font-weight: bold;
+  font-size: 13px;
+  line-height: 1.2;
+  margin-bottom: 5px;
+}
+
+/* Tabel Info */
+.kop-info-table {
+  width: 100%;
+  font-size: 12px;
+}
+
+.kop-info-table td {
+  border: none;
+  padding: 2px 0;
+}
+
+.kop-info-table .label {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* Print Mode */
+@media print {
+  .kop-bmkg td {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

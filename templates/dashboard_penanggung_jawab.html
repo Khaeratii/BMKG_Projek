@@ -1,0 +1,331 @@
+{% extends "base.html" %} {% block title %}Dashboard Penanggung Jawab | BMKG
+Wilayah IV{% endblock %} {% block body_class %}dashboard-page{% endblock %} {%
+block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dashboard_penanggung_jawab.css') }}"
+/>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dashboard.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="dashboard-wrapper">
+  <nav class="dashboard-navbar">
+    <div class="navbar-content">
+      <a href="{{ url_for('dashboard') }}" class="navbar-brand">
+        <img
+          src="{{ url_for('static', filename='images/logo_bmkg.png') }}"
+          alt="BMKG"
+          class="navbar-logo"
+        />
+        <div class="navbar-title">
+          BMKG Wilayah IV
+          <small>Sistem Usulan Perubahan</small>
+        </div>
+      </a>
+
+      <div class="navbar-user">
+        <div class="user-info">
+          <div class="user-name">
+            {{ session.nama_lengkap or 'Penanggung Jawab' }}
+          </div>
+          <span class="user-role {{ session.user_role or 'penanggung_jawab' }}">
+            {{ (session.user_role or 'penanggung_jawab').replace('_', '
+            ').title() }}
+          </span>
+        </div>
+
+        <div class="profile-icon">
+          {% if session.jenis_kelamin == 'P' %}
+          <i class="fas fa-female"></i>
+          {% elif session.jenis_kelamin == 'L' %}
+          <i class="fas fa-male"></i>
+          {% else %}
+          <i class="fas fa-user-circle"></i>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="dashboard-main">
+    <aside class="dashboard-sidebar">
+      <div class="sidebar-card">
+        <h3 class="sidebar-title">
+          <i class="fas fa-bars"></i>
+          Menu Utama
+        </h3>
+
+        <ul class="sidebar-menu">
+          <li>
+            <a href="{{ url_for('dashboard') }}" class="active">
+              <i class="fas fa-tachometer-alt"></i>
+              Dashboard
+            </a>
+          </li>
+
+          <div class="sidebar-divider"></div>
+
+          <li>
+            <h4 class="sidebar-subtitle">
+              <i class="fas fa-tasks"></i>
+              Tugas Saya
+            </h4>
+          </li>
+
+          <li>
+            <a href="{{ url_for('dokumen_evaluasi') }}" class="sidebar-submenu">
+              <i class="fas fa-search"></i>
+              Usulan Evaluasi
+              <span class="sidebar-badge badge-evaluasi" id="evaluasiCount">
+                {{ proposals|selectattr('status', 'equalto',
+                'evaluasi')|list|length }}
+              </span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('dokumen_approval') }}" class="sidebar-submenu">
+              <i class="fas fa-stamp"></i>
+              Usulan Persetujuan
+              <span class="sidebar-badge badge-approval" id="approvalCount">
+                {{ proposals|selectattr('status', 'equalto',
+                'approval')|list|length }}
+              </span>
+            </a>
+          </li>
+
+          <div class="sidebar-divider"></div>
+
+          <li>
+            <a href="{{ url_for('semua_usulan') }}">
+              <i class="fas fa-layer-group"></i>
+              Lihat Semua Usulan
+            </a>
+          </li>
+
+          <li>
+            <a href="{{ url_for('logout') }}" class="btn-logout">
+              <i class="fas fa-sign-out-alt"></i>
+              Logout
+            </a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <div class="dashboard-content">
+      <div class="welcome-card">
+        <h1 class="welcome-title">
+          Selamat Datang, {{ session.nama_lengkap or 'Penanggung Jawab' }}!
+        </h1>
+        <p class="welcome-subtitle">
+          {{ session.jabatan or 'Penanggung Jawab' }} | Sistem Usulan Perubahan
+          BMKG Wilayah IV
+        </p>
+        <div class="welcome-actions">
+          <a href="{{ url_for('dokumen_evaluasi') }}" class="btn-primary">
+            <i class="fas fa-clipboard-check"></i>
+            Cek Usulan Evaluasi
+          </a>
+          <button class="btn-secondary" id="quickGuideBtn">
+            <i class="fas fa-question-circle"></i>
+            Panduan Cepat
+          </button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <div class="table-header">
+          <h3 class="table-title">
+            <i class="fas fa-gavel"></i>
+            Usulan Menunggu Tindakan Anda
+          </h3>
+          <div class="table-actions">
+            <button class="btn-action btn-view" id="refreshTable">
+              <i class="fas fa-sync-alt"></i>
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          {% set pending_proposals = proposals|selectattr('status', 'in',
+          ['evaluasi', 'approval'])|list %} {% if pending_proposals and
+          pending_proposals|length > 0 %}
+          <table class="data-table" id="proposalsTable">
+            <thead>
+              <tr>
+                <th>No. Dokumen</th>
+                <th>Tanggal Usulan</th>
+                <th>Deskripsi Perubahan</th>
+                <th>Status Saat Ini</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for proposal in pending_proposals|sort(attribute='tanggal',
+              reverse=true) %}
+              <tr>
+                <td>
+                  <strong
+                    >{{ proposal.nomor_dokumen or 'Belum ada nomor' }}</strong
+                  >
+                </td>
+                <td class="tanggal-indonesia">{{ proposal.tanggal or '-' }}</td>
+                <td>
+                  <div
+                    class="proposal-desc"
+                    data-tooltip="{{ proposal.deskripsi_perubahan }}"
+                  >
+                    {{ proposal.deskripsi_perubahan[:60] }} {% if
+                    proposal.deskripsi_perubahan|length > 60 %}...{% endif %}
+                  </div>
+                </td>
+                <td>
+                  {% if proposal.status == 'evaluasi' %}
+                  <span class="status-badge badge-evaluasi"
+                    >Menunggu Evaluasi</span
+                  >
+                  {% elif proposal.status == 'approval' %}
+                  <span class="status-badge badge-approval"
+                    >Menunggu Persetujuan</span
+                  >
+                  {% else %}
+                  <span class="status-badge">{{ proposal.status }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button
+                      class="btn-action btn-view"
+                      onclick="viewProposal({{ proposal.id }})"
+                      data-tooltip="Tinjau Usulan"
+                    >
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    {% if proposal.status == 'evaluasi' %}
+                    <button
+                      class="btn-action btn-check"
+                      onclick="prosesEvaluasi({{ proposal.id }})"
+                      data-tooltip="Proses Evaluasi"
+                    >
+                      <i class="fas fa-clipboard-check"></i>
+                    </button>
+                    {% elif proposal.status == 'approval' %}
+                    <button
+                      class="btn-action btn-approve"
+                      onclick="prosesApproval({{ proposal.id }})"
+                      data-tooltip="Proses Persetujuan"
+                    >
+                      <i class="fas fa-check-double"></i>
+                    </button>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <div class="empty-state">
+            <div class="empty-icon">
+              <i class="fas fa-bell"></i>
+            </div>
+            <h3 class="empty-title">Tidak ada usulan yang menunggu tindakan</h3>
+            <p class="empty-description">
+              Semua usulan yang masuk sudah diproses atau disetujui.
+            </p>
+            <a href="{{ url_for('semua_usulan') }}" class="btn-primary">
+              <i class="fas fa-layer-group"></i>
+              Lihat Semua Usulan
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal Panduan Cepat -->
+<div class="modal-overlay" id="guideModal" style="display: none">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>
+        <i class="fas fa-graduation-cap"></i>
+        Panduan Cepat Penanggung Jawab
+      </h3>
+      <button class="modal-close" id="closeGuideBtn">&times;</button>
+    </div>
+
+    <div class="guide-steps">
+      <div class="step">
+        <h4>
+          <span class="step-number">1</span>
+          Tinjau Usulan Evaluasi
+        </h4>
+        <p>
+          Akses menu "Usulan Evaluasi" untuk meninjau usulan yang baru
+          diserahkan oleh Pegawai. Berikan evaluasi dan keputusan apakah usulan
+          layak diteruskan.
+        </p>
+      </div>
+
+      <div class="step">
+        <h4>
+          <span class="step-number">2</span>
+          Proses Persetujuan
+        </h4>
+        <p>
+          Periksa usulan yang telah selesai dievaluasi di menu "Usulan
+          Persetujuan" untuk memberikan persetujuan akhir (Approval).
+        </p>
+      </div>
+
+      <div class="step">
+        <h4>
+          <span class="step-number">3</span>
+          Berikan Keputusan
+        </h4>
+        <p>
+          Gunakan tombol aksi di tabel untuk memberikan keputusan (Setuju/Tolak)
+          dan melengkapi dokumen evaluasi/persetujuan.
+        </p>
+      </div>
+
+      <div class="step">
+        <h4>
+          <span class="step-number">4</span>
+          Pantau Status
+        </h4>
+        <p>
+          Lacak perkembangan usulan di dashboard ini, terutama yang telah masuk
+          ke tahap Implementasi.
+        </p>
+      </div>
+
+      <div class="step">
+        <h4>
+          <span class="step-number">5</span>
+          Prioritas dan Deadline
+        </h4>
+        <p>
+          Perhatikan indikator deadline yang akan berubah warna sesuai dengan
+          waktu tersisa. Usulan dengan deadline dekat akan ditandai warna kuning
+          atau merah.
+        </p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-primary" id="understandBtn">
+        <i class="fas fa-check"></i>
+        Mengerti
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard_penanggung_jawab.js') }}"></script>
+{% endblock %}
