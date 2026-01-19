@@ -2300,11 +2300,15 @@ def laporan_insiden_review():
     
     return render_template("review_insiden.html", system_name="laporan-insiden")
 
-# ==================== ROUTE UNTUK PRINT LAPORAN INSIDEN ====================
+# ==================== PERBAIKI: HAPUS ROUTE LAMA DAN BUAT YANG BARU ====================
 
+# HAPUS route lama ini jika ada:
+# @app.route('/laporan-insiden/print')
+# def laporan_insiden_print():
+#     ... kode lama ...
 
-# ==================== ROUTE UNTUK PRINT LAPORAN INSIDEN ====================
-# ==================== PERBAIKI ROUTE PRINT LAPORAN INSIDEN ====================
+# GANTI DENGAN ROUTE YANG INI:
+
 @app.route('/laporan-insiden/print', methods=['GET'])
 def laporan_insiden_print():
     """Print Laporan Insiden - DIPERBAIKI UNTUK SMKI & SMKI2"""
@@ -2342,19 +2346,250 @@ def laporan_insiden_print():
     # Jika tidak ada parameter, redirect ke dashboard
     return redirect(url_for('laporan_insiden_dashboard'))
 
-
+# ==================== ROUTE PRINT UNIFIED ====================
+# ==================== ROUTE PRINT UNTUK SEMUA SCENARIO ====================
 @app.route('/laporan-insiden/print/<int:laporan_id>')
 def laporan_insiden_print_by_id(laporan_id):
-    """Print Laporan Insiden dari database - DIPERBAIKI UNTUK SMKI & SMKI2"""
-    print(f"[DEBUG] Print by ID: {laporan_id} - DENGAN TANDA TANGAN GAMBAR")
+    """Print Laporan Insiden dari database - UNTUK SEMUA"""
+    print(f"[DEBUG] Print route called with ID: {laporan_id}")
     
+    # 1. AMBIL DATA DARI DATABASE
+    laporan_data = get_laporan_from_database(laporan_id)
+    
+    if not laporan_data:
+        # Coba cari di sessionStorage sebagai fallback
+        return try_sessionstorage_fallback(laporan_id)
+    
+    # 2. PROSES DATA UNTUK TEMPLATE
+    processed_data = prepare_data_for_javascript_template(laporan_data)
+    
+    # 3. RENDER TEMPLATE SAMA dengan form_03
+    return render_template("print_insiden.html",
+                         laporan=processed_data,  # Kirim data langsung
+                         system_name="laporan-insiden",
+                         datetime=datetime,
+                         is_from_database=True,  # Flag untuk template
+                         data_id=f"db_{laporan_id}")
+
+def get_laporan_from_database(laporan_id):
+    """Get complete laporan data from database"""
     try:
         conn = get_db_connection_mysql()
         if not conn:
-            return render_template("print_insiden.html", 
-                                 laporan=None,
-                                 error_message="Database connection failed",
-                                 system_name="laporan-insiden")
+            print("[ERROR] Database connection failed")
+            return None
+            
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT id, no_dok, no_revisi, tgl_efektif, 
+                   no_permohonan, tanggal_kejadian, nama_pelapor, 
+                   nama_bidang, deskripsi_insiden, jenis_insiden, 
+                   analisa_penyebab, tindak_smki, pic_tindak, 
+                   tindak_pihak, insiden_selesai, tanggal_penyelesaian,
+                   ttd_pelapor_filename, ttd_atasan_filename, 
+                   ttd_smki_filename, ttd_smki2_filename, ttd_ketua_filename,
+                   nama_ttd_pelapor, nama_ttd_atasan, nama_ttd_smki, 
+                   nama_ttd_smki2, nama_ttd_ketua, created_at
+            FROM laporan 
+            WHERE id = %s
+        """, (laporan_id,))
+        result = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        if result:
+            print(f"[SUCCESS] Data found for ID {laporan_id}: {result.get('no_dok')}")
+            return result
+        else:
+            print(f"[ERROR] No data found for ID {laporan_id}")
+            return None
+            
+    except Exception as e:
+        print(f"[ERROR] Database error: {e}")
+        return None
+
+def prepare_data_for_javascript_template(db_data):
+    """Convert database data to JavaScript-compatible format"""
+    if not db_data:
+        return {}
+    
+    # 1. Format tanggal
+    def format_date_for_display(date_value):
+        if not date_value:
+            return ""
+        try:
+            if isinstance(date_value, datetime):
+                return date_value.strftime('%d-%m-%Y')
+            elif isinstance(date_value, date):
+                return date_value.strftime('%d-%m-%Y')
+            else:
+                # Coba parse string
+                date_str = str(date_value)
+                for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y'):
+                    try:
+                        date_obj = datetime.strptime(date_str, fmt)
+                        return date_obj.strftime('%d-%m-%Y')
+                    except:
+                        continue
+                return date_str
+        except:
+            return str(date_value)
+    
+    # 2. Convert signature filenames ke base64
+    ttd_fields = ['pelapor', 'atasan', 'smki', 'smki2', 'ketua']
+    base64_data = {}
+    
+    for field in ttd_fields:
+        filename_key = f'ttd_{field}_filename'
+        filename = db_data.get(filename_key)
+        
+        if filename and filename != 'manual' and filename != '':
+            # Cari file signature
+            possible_paths = [
+                os.path.join(DATA_FOLDER, 'signatures', filename),
+                os.path.join('data', 'signatures', filename),
+                os.path.join('uploads', 'signatures', filename),
+                filename  # Jika sudah full path
+            ]
+            
+            base64_found = False
+            for path in possible_paths:
+                if os.path.exists(path):
+                    try:
+                        with open(path, 'rb') as f:
+                            signature_bytes = f.read()
+                            base64_encoded = base64.b64encode(signature_bytes).decode('utf-8')
+                            base64_data[f'ttd_{field}_base64'] = f"data:image/png;base64,{base64_encoded}"
+                            base64_data[f'ttd_{field}_has_image'] = True
+                            base64_found = True
+                            print(f"[DEBUG] {field} signature converted from: {path}")
+                            break
+                    except Exception as e:
+                        print(f"[ERROR] Error reading {field} signature: {e}")
+                        continue
+            
+            if not base64_found:
+                base64_data[f'ttd_{field}_has_image'] = False
+        else:
+            base64_data[f'ttd_{field}_has_image'] = False
+    
+    # 3. Gabungkan semua data
+    processed_data = {
+        # Metadata
+        'generated_id': f"db_{db_data['id']}",
+        'laporan_id': db_data['id'],
+        'form_version': '3.0',
+        'print_timestamp': datetime.now().isoformat(),
+        
+        # Data dokumen
+        'no_dok': db_data.get('no_dok', ''),
+        'no_revisi': db_data.get('no_revisi', '00'),
+        'tgl_efektif': format_date_for_display(db_data.get('tgl_efektif')),
+        'no_permohonan': db_data.get('no_permohonan', f"INS-{db_data['id']}"),
+        
+        # Data insiden
+        'tanggal_kejadian': format_date_for_display(db_data.get('tanggal_kejadian')),
+        'nama_pelapor': db_data.get('nama_pelapor', ''),
+        'nama_bidang': db_data.get('nama_bidang', ''),
+        'deskripsi_insiden': db_data.get('deskripsi_insiden', ''),
+        'jenis_insiden': db_data.get('jenis_insiden', ''),
+        'analisa_penyebab': db_data.get('analisa_penyebab', ''),
+        
+        # Tindakan
+        'tindak_smki': db_data.get('tindak_smki', ''),
+        'pic_tindak': db_data.get('pic_tindak', ''),
+        'tindak_pihak': db_data.get('tindak_pihak', ''),
+        
+        # Status
+        'selesai': db_data.get('insiden_selesai', 'Tidak'),
+        'insiden_selesai': db_data.get('insiden_selesai', 'Tidak'),
+        'tanggal_penyelesaian': format_date_for_display(db_data.get('tanggal_penyelesaian')),
+        
+        # 5 Nama penandatangan
+        'nama_ttd_pelapor': db_data.get('nama_ttd_pelapor', db_data.get('nama_pelapor', '')),
+        'nama_ttd_atasan': db_data.get('nama_ttd_atasan', ''),
+        'nama_ttd_smki': db_data.get('nama_ttd_smki', ''),
+        'nama_ttd_ketua': db_data.get('nama_ttd_ketua', ''),
+        'nama_ttd_smki2': db_data.get('nama_ttd_smki2', ''),
+    }
+    
+    # 4. Tambahkan signature base64 data
+    processed_data.update(base64_data)
+    
+    # 5. Debug info
+    print(f"[DEBUG] Processed data for template:")
+    print(f"  - ID: {processed_data['laporan_id']}")
+    print(f"  - No Dok: {processed_data['no_dok']}")
+    print(f"  - Signatures: {sum(1 for f in ttd_fields if processed_data.get(f'ttd_{f}_has_image'))}/5")
+    
+    return processed_data
+
+def try_sessionstorage_fallback(laporan_id):
+    """Fallback ke sessionStorage method"""
+    print(f"[DEBUG] Trying sessionStorage fallback for ID: {laporan_id}")
+    
+    # Render template kosong, JavaScript akan cari di sessionStorage
+    return render_template("print_insiden.html",
+                         laporan=None,
+                         system_name="laporan-insiden",
+                         datetime=datetime,
+                         data_id=f"search_{laporan_id}",
+                         debug_mode=True)
+
+@app.route('/api/laporan-insiden/detail/<int:laporan_id>')
+def get_laporan_detail(laporan_id):
+    """Get laporan detail dengan signature base64"""
+    try:
+        conn = get_db_connection_mysql()
+        if not conn:
+            return jsonify({"success": False, "message": "Database connection failed"}), 500
+            
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT * FROM laporan WHERE id = %s
+        """, (laporan_id,))
+        result = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        if result:
+            # Convert signature files to base64
+            ttd_fields = ['pelapor', 'atasan', 'smki', 'smki2', 'ketua']
+            for field in ttd_fields:
+                filename_key = f'ttd_{field}_filename'
+                if result.get(filename_key):
+                    filepath = os.path.join(DATA_FOLDER, 'signatures', result[filename_key])
+                    if os.path.exists(filepath):
+                        with open(filepath, 'rb') as f:
+                            signature_bytes = f.read()
+                            base64_encoded = base64.b64encode(signature_bytes).decode('utf-8')
+                            result[f'ttd_{field}_base64'] = f"data:image/png;base64,{base64_encoded}"
+            
+            return jsonify({
+                "success": True,
+                "data": result
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "message": "Laporan tidak ditemukan"
+            }), 404
+            
+    except Exception as e:
+        print(f"[ERROR] Get detail error: {e}")
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
+
+def get_laporan_from_database(laporan_id):
+    """Get laporan data from database"""
+    try:
+        conn = get_db_connection_mysql()
+        if not conn:
+            return None
             
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
@@ -2363,7 +2598,6 @@ def laporan_insiden_print_by_id(laporan_id):
                    deskripsi_insiden, jenis_insiden, analisa_penyebab,
                    tindak_smki, pic_tindak, tindak_pihak,
                    insiden_selesai, tanggal_penyelesaian,
-                   ttd_pelapor, ttd_atasan, ttd_smki, ttd_smki2, ttd_ketua,
                    ttd_pelapor_filename, ttd_atasan_filename, 
                    ttd_smki_filename, ttd_smki2_filename, ttd_ketua_filename,
                    nama_ttd_pelapor, nama_ttd_atasan, nama_ttd_smki, 
@@ -2377,39 +2611,190 @@ def laporan_insiden_print_by_id(laporan_id):
         cursor.close()
         conn.close()
         
-        if result:
-            # Prepare data dengan base64 signatures
-            laporan_data = prepare_print_data(result)
-            
-            # Pastikan SMKI dan SMKI2 ada
-            print(f"[DEBUG] Laporan data for print:")
-            print(f"  - ID: {laporan_data.get('id')}")
-            print(f"  - TTD SMKI: {laporan_data.get('ttd_smki', 'MISSING')}")
-            print(f"  - TTD SMKI2: {laporan_data.get('ttd_smki2', 'MISSING')}")
-            print(f"  - TTD SMKI base64: {'✓' if laporan_data.get('ttd_smki_base64') else '✗'}")
-            print(f"  - TTD SMKI2 base64: {'✓' if laporan_data.get('ttd_smki2_base64') else '✗'}")
-            
-            # Tambahkan metadata
-            laporan_data['form_version'] = '2.0'
-            laporan_data['has_logo'] = False
-            laporan_data['print_timestamp'] = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
-            
-            return render_template("print_insiden_direct.html",  # Template khusus database
-                                 laporan=laporan_data, 
-                                 system_name="laporan-insiden",
-                                 datetime=datetime)
-        else:
-            return render_template("print_insiden.html", 
-                                 laporan=None,
-                                 error_message=f"Laporan dengan ID {laporan_id} tidak ditemukan",
-                                 system_name="laporan-insiden")
-            
+        return result
+        
     except Exception as e:
-        print(f"[ERROR] Print by ID error: {e}")
-        return render_template("print_insiden.html", 
-                             laporan=None,
-                             error_message=f"Error: {str(e)}",
-                             system_name="laporan-insiden")
+        print(f"[ERROR] Database error: {e}")
+        return None
+
+def process_laporan_data_for_template(data):
+    """Process database data untuk print template"""
+    if not data:
+        return {}
+    
+    # Format tanggal
+    def format_date(date_value):
+        if not date_value:
+            return ""
+        try:
+            if isinstance(date_value, datetime):
+                return date_value.strftime('%d-%m-%Y')
+            elif isinstance(date_value, date):
+                return date_value.strftime('%d-%m-%Y')
+            return str(date_value)
+        except:
+            return str(date_value)
+    
+    # Format semua tanggal
+    date_fields = ['tgl_efektif', 'tanggal_kejadian', 'tanggal_penyelesaian', 'created_at']
+    for field in date_fields:
+        if field in data:
+            data[f'{field}_formatted'] = format_date(data[field])
+    
+    # Convert signature filenames to base64
+    ttd_fields = ['pelapor', 'atasan', 'smki', 'smki2', 'ketua']
+    for field in ttd_fields:
+        filename_key = f'ttd_{field}_filename'
+        base64_key = f'ttd_{field}_base64'
+        has_image_key = f'ttd_{field}_has_image'
+        
+        if data.get(filename_key):
+            filepath = os.path.join(DATA_FOLDER, 'signatures', data[filename_key])
+            if os.path.exists(filepath):
+                try:
+                    with open(filepath, 'rb') as f:
+                        signature_bytes = f.read()
+                        base64_encoded = base64.b64encode(signature_bytes).decode('utf-8')
+                        data[base64_key] = f"data:image/png;base64,{base64_encoded}"
+                        data[has_image_key] = True
+                        print(f"[DEBUG] {field} signature converted to base64")
+                except Exception as e:
+                    print(f"[ERROR] Error converting {field} signature: {e}")
+                    data[has_image_key] = False
+            else:
+                print(f"[WARN] Signature file not found: {filepath}")
+                data[has_image_key] = False
+        else:
+            data[has_image_key] = False
+        
+        # Tambahkan nama field jika belum ada
+        name_key = f'nama_ttd_{field}'
+        if name_key not in data:
+            data[name_key] = data.get(name_key, "")
+    
+    # Tambahkan metadata untuk template
+    data['print_timestamp'] = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+    data['print_mode'] = True
+    data['laporan_id'] = data.get('id')
+    data['form_version'] = "3.0"
+    
+    # Debug info
+    print(f"[DEBUG] Processed data signature status:")
+    for field in ttd_fields:
+        has_img = data.get(f'ttd_{field}_has_image', False)
+        name = data.get(f'nama_ttd_{field}', '')
+        print(f"  - {field}: has_image={has_img}, name='{name}'")
+    
+    return data
+
+def prepare_print_data_for_template(laporan_data):
+    """Prepare laporan data for print template"""
+    if not laporan_data:
+        return {}
+    
+    # Convert to dict if needed
+    if not isinstance(laporan_data, dict):
+        laporan_data = dict(laporan_data)
+    
+    # Format tanggal untuk display
+    def format_date_display(date_value):
+        if not date_value:
+            return ""
+        try:
+            if isinstance(date_value, datetime):
+                return date_value.strftime('%d-%m-%Y')
+            elif isinstance(date_value, date):
+                return date_value.strftime('%d-%m-%Y')
+            else:
+                # Try to parse string
+                for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y'):
+                    try:
+                        date_obj = datetime.strptime(str(date_value), fmt)
+                        return date_obj.strftime('%d-%m-%Y')
+                    except:
+                        continue
+                return str(date_value)
+        except:
+            return str(date_value)
+    
+    # Format semua tanggal
+    date_fields = ['tgl_efektif', 'tanggal_kejadian', 'tanggal_penyelesaian', 'created_at']
+    for field in date_fields:
+        if field in laporan_data:
+            laporan_data[f'{field}_formatted'] = format_date_display(laporan_data[field])
+    
+    # Tambahkan status tanda tangan
+    ttd_fields = ['pelapor', 'atasan', 'smki', 'smki2', 'ketua']
+    for field in ttd_fields:
+        filename_key = f'ttd_{field}_filename'
+        if filename_key in laporan_data and laporan_data[filename_key]:
+            laporan_data[f'ttd_{field}_has_image'] = True
+        else:
+            laporan_data[f'ttd_{field}_has_image'] = False
+    
+    # Tambahkan metadata
+    laporan_data['print_timestamp'] = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+    laporan_data['print_mode'] = True
+    laporan_data['laporan_id'] = laporan_data.get('id')
+    
+    return laporan_data
+
+# ==================== PERBAIKI ROUTE PRINT LAPORAN INSIDEN ====================
+
+
+
+
+# Tambahkan fungsi helper untuk prepare data
+def prepare_print_data_for_template(laporan_data):
+    """Prepare laporan data for print template"""
+    if not laporan_data:
+        return {}
+    
+    # Convert to dict if needed
+    if not isinstance(laporan_data, dict):
+        laporan_data = dict(laporan_data)
+    
+    # Format tanggal untuk display
+    def format_date_display(date_value):
+        if not date_value:
+            return ""
+        try:
+            if isinstance(date_value, datetime):
+                return date_value.strftime('%d-%m-%Y')
+            elif isinstance(date_value, date):
+                return date_value.strftime('%d-%m-%Y')
+            else:
+                # Try to parse string
+                for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y'):
+                    try:
+                        date_obj = datetime.strptime(str(date_value), fmt)
+                        return date_obj.strftime('%d-%m-%Y')
+                    except:
+                        continue
+                return str(date_value)
+        except:
+            return str(date_value)
+    
+    # Format semua tanggal
+    date_fields = ['tgl_efektif', 'tanggal_kejadian', 'tanggal_penyelesaian', 'created_at']
+    for field in date_fields:
+        if field in laporan_data:
+            laporan_data[f'{field}_formatted'] = format_date_display(laporan_data[field])
+    
+    # Tambahkan status tanda tangan
+    ttd_fields = ['pelapor', 'atasan', 'smki', 'smki2', 'ketua']
+    for field in ttd_fields:
+        filename_key = f'ttd_{field}_filename'
+        if filename_key in laporan_data and laporan_data[filename_key]:
+            laporan_data[f'ttd_{field}_has_image'] = True
+        else:
+            laporan_data[f'ttd_{field}_has_image'] = False
+    
+    # Tambahkan metadata
+    laporan_data['print_timestamp'] = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+    laporan_data['print_mode'] = True
+    
+    return laporan_data
 
 
 

@@ -1,9 +1,12 @@
 /**
  * Dashboard Pegawai JavaScript
  * BMKG Change Proposal System
+ * MODIFIED: Added print functionality compatible with form_03.js
  */
 
 document.addEventListener("DOMContentLoaded", function () {
+  console.log("📊 Dashboard Pegawai Loaded");
+
   // Format tanggal Indonesia
   formatIndonesianDates();
 
@@ -12,6 +15,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Initialize event listeners
   initEventListeners();
+
+  // Initialize print buttons
+  initPrintButtons();
 
   // Update stats counters
   updateLiveStats();
@@ -68,7 +74,6 @@ function formatIndonesianDates() {
  */
 function initTooltips() {
   // Tooltip sudah dihandle oleh CSS/HTML data-tooltip
-  // Ini untuk kompatibilitas jika ada tooltip custom
 }
 
 /**
@@ -115,6 +120,478 @@ function initEventListeners() {
 }
 
 /**
+ * Initialize print buttons - MENGGUNAKAN LOGIKA SAMA DENGAN FORM_03.JS
+ */
+function initPrintButtons() {
+  console.log("🖨️ Initializing print buttons...");
+
+  // Tombol cetak di Dashboard Utama (bagian Laporan Insiden)
+  document
+    .querySelectorAll(
+      '.document-actions .btn-view[title="Cetak"], .document-actions .btn-view i.fa-print'
+    )
+    .forEach((btn) => {
+      console.log("🔍 Found print button in document actions");
+
+      // Cari parent card untuk mendapatkan data-laporan-id
+      const card = btn.closest(".document-card");
+      if (card && card.dataset.type === "insiden") {
+        const laporanId = card
+          .querySelector(
+            '.document-actions button[onclick*="printLaporanInsiden"]'
+          )
+          ?.getAttribute("onclick")
+          ?.match(/\d+/)?.[0];
+
+        if (laporanId) {
+          console.log(`✅ Found laporan ID for print: ${laporanId}`);
+
+          // Replace onclick dengan fungsi baru
+          btn.onclick = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log(`🖨️ Print button clicked for laporan ID: ${laporanId}`);
+            handlePrintFromDashboard(laporanId);
+          };
+
+          // Hapus onclick attribute lama jika ada
+          btn.removeAttribute("onclick");
+        }
+      }
+    });
+
+  // Tombol cetak di Dashboard Laporan Insiden khusus
+  document
+    .querySelectorAll(
+      '.action-buttons .btn-view[title="Print"], .action-buttons .btn-view i.fa-print'
+    )
+    .forEach((btn) => {
+      console.log("🔍 Found print button in action buttons");
+
+      // Cari row untuk mendapatkan laporan ID
+      const row = btn.closest("tr");
+      if (row) {
+        // Cari button yang memiliki onclick dengan printLaporanInsiden
+        const printBtn = row.querySelector(
+          'button[onclick*="printLaporanInsiden"]'
+        );
+        if (printBtn) {
+          const onclickAttr = printBtn.getAttribute("onclick");
+          const match = onclickAttr.match(/printLaporanInsiden\((\d+)\)/);
+
+          if (match && match[1]) {
+            const laporanId = match[1];
+            console.log(`✅ Found laporan ID from onclick: ${laporanId}`);
+
+            // Replace onclick dengan fungsi baru
+            btn.onclick = function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log(
+                `🖨️ Print button clicked for laporan ID: ${laporanId}`
+              );
+              handlePrintFromDashboard(laporanId);
+            };
+
+            // Update tombol asli juga
+            printBtn.onclick = function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+              handlePrintFromDashboard(laporanId);
+              return false;
+            };
+          }
+        }
+      }
+    });
+
+  // Tombol dengan ID printReviewBtn (sama dengan form_03.html)
+  const printReviewBtn = document.getElementById("printReviewBtn");
+  if (printReviewBtn) {
+    console.log("✅ Found printReviewBtn with ID:", printReviewBtn.id);
+
+    // Cari laporan ID dari berbagai sumber
+    let laporanId = null;
+
+    // Coba dari data attribute
+    laporanId = printReviewBtn.dataset.laporanId;
+
+    // Coba dari onclick attribute
+    if (!laporanId && printReviewBtn.getAttribute("onclick")) {
+      const onclickMatch = printReviewBtn.getAttribute("onclick").match(/\d+/);
+      if (onclickMatch) laporanId = onclickMatch[0];
+    }
+
+    // Coba dari parent elements
+    if (!laporanId) {
+      const card = printReviewBtn.closest(".document-card");
+      if (card) {
+        const otherBtn = card.querySelector(
+          'button[onclick*="printLaporanInsiden"]'
+        );
+        if (otherBtn && otherBtn.getAttribute("onclick")) {
+          const match = otherBtn.getAttribute("onclick").match(/\d+/);
+          if (match) laporanId = match[0];
+        }
+      }
+    }
+
+    if (laporanId) {
+      console.log(`✅ Setting up printReviewBtn for laporan ID: ${laporanId}`);
+
+      printReviewBtn.onclick = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log(`🖨️ printReviewBtn clicked for laporan ID: ${laporanId}`);
+        handlePrintFromDashboard(laporanId);
+        return false;
+      };
+    } else {
+      console.warn("⚠️ Could not find laporan ID for printReviewBtn");
+    }
+  }
+
+  console.log("✅ Print buttons initialized");
+}
+
+/**
+ * ===================================================================
+ * FUNGSI CETAK UTAMA - SAMA DENGAN FORM_03.JS (handlePrintReview)
+ * ===================================================================
+ */
+
+/**
+ * Handle Print from Dashboard - Menggunakan logika sama dengan form_03.js
+ */
+/**
+ * Handle print dari dashboard - SIMPLIFIED VERSION
+ */
+async function handlePrintFromDashboard(laporanId) {
+  console.log("🖨️ [DASHBOARD] Printing laporan ID:", laporanId);
+
+  showToast("Membuka preview cetak...", "info");
+
+  // Langsung buka print URL tanpa sessionStorage complexity
+  const printUrl = `/laporan-insiden/print/${laporanId}`;
+  console.log("🔗 Print URL:", printUrl);
+
+  // Buka di tab baru
+  const printWindow = window.open(
+    printUrl,
+    "_blank",
+    "width=1024,height=768,toolbar=no,menubar=no,scrollbars=yes"
+  );
+
+  if (!printWindow) {
+    console.warn("⚠️ Popup blocked, opening in same tab");
+    showToast("Popup diblokir. Membuka di tab yang sama...", "warning");
+
+    setTimeout(() => {
+      window.location.href = printUrl;
+    }, 1000);
+  } else {
+    printWindow.focus();
+  }
+
+  // Fallback: jika masih error, coba dengan sessionStorage method
+  setTimeout(async () => {
+    try {
+      // Cek apakah window berhasil terbuka
+      if (printWindow && printWindow.closed) {
+        console.log("🔄 Fallback: Using sessionStorage method");
+
+        // Fetch data dan simpan ke sessionStorage
+        const response = await fetch(`/api/laporan-insiden/data/${laporanId}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            // Simpan ke sessionStorage seperti form_03.js
+            const generatedId = `dashboard_${laporanId}_${Date.now()}`;
+            sessionStorage.setItem(
+              `print_data_${generatedId}`,
+              JSON.stringify(data.data)
+            );
+
+            // Buka dengan data_id parameter
+            const fallbackUrl = `/laporan-insiden/print?data_id=${generatedId}`;
+            window.open(fallbackUrl, "_blank");
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Fallback error:", error);
+    }
+  }, 2000);
+}
+
+/**
+ * Prepare print data for dashboard - Format sama dengan form_03.js
+ */
+function preparePrintDataForDashboard(data, laporanId) {
+  console.log("📋 Preparing print data for dashboard...");
+
+  // Normalize status (sama dengan form_03.js)
+  let finalStatus = data.insiden_selesai || "Tidak";
+  if (typeof finalStatus === "string") {
+    finalStatus = finalStatus.trim();
+    if (finalStatus.toUpperCase() === "YA") {
+      finalStatus = "Ya";
+    } else if (finalStatus.toUpperCase() === "TIDAK") {
+      finalStatus = "Tidak";
+    }
+  }
+
+  if (finalStatus !== "Ya" && finalStatus !== "Tidak") {
+    console.warn(`⚠️ Invalid status: '${finalStatus}', defaulting to 'Tidak'`);
+    finalStatus = "Tidak";
+  }
+
+  // Generate unique ID untuk print
+  const generatedId = `dashboard_print_${laporanId}_${Date.now()}_${Math.random()
+    .toString(36)
+    .substr(2, 9)}`;
+
+  // Format data SAMA PERSIS dengan form_03.js
+  const printData = {
+    // ============ DOKUMEN ============
+    no_dok: data.no_dok || "",
+    no_revisi: data.no_revisi || "00",
+    tgl_efektif: data.tgl_efektif || "",
+    no_permohonan: data.no_permohonan || "",
+
+    // ============ KEJADIAN ============
+    tanggal_kejadian: data.tanggal_kejadian || "",
+    nama_pelapor: data.nama_pelapor || "",
+    nama_bidang: data.nama_bidang || "",
+    deskripsi_insiden: data.deskripsi_insiden || "",
+    jenis_insiden: data.jenis_insiden || "",
+    analisa_penyebab: data.analisa_penyebab || "",
+
+    // ============ TINDAKAN ============
+    tindak_smki: data.tindak_smki || "",
+    pic_tindak: data.pic_tindak || "",
+    tindak_pihak: data.tindak_pihak || "",
+
+    // ============ STATUS ============
+    selesai: finalStatus,
+    insiden_selesai: finalStatus,
+    completed: finalStatus === "Ya",
+    tanggal_penyelesaian: data.tanggal_penyelesaian || "",
+
+    // ============ 5 TANDA TANGAN ============
+    // Note: Di dashboard, tanda tangan sudah ada di database sebagai filename
+    // Template print akan mengambil dari database langsung
+
+    // ============ 5 NAMA PENANDATANGAN ============
+    nama_ttd_pelapor: data.nama_ttd_pelapor || data.nama_pelapor || "",
+    nama_ttd_atasan: data.nama_ttd_atasan || "",
+    nama_ttd_smki: data.nama_ttd_smki || "",
+    nama_ttd_ketua: data.nama_ttd_ketua || "",
+    nama_ttd_smki2: data.nama_ttd_smki2 || "",
+
+    // ============ SIGNATURE FILES (untuk template) ============
+    ttd_pelapor_filename: data.ttd_pelapor_filename || "",
+    ttd_atasan_filename: data.ttd_atasan_filename || "",
+    ttd_smki_filename: data.ttd_smki_filename || "",
+    ttd_smki2_filename: data.ttd_smki2_filename || "",
+    ttd_ketua_filename: data.ttd_ketua_filename || "",
+
+    // ============ METADATA ============
+    print_timestamp: new Date().toISOString(),
+    print_date_formatted: new Date().toLocaleString("id-ID"),
+    form_version: "3.0",
+    generated_id: generatedId,
+    source: "dashboard",
+    laporan_id: laporanId,
+
+    // ============ DEBUG INFO ============
+    _debug: {
+      status_normalized: finalStatus,
+      completion_date: data.tanggal_penyelesaian || "empty",
+      signature_files: {
+        pelapor: data.ttd_pelapor_filename || "none",
+        atasan: data.ttd_atasan_filename || "none",
+        smki: data.ttd_smki_filename || "none",
+        ketua: data.ttd_ketua_filename || "none",
+        smki2: data.ttd_smki2_filename || "none",
+      },
+      storage_time: new Date().toISOString(),
+    },
+  };
+
+  console.log("✅ Print data prepared:", {
+    generated_id: printData.generated_id,
+    status: printData.selesai,
+    signature_count: Object.keys(printData._debug.signature_files).filter(
+      (k) => printData._debug.signature_files[k] !== "none"
+    ).length,
+  });
+
+  return printData;
+}
+
+/**
+ * Save print data to storage - Sama dengan form_03.js
+ */
+function savePrintDataToStorage(printData) {
+  console.log("💾 Saving print data to storage...");
+
+  try {
+    // Clean up old data first
+    cleanupOldPrintData();
+
+    // Simpan dengan unique ID
+    const storageKey = `print_data_${printData.generated_id}`;
+    const jsonString = JSON.stringify(printData);
+
+    console.log(`📦 Data size: ${jsonString.length} bytes`);
+
+    if (jsonString.length > 5000000) {
+      // 5MB limit
+      console.warn("⚠️ Data terlalu besar, gunakan minimal version");
+
+      const minimalPrintData = {
+        no_dok: printData.no_dok,
+        no_permohonan: printData.no_permohonan,
+        nama_pelapor: printData.nama_pelapor,
+        nama_bidang: printData.nama_bidang,
+        tanggal_kejadian: printData.tanggal_kejadian,
+        selesai: printData.selesai,
+        insiden_selesai: printData.insiden_selesai,
+        laporan_id: printData.laporan_id,
+        generated_id: printData.generated_id,
+        form_version: printData.form_version,
+        _minimal: true,
+      };
+
+      const minimalString = JSON.stringify(minimalPrintData);
+      sessionStorage.setItem(storageKey, minimalString);
+      console.log(`✅ Minimal data saved (${minimalString.length} bytes)`);
+    } else {
+      sessionStorage.setItem(storageKey, jsonString);
+      console.log("✅ Full data saved successfully");
+    }
+
+    // Simpan backup info
+    sessionStorage.setItem("last_print_data_id", printData.generated_id);
+
+    // Simpan ke localStorage untuk backup
+    const backupData = {
+      id: printData.generated_id,
+      timestamp: printData.print_timestamp,
+      no_dok: printData.no_dok,
+      no_permohonan: printData.no_permohonan,
+      nama_pelapor: printData.nama_pelapor,
+      status: printData.selesai,
+      laporan_id: printData.laporan_id,
+    };
+
+    localStorage.setItem("last_print_data", JSON.stringify(backupData));
+
+    console.log("✅ All data saved to storage");
+    return true;
+  } catch (error) {
+    console.error("❌ Error saving to storage:", error);
+    return false;
+  }
+}
+
+/**
+ * Cleanup old print data - Sama dengan form_03.js
+ */
+function cleanupOldPrintData() {
+  try {
+    const keysToRemove = [];
+    const now = Date.now();
+    const maxAge = 24 * 60 * 60 * 1000; // 24 jam
+
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key.startsWith("print_data_")) {
+        try {
+          const data = JSON.parse(sessionStorage.getItem(key));
+          if (data && data._debug && data._debug.storage_time) {
+            const storageTime = new Date(data._debug.storage_time).getTime();
+            if (now - storageTime > maxAge) {
+              keysToRemove.push(key);
+            }
+          } else if (data && data.timestamp) {
+            const storageTime = new Date(data.timestamp).getTime();
+            if (now - storageTime > maxAge) {
+              keysToRemove.push(key);
+            }
+          }
+        } catch (e) {
+          keysToRemove.push(key);
+        }
+      }
+    }
+
+    keysToRemove.forEach((key) => {
+      sessionStorage.removeItem(key);
+      console.log(`🧹 Cleaned up old data: ${key}`);
+    });
+
+    if (keysToRemove.length > 0) {
+      console.log(`✅ Cleaned up ${keysToRemove.length} old data items`);
+    }
+  } catch (e) {
+    console.warn("Could not cleanup old data:", e);
+  }
+}
+
+/**
+ * Open print window - Sama dengan form_03.js
+ */
+function openPrintWindow(generatedId) {
+  console.log("🌐 Opening print window...");
+
+  const printUrl = `/laporan-insiden/print?data_id=${generatedId}&autoprint=1`;
+  console.log("🔗 Print URL:", printUrl);
+
+  const printWindow = window.open(
+    printUrl,
+    "_blank",
+    "width=1024,height=768,toolbar=no,menubar=no,scrollbars=yes"
+  );
+
+  if (!printWindow) {
+    console.warn("⚠️ Popup blocked, opening in same tab");
+    showToast("Popup diblokir. Membuka di tab yang sama...", "warning");
+
+    setTimeout(() => {
+      window.location.href = printUrl;
+    }, 1000);
+  } else {
+    printWindow.focus();
+    showToast("Membuka jendela cetak...", "success");
+
+    // Auto close setelah 30 detik
+    setTimeout(() => {
+      if (printWindow && !printWindow.closed) {
+        printWindow.close();
+        console.log("🔄 Print window auto-closed");
+      }
+    }, 30000);
+  }
+}
+
+/**
+ * Original printLaporanInsiden function (compatibility)
+ */
+function printLaporanInsiden(id) {
+  console.log("[COMPAT] printLaporanInsiden called with ID:", id);
+  handlePrintFromDashboard(id);
+  return false;
+}
+
+/**
+ * ===================================================================
+ * FUNGSI-FUNGSI LAINNYA (TETAP SAMA)
+ * ===================================================================
+ */
+
+/**
  * Update live statistics
  */
 function updateLiveStats() {
@@ -152,12 +629,6 @@ function animateCount(element, target) {
 }
 
 /**
- * ================================================
- * FUNGSI TOMBOL AKSI UTAMA
- * ================================================
- */
-
-/**
  * Edit proposal (draft only)
  */
 function editProposal(id) {
@@ -183,10 +654,6 @@ function editProposal(id) {
     // Buat URL
     const url = `/pegawai/edit-proposal/${proposalId}`;
     console.log("[EDIT] Redirect ke URL:", url);
-
-    // Debug: coba buka URL manual
-    console.log("[DEBUG] Coba buka URL ini di browser baru:");
-    console.log(`http://localhost:5000/pegawai/edit-proposal/${proposalId}`);
 
     // Redirect
     window.location.href = url;
@@ -287,12 +754,6 @@ function downloadPdf(id) {
     window.open(pdfUrl, "_blank");
   }, 1000);
 }
-
-/**
- * ================================================
- * FUNGSI HELPER TOMBOL AKSI
- * ================================================
- */
 
 /**
  * Remove proposal row from table

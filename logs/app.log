@@ -3297,3 +3297,118 @@
 2026-01-19 05:48:21,781 | INFO | 127.0.0.1 - - [19/Jan/2026 05:48:21] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
 2026-01-19 05:48:21,781 | INFO | 127.0.0.1 - - [19/Jan/2026 05:48:21] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
 2026-01-19 05:48:31,582 | INFO | 127.0.0.1 - - [19/Jan/2026 05:48:31] "GET /surat-pernyataan/download/12 HTTP/1.1" 200 -
+2026-01-19 07:12:05,856 | INFO | 127.0.0.1 - - [19/Jan/2026 07:12:05] "GET /laporan-insiden HTTP/1.1" 200 -
+2026-01-19 07:12:06,103 | INFO | 127.0.0.1 - - [19/Jan/2026 07:12:06] "[36mGET /static/css/form_03.css HTTP/1.1[0m" 304 -
+2026-01-19 07:12:06,193 | INFO | 127.0.0.1 - - [19/Jan/2026 07:12:06] "[36mGET /static/js/signature.js HTTP/1.1[0m" 304 -
+2026-01-19 07:12:06,241 | INFO | 127.0.0.1 - - [19/Jan/2026 07:12:06] "GET /static/js/form_03.js HTTP/1.1" 200 -
+2026-01-19 07:13:31,794 | INFO | 127.0.0.1 - - [19/Jan/2026 07:13:31] "POST /api/laporan-insiden/save HTTP/1.1" 200 -
+2026-01-19 07:13:33,337 | INFO | 127.0.0.1 - - [19/Jan/2026 07:13:33] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 07:13:33,624 | INFO | 127.0.0.1 - - [19/Jan/2026 07:13:33] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 07:13:33,690 | INFO | 127.0.0.1 - - [19/Jan/2026 07:13:33] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-19 07:13:33,691 | INFO | 127.0.0.1 - - [19/Jan/2026 07:13:33] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-19 07:13:33,692 | INFO | 127.0.0.1 - - [19/Jan/2026 07:13:33] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-19 07:13:33,692 | INFO | 127.0.0.1 - - [19/Jan/2026 07:13:33] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-19 07:13:42,493 | INFO | 127.0.0.1 - - [19/Jan/2026 07:13:42] "GET /laporan-insiden/print/12 HTTP/1.1" 200 -
+2026-01-19 07:14:22,800 | INFO | 127.0.0.1 - - [19/Jan/2026 07:14:22] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 07:14:23,109 | INFO | 127.0.0.1 - - [19/Jan/2026 07:14:23] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 07:14:23,160 | INFO | 127.0.0.1 - - [19/Jan/2026 07:14:23] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-19 07:14:23,164 | INFO | 127.0.0.1 - - [19/Jan/2026 07:14:23] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-19 07:14:23,168 | INFO | 127.0.0.1 - - [19/Jan/2026 07:14:23] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-19 07:14:23,174 | INFO | 127.0.0.1 - - [19/Jan/2026 07:14:23] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-19 07:14:25,529 | INFO | 127.0.0.1 - - [19/Jan/2026 07:14:25] "GET /laporan-insiden/print/12 HTTP/1.1" 200 -
+2026-01-19 07:14:38,543 | INFO | 127.0.0.1 - - [19/Jan/2026 07:14:38] "GET /laporan-insiden/print/8 HTTP/1.1" 200 -
+2026-01-19 07:14:45,067 | INFO | 127.0.0.1 - - [19/Jan/2026 07:14:45] "GET /laporan-insiden/print/8 HTTP/1.1" 200 -
+2026-01-19 08:53:20,126 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:20] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 08:53:20,200 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:20] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 08:53:20,205 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:20] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-19 08:53:20,208 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:20] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-19 08:53:20,217 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:20] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-19 08:53:20,220 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:20] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-19 08:53:23,077 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:23] "GET /laporan-insiden/print/12 HTTP/1.1" 200 -
+2026-01-19 08:53:29,343 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:29] "GET /laporan-insiden/print/6 HTTP/1.1" 200 -
+2026-01-19 08:53:36,137 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:36] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 08:53:36,173 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:36] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 08:53:36,181 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:36] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-19 08:53:36,181 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:36] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-19 08:53:36,187 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:36] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-19 08:53:36,189 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:36] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-19 08:53:39,646 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:39] "POST /api/laporan-insiden/delete/12 HTTP/1.1" 200 -
+2026-01-19 08:53:41,944 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:41] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 08:53:41,991 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:41] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 08:53:41,994 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:41] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-19 08:53:41,999 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:41] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-19 08:53:42,005 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:42] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-19 08:53:42,011 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:42] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-19 08:53:44,516 | INFO | 127.0.0.1 - - [19/Jan/2026 08:53:44] "GET /laporan-insiden/print/1 HTTP/1.1" 200 -
+2026-01-19 10:07:13,356 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.9.7.114:5000
+2026-01-19 10:07:13,358 | INFO | [33mPress CTRL+C to quit[0m
+2026-01-19 10:07:13,360 | INFO |  * Restarting with stat
+2026-01-19 10:07:14,620 | WARNING |  * Debugger is active!
+2026-01-19 10:07:14,629 | INFO |  * Debugger PIN: 220-703-075
+2026-01-19 10:07:18,670 | INFO | 127.0.0.1 - - [19/Jan/2026 10:07:18] "[32mGET / HTTP/1.1[0m" 302 -
+2026-01-19 10:07:18,895 | INFO | 127.0.0.1 - - [19/Jan/2026 10:07:18] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 10:07:19,021 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-19 10:07:19,225 | INFO |  * Restarting with stat
+2026-01-19 10:27:52,927 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.9.7.114:5000
+2026-01-19 10:27:52,928 | INFO | [33mPress CTRL+C to quit[0m
+2026-01-19 10:27:52,938 | INFO |  * Restarting with stat
+2026-01-19 10:27:54,548 | WARNING |  * Debugger is active!
+2026-01-19 10:27:54,567 | INFO |  * Debugger PIN: 220-703-075
+2026-01-19 10:27:58,984 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-19 10:27:59,171 | INFO |  * Restarting with stat
+2026-01-19 10:28:00,458 | WARNING |  * Debugger is active!
+2026-01-19 10:28:00,461 | INFO |  * Debugger PIN: 220-703-075
+2026-01-19 10:28:05,579 | INFO | 127.0.0.1 - - [19/Jan/2026 10:28:05] "[32mGET / HTTP/1.1[0m" 302 -
+2026-01-19 10:28:05,778 | INFO | 127.0.0.1 - - [19/Jan/2026 10:28:05] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 10:28:06,109 | INFO | 127.0.0.1 - - [19/Jan/2026 10:28:06] "GET /static/css/style.css HTTP/1.1" 200 -
+2026-01-19 10:28:06,138 | INFO | 127.0.0.1 - - [19/Jan/2026 10:28:06] "GET /static/css/dashboard_pegawai.css HTTP/1.1" 200 -
+2026-01-19 10:28:06,213 | INFO | 127.0.0.1 - - [19/Jan/2026 10:28:06] "GET /static/js/dashboard.js HTTP/1.1" 200 -
+2026-01-19 10:28:06,229 | INFO | 127.0.0.1 - - [19/Jan/2026 10:28:06] "GET /static/css/dashboard.css HTTP/1.1" 200 -
+2026-01-19 10:28:06,229 | INFO | 127.0.0.1 - - [19/Jan/2026 10:28:06] "GET /static/images/logo_bmkg.png HTTP/1.1" 200 -
+2026-01-19 10:28:36,857 | INFO | 127.0.0.1 - - [19/Jan/2026 10:28:36] "GET /laporan-insiden/print/11 HTTP/1.1" 200 -
+2026-01-19 10:56:11,677 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-19 10:56:11,868 | INFO |  * Restarting with stat
+2026-01-19 10:56:13,359 | WARNING |  * Debugger is active!
+2026-01-19 10:56:13,369 | INFO |  * Debugger PIN: 220-703-075
+2026-01-19 10:59:37,744 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-19 10:59:37,934 | INFO |  * Restarting with stat
+2026-01-19 10:59:39,493 | WARNING |  * Debugger is active!
+2026-01-19 10:59:39,502 | INFO |  * Debugger PIN: 220-703-075
+2026-01-19 11:00:00,886 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-19 11:00:01,068 | INFO |  * Restarting with stat
+2026-01-19 11:00:02,509 | WARNING |  * Debugger is active!
+2026-01-19 11:00:02,519 | INFO |  * Debugger PIN: 220-703-075
+2026-01-19 11:01:20,235 | INFO | 127.0.0.1 - - [19/Jan/2026 11:01:20] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 11:01:20,518 | INFO | 127.0.0.1 - - [19/Jan/2026 11:01:20] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-19 11:01:20,567 | INFO | 127.0.0.1 - - [19/Jan/2026 11:01:20] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 11:01:20,583 | INFO | 127.0.0.1 - - [19/Jan/2026 11:01:20] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-19 11:01:20,583 | INFO | 127.0.0.1 - - [19/Jan/2026 11:01:20] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-19 11:01:20,630 | INFO | 127.0.0.1 - - [19/Jan/2026 11:01:20] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-19 11:01:23,899 | INFO | 127.0.0.1 - - [19/Jan/2026 11:01:23] "GET /laporan-insiden/print/11 HTTP/1.1" 200 -
+2026-01-19 11:01:28,101 | INFO | 127.0.0.1 - - [19/Jan/2026 11:01:28] "GET /laporan-insiden/print/10 HTTP/1.1" 200 -
+2026-01-19 11:07:38,146 | INFO | 127.0.0.1 - - [19/Jan/2026 11:07:38] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 11:07:38,187 | INFO | 127.0.0.1 - - [19/Jan/2026 11:07:38] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-19 11:07:38,191 | INFO | 127.0.0.1 - - [19/Jan/2026 11:07:38] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 11:07:38,191 | INFO | 127.0.0.1 - - [19/Jan/2026 11:07:38] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-19 11:07:38,191 | INFO | 127.0.0.1 - - [19/Jan/2026 11:07:38] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-19 11:07:38,207 | INFO | 127.0.0.1 - - [19/Jan/2026 11:07:38] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-19 11:07:40,592 | INFO | 127.0.0.1 - - [19/Jan/2026 11:07:40] "GET /laporan-insiden/print/8 HTTP/1.1" 200 -
+2026-01-19 11:08:00,794 | INFO | 127.0.0.1 - - [19/Jan/2026 11:08:00] "GET /laporan-insiden HTTP/1.1" 200 -
+2026-01-19 11:08:00,858 | INFO | 127.0.0.1 - - [19/Jan/2026 11:08:00] "[36mGET /static/css/form_03.css HTTP/1.1[0m" 304 -
+2026-01-19 11:08:00,874 | INFO | 127.0.0.1 - - [19/Jan/2026 11:08:00] "[36mGET /static/js/signature.js HTTP/1.1[0m" 304 -
+2026-01-19 11:08:00,882 | INFO | 127.0.0.1 - - [19/Jan/2026 11:08:00] "GET /static/js/form_03.js HTTP/1.1" 200 -
+2026-01-19 11:11:37,231 | INFO | 127.0.0.1 - - [19/Jan/2026 11:11:37] "GET /laporan-insiden/print?data_id=print_1768792296919_w38jfyi0g&autoprint=1 HTTP/1.1" 200 -
+2026-01-19 11:11:50,159 | INFO | 127.0.0.1 - - [19/Jan/2026 11:11:50] "POST /api/laporan-insiden/save HTTP/1.1" 200 -
+2026-01-19 11:11:51,710 | INFO | 127.0.0.1 - - [19/Jan/2026 11:11:51] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 11:11:51,757 | INFO | 127.0.0.1 - - [19/Jan/2026 11:11:51] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 11:11:51,757 | INFO | 127.0.0.1 - - [19/Jan/2026 11:11:51] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-19 11:11:51,757 | INFO | 127.0.0.1 - - [19/Jan/2026 11:11:51] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-19 11:11:51,773 | INFO | 127.0.0.1 - - [19/Jan/2026 11:11:51] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-19 11:11:51,779 | INFO | 127.0.0.1 - - [19/Jan/2026 11:11:51] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-19 11:11:55,392 | INFO | 127.0.0.1 - - [19/Jan/2026 11:11:55] "GET /laporan-insiden/print/13 HTTP/1.1" 200 -

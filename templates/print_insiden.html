@@ -752,173 +752,220 @@
 
     <script>
       // ============================================
-      // MAIN SCRIPT - Load data from sessionStorage
+      // ENHANCED MAIN SCRIPT - Handle multiple data sources
       // ============================================
       (function () {
         "use strict";
 
-        console.log("🔄 Print page initialized");
+        console.log("🔄 Enhanced Print Page Loaded");
 
-        // Global data variable
+        // Global variables
         let laporanData = null;
+        let dataSource = "unknown";
 
-        // Function to load data from storage
-        function loadDataFromStorage() {
+        // ============ DETECT DATA SOURCE ============
+        function determineDataSource() {
+          console.log("🔍 Determining data source...");
+
+          // 1. Check if data is passed directly from Flask (for dashboard)
+          if (
+            typeof window.laporanDataFromFlask !== "undefined" &&
+            window.laporanDataFromFlask
+          ) {
+            console.log("✅ Data source: Direct from Flask (Dashboard)");
+            return "flask";
+          }
+
+          // 2. Check URL for data_id parameter (for form_03)
+          const urlParams = new URLSearchParams(window.location.search);
+          const dataId = urlParams.get("data_id");
+
+          if (dataId) {
+            console.log(`✅ Data source: SessionStorage (data_id: ${dataId})`);
+            return "sessionstorage";
+          }
+
+          // 3. Check if we have a direct database ID in URL (fallback)
+          const pathMatch = window.location.pathname.match(
+            /\/laporan-insiden\/print\/(\d+)/
+          );
+          if (pathMatch) {
+            console.log(
+              `✅ Data source: Database via direct URL (ID: ${pathMatch[1]})`
+            );
+            return "database";
+          }
+
+          console.warn("⚠️ Unknown data source");
+          return "unknown";
+        }
+
+        // ============ LOAD DATA FROM DIFFERENT SOURCES ============
+        async function loadData() {
+          dataSource = determineDataSource();
+          console.log(`📊 Loading data from: ${dataSource}`);
+
+          switch (dataSource) {
+            case "flask":
+              laporanData = loadDataFromFlask();
+              break;
+
+            case "sessionstorage":
+              laporanData = loadDataFromSessionStorage();
+              break;
+
+            case "database":
+              laporanData = await loadDataFromDatabase();
+              break;
+
+            default:
+              console.error("❌ Cannot determine data source");
+              return null;
+          }
+
+          if (laporanData) {
+            console.log("✅ Data loaded successfully");
+            console.log("📋 Data summary:", {
+              id: laporanData.laporan_id || laporanData.id || "N/A",
+              no_dok: laporanData.no_dok || "N/A",
+              status:
+                laporanData.selesai || laporanData.insiden_selesai || "N/A",
+              source: dataSource,
+            });
+            return laporanData;
+          }
+
+          console.error("❌ Failed to load data");
+          return null;
+        }
+
+        // ============ 1. LOAD FROM FLASK (DASHBOARD) ============
+        function loadDataFromFlask() {
+          try {
+            if (window.laporanDataFromFlask) {
+              console.log("📥 Loading data from Flask template variable");
+              return window.laporanDataFromFlask;
+            }
+          } catch (error) {
+            console.error("❌ Error loading Flask data:", error);
+          }
+          return null;
+        }
+
+        // ============ 2. LOAD FROM SESSIONSTORAGE (FORM_03) ============
+        function loadDataFromSessionStorage() {
           try {
             const urlParams = new URLSearchParams(window.location.search);
             const dataId = urlParams.get("data_id");
-            const isMinimal = urlParams.get("minimal") === "1";
 
             if (!dataId) {
-              console.log("❌ No data_id parameter found in URL");
-              showError(
-                "Data ID tidak ditemukan dalam URL. Silakan kembali ke form."
-              );
+              console.error("❌ No data_id parameter");
               return null;
             }
 
-            console.log(
-              `🔍 Loading data with ID: ${dataId}, minimal: ${isMinimal}`
-            );
+            console.log(`🔍 Looking for data with ID: ${dataId}`);
 
-            // Cari data di sessionStorage
-            let storedData = sessionStorage.getItem(`print_data_${dataId}`);
+            // Try various storage keys
+            const storageKeys = [
+              `print_data_${dataId}`,
+              `minimal_data_${dataId}`,
+              `fallback_data_${dataId}`,
+              dataId, // Sometimes stored without prefix
+            ];
 
-            // Jika tidak ditemukan, coba storage lain
-            if (!storedData) {
-              console.log(
-                `⚠️ Data not found in sessionStorage, trying localStorage...`
-              );
-              storedData = localStorage.getItem(`print_data_${dataId}`);
-            }
-
-            // Jika masih tidak ditemukan, coba last_print_data
-            if (!storedData) {
-              console.log(
-                `⚠️ Data not found with key, trying last_print_data...`
-              );
-              const lastData =
-                sessionStorage.getItem("last_print_data") ||
-                localStorage.getItem("last_print_data");
-              if (lastData) {
-                const lastDataObj = JSON.parse(lastData);
-                if (lastDataObj.id === dataId) {
-                  // Coba key dengan prefix
-                  storedData = sessionStorage.getItem(`print_data_${dataId}`);
-                  if (!storedData) {
-                    storedData = localStorage.getItem(`print_data_${dataId}`);
-                  }
-                }
-              }
-            }
-
-            // Jika mode minimal dan tidak ada data, gunakan fallback
-            if (!storedData && isMinimal) {
-              console.log("⚠️ Using minimal data mode");
+            let storedData = null;
+            for (const key of storageKeys) {
               storedData =
-                sessionStorage.getItem(`minimal_data_${dataId}`) ||
-                localStorage.getItem(`minimal_data_${dataId}`);
+                sessionStorage.getItem(key) || localStorage.getItem(key);
+              if (storedData) {
+                console.log(`✅ Found data in storage key: ${key}`);
+                break;
+              }
             }
 
             if (!storedData) {
               console.error("❌ Data not found in any storage");
-              showError(
-                `Data dengan ID ${dataId} tidak ditemukan dalam penyimpanan.`
-              );
               return null;
             }
 
-            // Parse the data
             const parsedData = JSON.parse(storedData);
-            console.log(`✅ Data loaded successfully:`, {
-              id: parsedData.generated_id || dataId,
-              no_dok: parsedData.no_dok || "N/A",
-              has_signatures: {
-                pelapor:
-                  !!parsedData.ttd_pelapor_base64 || !!parsedData.ttd_pelapor,
-                atasan:
-                  !!parsedData.ttd_atasan_base64 || !!parsedData.ttd_atasan,
-                smki: !!parsedData.ttd_smki_base64 || !!parsedData.ttd_smki,
-                ketua: !!parsedData.ttd_ketua_base64 || !!parsedData.ttd_ketua,
-                smki2: !!parsedData.ttd_smki2_base64 || !!parsedData.ttd_smki2,
-              },
-            });
-
-            // DEBUG: Tampilkan semua field yang dimulai dengan 'ttd'
-            console.log("🔍 All TTD fields in data:");
-            Object.keys(parsedData).forEach((key) => {
-              if (
-                key.includes("ttd") ||
-                key.includes("TTD") ||
-                key.includes("signature")
-              ) {
-                const value = parsedData[key];
-                console.log(
-                  `  ${key}:`,
-                  value
-                    ? typeof value === "string"
-                      ? `✓ (${value.length} chars)`
-                      : "✓ Object"
-                    : "✗ Empty"
-                );
-              }
-            });
-
+            console.log("✅ Data parsed from storage");
             return parsedData;
           } catch (error) {
-            console.error("❌ Error loading data from storage:", error);
-            showError(`Error memuat data: ${error.message}`);
+            console.error("❌ Error loading from storage:", error);
             return null;
           }
         }
 
-        // Function to update UI with data
+        // ============ 3. LOAD FROM DATABASE (FALLBACK) ============
+        async function loadDataFromDatabase() {
+          try {
+            const match = window.location.pathname.match(
+              /\/laporan-insiden\/print\/(\d+)/
+            );
+            if (!match) {
+              console.error("❌ No database ID in URL");
+              return null;
+            }
+
+            const laporanId = match[1];
+            console.log(`📡 Fetching from database API for ID: ${laporanId}`);
+
+            // Try to fetch from API
+            const response = await fetch(
+              `/api/laporan-insiden/detail/${laporanId}`
+            );
+
+            if (!response.ok) {
+              throw new Error(`API error: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.success && result.data) {
+              console.log("✅ Data loaded from database API");
+              return result.data;
+            } else {
+              throw new Error(result.message || "No data returned");
+            }
+          } catch (error) {
+            console.error("❌ Error loading from database:", error);
+            return null;
+          }
+        }
+
+        // ============ UPDATE UI WITH DATA ============
         function updateUIWithData(data) {
-          if (!data) return;
+          if (!data) {
+            console.error("❌ No data to update UI");
+            return;
+          }
 
           console.log("🎨 Updating UI with data...");
 
-          // Helper for date formatting
+          // Format date helper
           function formatDateDisplay(dateStr) {
             if (!dateStr) return "";
             try {
-              // Jika sudah dalam format DD-MM-YYYY, return langsung
+              // If already in DD-MM-YYYY format
               if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
                 return dateStr;
               }
 
-              // Coba parse berbagai format
-              const dateFormats = [
-                "YYYY-MM-DD",
-                "YYYY/MM/DD",
-                "DD/MM/YYYY",
-                "MM/DD/YYYY",
-                "DD-MM-YYYY",
-                "MM-DD-YYYY",
+              // Try various date formats
+              const formats = [
+                { regex: /^(\d{4})-(\d{2})-(\d{2})$/, parts: [3, 2, 1] }, // YYYY-MM-DD
+                { regex: /^(\d{2})\/(\d{2})\/(\d{4})$/, parts: [1, 2, 3] }, // DD/MM/YYYY
+                { regex: /^(\d{2})-(\d{2})-(\d{4})$/, parts: [1, 2, 3] }, // DD-MM-YYYY
               ];
 
-              for (const format of dateFormats) {
-                try {
-                  let date;
-                  if (format === "YYYY-MM-DD") {
-                    const [year, month, day] = dateStr.split("-");
-                    date = new Date(year, month - 1, day);
-                  } else if (format === "DD/MM/YYYY") {
-                    const [day, month, year] = dateStr.split("/");
-                    date = new Date(year, month - 1, day);
-                  } else if (format === "DD-MM-YYYY") {
-                    const [day, month, year] = dateStr.split("-");
-                    date = new Date(year, month - 1, day);
-                  }
-
-                  if (date && !isNaN(date.getTime())) {
-                    const d = String(date.getDate()).padStart(2, "0");
-                    const m = String(date.getMonth() + 1).padStart(2, "0");
-                    const y = date.getFullYear();
-                    return `${d}-${m}-${y}`;
-                  }
-                } catch (e) {
-                  continue;
+              for (const format of formats) {
+                const match = dateStr.match(format.regex);
+                if (match) {
+                  const day = match[format.parts[0]].padStart(2, "0");
+                  const month = match[format.parts[1]].padStart(2, "0");
+                  const year = match[format.parts[2]];
+                  return `${day}-${month}-${year}`;
                 }
               }
 
@@ -929,61 +976,42 @@
             }
           }
 
-          // Update document info
-          updateTextContent("reviewNoDok", data.no_dok || "Belum diisi");
-          updateTextContent("reviewNoRevisi", data.no_revisi || "00");
-          updateTextContent(
-            "reviewTglEfektif",
-            data.tgl_efektif_formatted ||
-              formatDateDisplay(data.tgl_efektif) ||
-              "Belum diisi"
-          );
-          updateTextContent(
-            "reviewNoPermohonan",
-            data.no_permohonan || "Belum diisi"
-          );
+          // Update basic fields
+          const fieldMap = [
+            { id: "reviewNoDok", key: "no_dok" },
+            { id: "reviewNoRevisi", key: "no_revisi", default: "00" },
+            { id: "reviewNoPermohonan", key: "no_permohonan" },
+            {
+              id: "reviewTanggalKejadian",
+              key: "tanggal_kejadian",
+              format: true,
+            },
+            { id: "reviewNamaPelapor", key: "nama_pelapor" },
+            { id: "reviewNamaBidang", key: "nama_bidang" },
+            { id: "reviewDeskripsiInsiden", key: "deskripsi_insiden" },
+            { id: "reviewJenisInsiden", key: "jenis_insiden" },
+            { id: "reviewAnalisaPenyebab", key: "analisa_penyebab" },
+            { id: "reviewTindakSMKI", key: "tindak_smki" },
+            { id: "reviewPICTindak", key: "pic_tindak" },
+            { id: "reviewTindakPihak", key: "tindak_pihak" },
+            {
+              id: "reviewTanggalPenyelesaian",
+              key: "tanggal_penyelesaian",
+              format: true,
+            },
+            { id: "reviewTglEfektif", key: "tgl_efektif", format: true },
+          ];
 
-          // Update incident data
-          updateTextContent(
-            "reviewTanggalKejadian",
-            data.tanggal_kejadian_formatted ||
-              formatDateDisplay(data.tanggal_kejadian) ||
-              "Belum diisi"
-          );
-          updateTextContent(
-            "reviewNamaPelapor",
-            data.nama_pelapor || "Belum diisi"
-          );
-          updateTextContent(
-            "reviewNamaBidang",
-            data.nama_bidang || "Belum diisi"
-          );
-          updateTextContent(
-            "reviewDeskripsiInsiden",
-            data.deskripsi_insiden || "Belum diisi"
-          );
-          updateTextContent(
-            "reviewJenisInsiden",
-            data.jenis_insiden || "Belum diisi"
-          );
-          updateTextContent(
-            "reviewAnalisaPenyebab",
-            data.analisa_penyebab || "Belum diisi"
-          );
-
-          // Update action data
-          updateTextContent(
-            "reviewTindakSMKI",
-            data.tindak_smki || "Belum diisi"
-          );
-          updateTextContent(
-            "reviewPICTindak",
-            data.pic_tindak || "Belum diisi"
-          );
-          updateTextContent(
-            "reviewTindakPihak",
-            data.tindak_pihak || "Tidak ada"
-          );
+          fieldMap.forEach(({ id, key, default: defaultValue, format }) => {
+            const element = document.getElementById(id);
+            if (element) {
+              let value = data[key] || defaultValue || "-";
+              if (format && value !== "-") {
+                value = formatDateDisplay(value);
+              }
+              element.textContent = value;
+            }
+          });
 
           // Update status
           const isCompleted =
@@ -993,199 +1021,160 @@
             statusElement.innerHTML = isCompleted
               ? '<span class="status-completed">✔ SELESAI</span>'
               : '<span class="status-pending">✘ BELUM SELESAI</span>';
+
+            // Show/hide completion date
+            const dateRow = document.getElementById("rowTanggalPenyelesaian");
+            if (dateRow) {
+              dateRow.style.display = isCompleted ? "flex" : "none";
+            }
           }
 
-          // Update completion date
-          const tanggalPenyelesaian =
-            data.tanggal_penyelesaian_formatted ||
-            formatDateDisplay(data.tanggal_penyelesaian);
-          if (tanggalPenyelesaian && isCompleted) {
-            updateTextContent("reviewTanggalPenyelesaian", tanggalPenyelesaian);
-            document.getElementById("rowTanggalPenyelesaian").style.display =
-              "flex";
-          }
+          // Update 5 signatures
+          updateAllSignatures(data);
 
           // Update form version
-          updateTextContent("formVersion", data.form_version || "2.0");
-
-          // ============ UPDATE SIGNATURES ============
-          console.log("🔏 Updating signatures...");
-
-          // Mapping untuk 5 tanda tangan
-          const signatureConfigs = [
-            {
-              key: "pelapor",
-              base64Key: "ttd_pelapor_base64",
-              altBase64Keys: ["ttdPelaporBase64", "ttd_pelapor"],
-              nameKey: "nama_ttd_pelapor",
-              altNameKeys: ["nama_pelapor"],
-              required: true,
-            },
-            {
-              key: "atasan",
-              base64Key: "ttd_atasan_base64",
-              altBase64Keys: ["ttdAtasanBase64", "ttd_atasan"],
-              nameKey: "nama_ttd_atasan",
-              required: false,
-            },
-            {
-              key: "smki",
-              base64Key: "ttd_smki_base64",
-              altBase64Keys: ["ttdSmkiBase64", "ttd_smki"],
-              nameKey: "nama_ttd_smki",
-              required: false,
-            },
-            {
-              key: "ketua",
-              base64Key: "ttd_ketua_base64",
-              altBase64Keys: ["ttdKetuaBase64", "ttd_ketua"],
-              nameKey: "nama_ttd_ketua",
-              required: false,
-            },
-            {
-              key: "smki2",
-              base64Key: "ttd_smki2_base64",
-              altBase64Keys: ["ttdSmki2Base64", "ttd_smki2"],
-              nameKey: "nama_ttd_smki2",
-              required: false,
-            },
-          ];
-
-          // Update setiap tanda tangan
-          signatureConfigs.forEach((config) => {
-            updateSignature(config, data);
-          });
+          const versionElement = document.getElementById("formVersion");
+          if (versionElement) {
+            versionElement.textContent = data.form_version || "2.0";
+          }
 
           console.log("✅ UI updated successfully");
         }
 
-        // Helper function to update text content
-        function updateTextContent(elementId, text) {
-          const element = document.getElementById(elementId);
-          if (element) {
-            element.textContent = text;
-          }
+        // ============ UPDATE ALL 5 SIGNATURES ============
+        function updateAllSignatures(data) {
+          console.log("🔏 Updating 5 signatures...");
+
+          const signatureConfigs = [
+            {
+              key: "pelapor",
+              base64Keys: [
+                "ttd_pelapor_base64",
+                "ttdPelaporBase64",
+                "ttd_pelapor",
+              ],
+              nameKeys: ["nama_ttd_pelapor", "nama_pelapor"],
+              required: true,
+            },
+            {
+              key: "atasan",
+              base64Keys: [
+                "ttd_atasan_base64",
+                "ttdAtasanBase64",
+                "ttd_atasan",
+              ],
+              nameKeys: ["nama_ttd_atasan"],
+              required: false,
+            },
+            {
+              key: "smki",
+              base64Keys: ["ttd_smki_base64", "ttdSmkiBase64", "ttd_smki"],
+              nameKeys: ["nama_ttd_smki"],
+              required: false,
+            },
+            {
+              key: "ketua",
+              base64Keys: ["ttd_ketua_base64", "ttdKetuaBase64", "ttd_ketua"],
+              nameKeys: ["nama_ttd_ketua"],
+              required: false,
+            },
+            {
+              key: "smki2",
+              base64Keys: ["ttd_smki2_base64", "ttdSmki2Base64", "ttd_smki2"],
+              nameKeys: ["nama_ttd_smki2"],
+              required: false,
+            },
+          ];
+
+          signatureConfigs.forEach((config) => {
+            updateSignatureElement(config, data);
+          });
         }
 
-        // Helper function to update signature
-        function updateSignature(config, data) {
-          const {
-            key,
-            base64Key,
-            altBase64Keys,
-            nameKey,
-            altNameKeys,
-            required,
-          } = config;
+        function updateSignatureElement(config, data) {
+          const { key, base64Keys, nameKeys, required } = config;
 
-          console.log(`🔍 Updating signature ${key}:`, {
-            base64Key,
-            altBase64Keys,
-            nameKey,
-            hasBase64: !!data[base64Key],
-            dataKeys: Object.keys(data).filter((k) => k.includes(key)),
-          });
-
-          // Cari base64 data dari berbagai kemungkinan key
-          let base64Data = data[base64Key];
-
-          if (!base64Data || base64Data.length < 100) {
-            // Coba dari alt keys
-            for (const altKey of altBase64Keys) {
-              if (data[altKey] && data[altKey].length > 100) {
-                base64Data = data[altKey];
-                console.log(`✅ Found ${key} signature in alt key: ${altKey}`);
-                break;
-              }
+          // Find base64 data
+          let base64Data = null;
+          for (const base64Key of base64Keys) {
+            if (data[base64Key] && data[base64Key].length > 100) {
+              base64Data = data[base64Key];
+              break;
             }
           }
 
-          // Cari nama dari berbagai kemungkinan key
-          let nameValue = data[nameKey];
-          if (!nameValue && altNameKeys) {
-            for (const altNameKey of altNameKeys) {
-              if (data[altNameKey]) {
-                nameValue = data[altNameKey];
-                break;
-              }
+          // Find name
+          let nameValue = "";
+          for (const nameKey of nameKeys) {
+            if (data[nameKey] && data[nameKey].trim()) {
+              nameValue = data[nameKey].trim();
+              break;
             }
           }
 
           // Get DOM elements
-          const statusElement = document.getElementById(
-            `reviewStatusTTD${capitalizeFirst(key)}`
-          );
-          const nameElement = document.getElementById(
-            `reviewNamaTTD${capitalizeFirst(key)}`
-          );
-          const imgElement = document.getElementById(
-            `ttd${capitalizeFirst(key)}Image`
-          );
-          const lineElement = document.getElementById(`${key}Line`);
-          const container = document.getElementById(`${key}Container`);
+          const capitalizedKey =
+            key === "smki2"
+              ? "SMKI2"
+              : key === "smki"
+              ? "SMKI"
+              : key.charAt(0).toUpperCase() + key.slice(1);
 
-          // Validate base64 data
-          const hasValidBase64 =
-            base64Data &&
-            base64Data.length > 100 &&
-            (base64Data.startsWith("data:image") ||
-              base64Data.includes("base64") ||
-              base64Data.includes("image/"));
+          const statusId = `reviewStatusTTD${capitalizedKey}`;
+          const nameId = `reviewNamaTTD${capitalizedKey}`;
+          const imgId = `ttd${capitalizedKey}Image`;
+          const lineId = `${key}Line`;
+          const containerId = `${key}Container`;
 
-          console.log(`${key} signature validation:`, {
-            hasValidBase64,
-            base64Length: base64Data ? base64Data.length : 0,
-            startsWith: base64Data
-              ? base64Data.substring(0, 30) + "..."
-              : "NONE",
-          });
+          const statusElement = document.getElementById(statusId);
+          const nameElement = document.getElementById(nameId);
+          const imgElement = document.getElementById(imgId);
+          const lineElement = document.getElementById(lineId);
+          const container = document.getElementById(containerId);
+
+          if (!statusElement || !nameElement) {
+            console.warn(`⚠️ Elements not found for ${key}`);
+            return;
+          }
 
           // Update status
-          if (statusElement) {
-            if (hasValidBase64) {
-              statusElement.textContent = "TTD DIGITAL";
-              statusElement.className = "signature-status status-available";
-            } else if (
-              nameValue &&
-              nameValue.trim() !== "" &&
-              nameValue.trim() !== "(Belum diisi)"
-            ) {
-              statusElement.textContent = "TTD MANUAL";
-              statusElement.className = "signature-status status-manual";
-            } else if (required) {
-              statusElement.textContent = "BELUM";
-              statusElement.className = "signature-status status-missing";
-            } else {
-              statusElement.textContent = "OPSIONAL";
-              statusElement.className = "signature-status status-missing";
-            }
+          const hasValidBase64 =
+            base64Data &&
+            (base64Data.startsWith("data:image") ||
+              base64Data.includes("base64"));
+
+          if (hasValidBase64) {
+            statusElement.textContent = "TTD DIGITAL";
+            statusElement.className = "signature-status status-available";
+          } else if (nameValue && nameValue !== "") {
+            statusElement.textContent = "TTD MANUAL";
+            statusElement.className = "signature-status status-manual";
+          } else if (required) {
+            statusElement.textContent = "BELUM";
+            statusElement.className = "signature-status status-missing";
+          } else {
+            statusElement.textContent = "OPSIONAL";
+            statusElement.className = "signature-status status-missing";
           }
 
           // Update name
-          if (nameElement) {
-            nameElement.textContent =
-              nameValue || (required ? "(Belum diisi)" : "(Opsional)");
-          }
+          nameElement.textContent =
+            nameValue || (required ? "(Belum diisi)" : "(Opsional)");
 
-          // Update image/line visibility
+          // Update image/line
           if (imgElement && lineElement) {
             if (hasValidBase64) {
               imgElement.src = base64Data;
               imgElement.style.display = "block";
               lineElement.style.display = "none";
 
-              // Add error handler
-              imgElement.onload = function () {
-                console.log(`✅ ${key} image loaded successfully`);
-              };
-
-              imgElement.onerror = function (e) {
-                console.error(`❌ ${key} image failed to load:`, e);
+              imgElement.onerror = function () {
+                console.error(`❌ Failed to load ${key} signature image`);
                 this.style.display = "none";
                 lineElement.style.display = "block";
 
                 // Update status to manual
-                if (statusElement) {
+                if (nameValue) {
                   statusElement.textContent = "TTD MANUAL";
                   statusElement.className = "signature-status status-manual";
                 }
@@ -1197,57 +1186,36 @@
           }
         }
 
-        // Helper function to capitalize first letter
-        function capitalizeFirst(string) {
-          // Khusus untuk smki dan smki2, return uppercase
-          if (string === "smki") return "SMKI";
-          if (string === "smki2") return "SMKI2";
-
-          // Untuk lainnya, capitalize first letter
-          return string.charAt(0).toUpperCase() + string.slice(1);
-        }
-
-        // Function to show error message
+        // ============ ERROR HANDLING ============
         function showError(message) {
-          const errorContainer = document.getElementById("errorContainer");
+          console.error("❌ Error:", message);
+
           const loadingOverlay = document.getElementById("loadingOverlay");
           const mainContent = document.getElementById("mainContent");
+          const errorContainer = document.getElementById("errorContainer");
 
-          if (loadingOverlay) {
-            loadingOverlay.style.display = "none";
-          }
-
-          if (mainContent) {
-            mainContent.style.display = "none";
-          }
+          if (loadingOverlay) loadingOverlay.style.display = "none";
+          if (mainContent) mainContent.style.display = "none";
 
           if (errorContainer) {
             errorContainer.innerHTML = `
-          <i class="fas fa-exclamation-triangle fa-3x"></i>
-          <h3>Data Tidak Dapat Dimuat</h3>
-          <p>${message}</p>
-          <div style="margin-top: 20px;">
-            <button onclick="window.history.back()" class="btn-print" style="margin-right: 10px;">
-              <i class="fas fa-arrow-left"></i> Kembali ke Form
-            </button>
-            <button onclick="location.reload()" class="btn-download">
-              <i class="fas fa-sync-alt"></i> Refresh Halaman
-            </button>
-          </div>
-          <div style="margin-top: 15px; font-size: 11px; color: #666;">
-            <p>Tips:</p>
-            <ul style="text-align: left; padding-left: 20px;">
-              <li>Pastikan tanda tangan telah disimpan sebelum print</li>
-              <li>Coba kembali ke form dan ulangi proses print</li>
-              <li>Jika masalah berlanjut, hubungi administrator</li>
-            </ul>
-          </div>
-        `;
+              <i class="fas fa-exclamation-triangle fa-3x"></i>
+              <h3>Data Tidak Dapat Dimuat</h3>
+              <p>${message}</p>
+              <div style="margin-top: 20px;">
+                <button onclick="window.history.back()" class="btn-print" style="margin-right: 10px;">
+                  <i class="fas fa-arrow-left"></i> Kembali
+                </button>
+                <button onclick="location.reload()" class="btn-download">
+                  <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+              </div>
+            `;
             errorContainer.style.display = "block";
           }
         }
 
-        // Function to set print timestamp
+        // ============ SET PRINT TIMESTAMP ============
         function setPrintTimestamp() {
           const now = new Date();
           const timestamp = now.toLocaleString("id-ID", {
@@ -1264,15 +1232,26 @@
           }
         }
 
-        // Function to initialize page
-        function initializePage() {
-          console.log("📄 Initializing print page...");
+        // ============ CHECK AUTO PRINT ============
+        function checkAutoPrint() {
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get("autoprint") === "1") {
+            console.log("🖨️ Auto-printing document...");
+            setTimeout(() => {
+              window.print();
+            }, 1000);
+          }
+        }
+
+        // ============ INITIALIZE PAGE ============
+        async function initializePage() {
+          console.log("📄 Initializing enhanced print page...");
 
           // Set print timestamp
           setPrintTimestamp();
 
           // Load data
-          laporanData = loadDataFromStorage();
+          laporanData = await loadData();
 
           if (laporanData) {
             // Update UI
@@ -1289,20 +1268,16 @@
                   mainContent.style.display = "block";
                 }
 
-                // Auto print if parameter exists
-                const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.get("autoprint") === "1") {
-                  setTimeout(() => {
-                    console.log("🖨️ Auto-printing document...");
-                    window.print();
-                  }, 1000);
-                }
+                // Check auto print
+                checkAutoPrint();
               }, 500);
             }
+          } else {
+            showError("Data laporan tidak dapat dimuat. Silakan coba kembali.");
           }
         }
 
-        // Debug function
+        // ============ DEBUG FUNCTIONS ============
         function toggleDebug() {
           const debugInfo = document.getElementById("debugInfo");
           const debugContent = document.getElementById("debugContent");
@@ -1313,45 +1288,46 @@
             debugInfo.style.display = "block";
 
             let debugHTML = `
-          <div><strong>URL Parameters:</strong></div>
-          <div style="font-size: 9px; margin: 5px 0;">
-            ${window.location.search}
-          </div>
-          <div><strong>Data Status:</strong> ${
-            laporanData ? "Loaded" : "Not loaded"
-          }</div>
-        `;
+              <div><strong>Data Source:</strong> ${dataSource}</div>
+              <div><strong>Data Status:</strong> ${
+                laporanData ? "Loaded" : "Not Loaded"
+              }</div>
+              <div><strong>URL:</strong> ${window.location.href}</div>
+            `;
 
             if (laporanData) {
               debugHTML += `
-            <div><strong>Data ID:</strong> ${
-              laporanData.generated_id || "N/A"
-            }</div>
-            <div><strong>No. Dok:</strong> ${laporanData.no_dok || "N/A"}</div>
-            <div><strong>Fields:</strong> ${
-              Object.keys(laporanData).length
-            }</div>
-            <div><strong>All TTD Fields:</strong></div>
-          `;
+                <div><strong>Data ID:</strong> ${
+                  laporanData.laporan_id || laporanData.id || "N/A"
+                }</div>
+                <div><strong>No. Dok:</strong> ${
+                  laporanData.no_dok || "N/A"
+                }</div>
+                <div><strong>Signatures Found:</strong></div>
+              `;
 
-              // List all TTD fields
-              Object.keys(laporanData).forEach((key) => {
-                if (
-                  key.includes("ttd") ||
-                  key.includes("TTD") ||
-                  key.includes("signature")
-                ) {
-                  const value = laporanData[key];
-                  debugHTML += `<div style="font-size: 8px; margin-left: 10px;">
-                ${key}: ${
-                    value
-                      ? typeof value === "string"
-                        ? `${value.substring(0, 30)}...`
-                        : "Object"
-                      : "EMPTY"
+              const signatureFields = [
+                "pelapor",
+                "atasan",
+                "smki",
+                "ketua",
+                "smki2",
+              ];
+              signatureFields.forEach((field) => {
+                const base64Keys = [
+                  `ttd_${field}_base64`,
+                  `ttd${field.charAt(0).toUpperCase() + field.slice(1)}Base64`,
+                ];
+                let found = false;
+                for (const key of base64Keys) {
+                  if (laporanData[key] && laporanData[key].length > 100) {
+                    found = true;
+                    break;
                   }
-              </div>`;
                 }
+                debugHTML += `<div style="font-size: 9px; margin-left: 10px;">${field}: ${
+                  found ? "✓" : "✗"
+                }</div>`;
               });
             }
 
@@ -1359,7 +1335,7 @@
           }
         }
 
-        // PDF Download function
+        // ============ PDF DOWNLOAD ============
         function downloadAsPDF() {
           const element = document.body;
           const timestamp = new Date().getTime();
@@ -1376,7 +1352,6 @@
             jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
           };
 
-          // Show loading
           const downloadBtn = document.querySelector(".btn-download");
           const originalText = downloadBtn ? downloadBtn.innerHTML : "";
 
@@ -1406,13 +1381,47 @@
             });
         }
 
-        // Expose functions to global scope
+        // ============ EXPOSE FUNCTIONS GLOBALLY ============
         window.toggleDebug = toggleDebug;
         window.downloadAsPDF = downloadAsPDF;
 
-        // Initialize when DOM is ready
-        document.addEventListener("DOMContentLoaded", initializePage);
+        // ============ INITIALIZE ON DOM READY ============
+        document.addEventListener("DOMContentLoaded", function () {
+          // Set timeout untuk prevent infinite loading
+          setTimeout(() => {
+            const loadingOverlay = document.getElementById("loadingOverlay");
+            if (loadingOverlay && loadingOverlay.style.display !== "none") {
+              showError("Loading timeout. Silakan refresh halaman.");
+            }
+          }, 10000);
+
+          initializePage();
+        });
       })();
     </script>
+
+    <!-- ============================================ -->
+    <!-- DATA INJECTION FROM FLASK (UNTUK DASHBOARD) -->
+    <!-- ============================================ -->
+    {% if laporan %}
+    <script>
+      // Inject data langsung dari Flask untuk dashboard
+      window.laporanDataFromFlask = {{ laporan | tojson | safe }};
+
+      console.log("🎯 Data injected from Flask template");
+      console.log("📊 Flask Data Summary:", {
+        id: window.laporanDataFromFlask?.laporan_id || window.laporanDataFromFlask?.id,
+        no_dok: window.laporanDataFromFlask?.no_dok,
+        source: "flask_template",
+        signatures: {
+          pelapor: !!window.laporanDataFromFlask?.ttd_pelapor_base64,
+          atasan: !!window.laporanDataFromFlask?.ttd_atasan_base64,
+          smki: !!window.laporanDataFromFlask?.ttd_smki_base64,
+          ketua: !!window.laporanDataFromFlask?.ttd_ketua_base64,
+          smki2: !!window.laporanDataFromFlask?.ttd_smki2_base64,
+        }
+      });
+    </script>
+    {% endif %}
   </body>
 </html>
