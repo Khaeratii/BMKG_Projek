@@ -10,8 +10,9 @@ import pytz
 from datetime import datetime, timedelta, date
 from io import BytesIO
 from logging.handlers import RotatingFileHandler
+from functools import wraps
 
-from flask import Flask, render_template, redirect, url_for, request, session, flash, jsonify, send_file, send_from_directory
+from flask import Flask, render_template, redirect, url_for, request, session, flash, jsonify, send_file, send_from_directory, make_response
 from PIL import Image
 from docxtpl import DocxTemplate, InlineImage
 from docx.shared import Mm
@@ -39,6 +40,23 @@ try:
 except ImportError:
     HAS_PDFKIT = False
     print("[INFO] pdfkit not installed")
+
+# ==================== WINDOWS COM LIBRARIES ====================
+try:
+    import pythoncom
+    HAS_PYTHONCOM = True
+    print("[OK] pythoncom available for Windows COM")
+except ImportError:
+    HAS_PYTHONCOM = False
+    print("[INFO] pythoncom not installed")
+
+try:
+    import win32com.client
+    HAS_WIN32COM = True
+    print("[OK] win32com available for Windows COM")
+except ImportError:
+    HAS_WIN32COM = False
+    print("[INFO] win32com not installed")
 
 # ==================== APP INITIALIZATION ====================
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -420,20 +438,159 @@ def generate_docx_from_template(template_path, data, output_filename):
         print(f"[ERROR] Failed to generate document: {e}")
         return None
 
-def convert_to_pdf(docx_path):
-    """Convert DOCX to PDF"""
+# ==================== FUNGSI KONVERSI PDF YANG DIPERBAIKI ====================
+
+def convert_docx_to_pdf_robust(docx_path, pdf_path):
+    """Convert DOCX to PDF dengan error handling yang lebih baik"""
     try:
+        if not os.path.exists(docx_path):
+            print(f"[ERROR] DOCX file not found: {docx_path}")
+            return False
+        
+        print(f"[DEBUG] Converting DOCX to PDF: {docx_path} -> {pdf_path}")
+        
+        # Pastikan output directory ada
+        os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
+        
+        # Method 1: Try docx2pdf with COM initialization
+        if HAS_DOCX2PDF:
+            try:
+                # Inisialisasi COM untuk Windows jika perlu
+                if sys.platform == 'win32' and HAS_PYTHONCOM:
+                    pythoncom.CoInitialize()
+                    print("[DEBUG] COM initialized for Windows")
+                
+                convert(docx_path, pdf_path)
+                
+                if os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 0:
+                    print(f"[SUCCESS] PDF created with docx2pdf: {pdf_path}")
+                    return True
+                else:
+                    print(f"[WARN] PDF created but might be empty")
+                    return False
+                    
+            except Exception as e:
+                print(f"[WARN] docx2pdf conversion failed: {e}")
+                # Lanjut ke metode lain
+        
+        # Method 2: Try win32com (Microsoft Word)
+        if HAS_WIN32COM and sys.platform == 'win32':
+            try:
+                pythoncom.CoInitialize()
+                word = win32com.client.Dispatch("Word.Application")
+                word.Visible = False
+                
+                # Convert absolute paths
+                docx_abs = os.path.abspath(docx_path)
+                pdf_abs = os.path.abspath(pdf_path)
+                
+                doc = word.Documents.Open(docx_abs)
+                doc.SaveAs(pdf_abs, FileFormat=17)  # 17 = PDF format
+                doc.Close()
+                word.Quit()
+                
+                if os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 0:
+                    print(f"[SUCCESS] PDF created with Word COM: {pdf_path}")
+                    return True
+                    
+            except Exception as e:
+                print(f"[WARN] Word COM conversion failed: {e}")
+        
+        # Method 3: Try pdfkit jika wkhtmltopdf terinstall
+        if HAS_PDFKIT:
+            try:
+                # Cek jika wkhtmltopdf tersedia
+                if sys.platform == 'win32':
+                    wkhtmltopdf_paths = [
+                        'C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe',
+                        'C:/Program Files (x86)/wkhtmltopdf/bin/wkhtmltopdf.exe'
+                    ]
+                    config = None
+                    for path in wkhtmltopdf_paths:
+                        if os.path.exists(path):
+                            config = pdfkit.configuration(wkhtmltopdf=path)
+                            break
+                else:
+                    config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
+                
+                if config:
+                    pdfkit.from_file(docx_path, pdf_path, configuration=config)
+                    
+                    if os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 0:
+                        print(f"[SUCCESS] PDF created with pdfkit: {pdf_path}")
+                        return True
+                        
+            except Exception as e:
+                print(f"[WARN] pdfkit conversion failed: {e}")
+        
+        # Method 4: Try subprocess dengan LibreOffice/OpenOffice
+        try:
+            import subprocess
+            
+            if sys.platform == 'win32':
+                # Cari LibreOffice di Windows
+                lo_paths = [
+                    r"C:\Program Files\LibreOffice\program\soffice.exe",
+                    r"C:\Program Files (x86)\LibreOffice\program\soffice.exe"
+                ]
+            else:
+                lo_paths = ["/usr/bin/libreoffice", "/usr/bin/soffice"]
+            
+            for lo_exe in lo_paths:
+                if os.path.exists(lo_exe):
+                    cmd = [
+                        lo_exe,
+                        '--headless',
+                        '--convert-to', 'pdf:writer_pdf_Export',
+                        '--outdir', os.path.dirname(pdf_path),
+                        os.path.abspath(docx_path)
+                    ]
+                    
+                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                    if result.returncode == 0:
+                        # Cari file PDF yang dihasilkan
+                        base_name = os.path.splitext(os.path.basename(docx_path))[0]
+                        generated_pdf = os.path.join(os.path.dirname(pdf_path), f"{base_name}.pdf")
+                        
+                        if os.path.exists(generated_pdf):
+                            # Rename ke path yang diinginkan
+                            if generated_pdf != pdf_path:
+                                os.rename(generated_pdf, pdf_path)
+                            
+                            print(f"[SUCCESS] PDF created with LibreOffice: {pdf_path}")
+                            return True
+                        
+            print(f"[WARN] LibreOffice/OpenOffice not found or failed")
+            
+        except Exception as e:
+            print(f"[WARN] LibreOffice conversion failed: {e}")
+        
+        print(f"[ERROR] All PDF conversion methods failed")
+        return False
+        
+    except Exception as e:
+        print(f"[ERROR] PDF conversion failed: {e}")
+        traceback.print_exc()
+        return False
+
+def convert_to_pdf(docx_path):
+    """Convert DOCX to PDF - wrapper untuk compatibility"""
+    try:
+        if not os.path.exists(docx_path):
+            print(f"[ERROR] DOCX file not found: {docx_path}")
+            return None
+        
         pdf_path = docx_path.replace('.docx', '.pdf')
         
-        if HAS_DOCX2PDF:
-            convert(docx_path, pdf_path)
+        success = convert_docx_to_pdf_robust(docx_path, pdf_path)
+        
+        if success and os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 0:
+            print(f"[SUCCESS] PDF created: {pdf_path}")
             return pdf_path
         
-        elif HAS_PDFKIT:
-            config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
-            pdfkit.from_file(docx_path, pdf_path, configuration=config)
-            return pdf_path
-            
+        print(f"[WARN] PDF conversion failed for {docx_path}")
+        return None
+        
     except Exception as e:
         print(f"[WARN] PDF conversion failed: {e}")
         return None
@@ -504,13 +661,11 @@ def generate_surat_pernyataan_docx(surat_data):
                         tanda_tangan_image = InlineImage(doc, sig_path, width=Mm(100))
                         
                         # Cek ukuran asli gambar
-                        from PIL import Image
                         img = Image.open(sig_path)
                         print(f"[DEBUG] 🖼️ Original image size: {img.size}")
                         print(f"[DEBUG] 🖼️ Image mode: {img.mode}")
                         
                         # **OPTIONAL: Optimize image quality**
-                        # Konversi ke RGB jika perlu
                         if img.mode in ('RGBA', 'LA', 'P'):
                             print(f"[DEBUG] 🔄 Converting image from {img.mode} to RGB")
                             background = Image.new('RGB', img.size, (255, 255, 255))
@@ -586,7 +741,115 @@ def generate_surat_pernyataan_docx(surat_data):
         print(f"[ERROR] 📝 Traceback: {traceback.format_exc()}")
         return None
 
-# ==================== SURAT PERNYATAAN ROUTES (TAMBAHKAN INI) ====================
+# ==================== FUNGSI UTILITAS BARU UNTUK MENGATASI MASALAH CACHE ====================
+
+def disable_cache(f):
+    """Decorator untuk menonaktifkan cache pada response"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        response = f(*args, **kwargs)
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        # Tambahkan timestamp unik dalam header
+        response.headers['X-Generated-At'] = str(time.time())
+        return response
+    return decorated_function
+
+def send_file_with_cache_control(filepath, filename, mimetype):
+    """Send file dengan cache control yang tepat"""
+    try:
+        if not os.path.exists(filepath):
+            print(f"[ERROR] File not found: {filepath}")
+            return None
+        
+        response = make_response(send_file(
+            filepath,
+            as_attachment=True,
+            download_name=filename,
+            mimetype=mimetype
+        ))
+        
+        # Set header untuk mencegah caching
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        # Tambahkan timestamp unik
+        response.headers['X-Unique-ID'] = str(uuid.uuid4())[:8]
+        response.headers['X-Filename'] = filename
+        
+        return response
+        
+    except Exception as e:
+        print(f"[ERROR] Error in send_file_with_cache_control: {e}")
+        return None
+
+def clear_old_pdf_files(prefix, max_age_minutes=5):
+    """Hapus file PDF lama untuk mencegah penumpukan"""
+    try:
+        import glob
+        current_time = time.time()
+        
+        pattern = os.path.join(OUTPUT_DIR, f"*{prefix}*.pdf")
+        pdf_files = glob.glob(pattern)
+        
+        for pdf_file in pdf_files:
+            try:
+                file_age = current_time - os.path.getmtime(pdf_file)
+                if file_age > (max_age_minutes * 60):
+                    os.remove(pdf_file)
+                    print(f"[CLEANUP] Removed old PDF: {pdf_file}")
+            except Exception as e:
+                print(f"[WARN] Failed to remove old PDF {pdf_file}: {e}")
+                
+    except Exception as e:
+        print(f"[WARN] Error in clear_old_pdf_files: {e}")
+
+def generate_unique_filename(base_name, extension):
+    """Generate nama file unik dengan timestamp"""
+    timestamp = int(time.time() * 1000)  # Milliseconds
+    unique_id = str(uuid.uuid4())[:8]
+    safe_base = "".join(c for c in base_name if c.isalnum() or c in ('-', '_')).rstrip()
+    return f"{safe_base}_{timestamp}_{unique_id}.{extension}"
+
+def get_or_create_pdf(docx_path, prefix):
+    """Get existing PDF or create new one"""
+    try:
+        # Cari PDF yang sudah ada
+        import glob
+        pattern = os.path.join(OUTPUT_DIR, f"*{prefix}*.pdf")
+        existing_files = glob.glob(pattern)
+        
+        # Sort by modification time (newest first)
+        existing_files.sort(key=os.path.getmtime, reverse=True)
+        
+        # Jika ada file yang kurang dari 5 menit, gunakan itu
+        current_time = time.time()
+        for pdf_file in existing_files:
+            file_age = current_time - os.path.getmtime(pdf_file)
+            if file_age < 300:  # 5 menit
+                print(f"[INFO] Using existing PDF: {pdf_file}")
+                return pdf_file
+        
+        # Jika tidak ada, buat baru
+        timestamp = int(time.time() * 1000)
+        unique_id = str(uuid.uuid4())[:8]
+        pdf_filename = f"{prefix}_{timestamp}_{unique_id}.pdf"
+        pdf_path = os.path.join(OUTPUT_DIR, pdf_filename)
+        
+        success = convert_docx_to_pdf_robust(docx_path, pdf_path)
+        
+        if success and os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 0:
+            print(f"[SUCCESS] Created new PDF: {pdf_path}")
+            return pdf_path
+        
+        return None
+        
+    except Exception as e:
+        print(f"[ERROR] Error in get_or_create_pdf: {e}")
+        return None
+
+# ==================== SURAT PERNYATAAN ROUTES ====================
 
 @app.route('/surat-pernyataan/generate', methods=["POST"])
 def generate_surat_pernyataan():
@@ -653,7 +916,7 @@ def generate_surat_pernyataan():
                 flash(error_msg, "error")
                 return redirect(url_for('surat_pernyataan_home'))
 
-        # Convert ke PDF
+        # Convert ke PDF dengan cache control
         pdf_path = convert_to_pdf(docx_path)
         
         # Simpan ke database
@@ -688,31 +951,36 @@ def generate_surat_pernyataan():
                     "id": surat.id,
                     "nama": nama,
                     "docx_url": url_for('generate_surat_pernyataan_docx_route', surat_id=surat.id),
-                    "pdf_url": url_for('generate_surat_pernyataan_pdf_route', surat_id=surat.id),
+                    "pdf_url": url_for('generate_surat_pernyataan_pdf_route', surat_id=surat.id) + f"?t={int(time.time())}",
                     "view_url": url_for('view_surat_pernyataan', surat_id=surat.id)
                 },
                 "redirect": url_for('main_dashboard')
             })
         
-        # Kirim file untuk non-AJAX
+        # Kirim file untuk non-AJAX dengan cache control
         if pdf_path and os.path.exists(pdf_path):
             response_file = pdf_path
-            response_filename = os.path.basename(pdf_path)
+            response_filename = generate_unique_filename(f"Surat_Pernyataan_{safe_filename(nama)}", "pdf")
             mimetype = 'application/pdf'
         else:
             response_file = docx_path
-            response_filename = os.path.basename(docx_path)
+            response_filename = generate_unique_filename(f"Surat_Pernyataan_{safe_filename(nama)}", "docx")
             mimetype = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         
         success_msg = "Surat pernyataan berhasil dibuat!"
         flash(success_msg, "success")
         
-        return send_file(
-            response_file,
-            as_attachment=True,
-            download_name=response_filename,
-            mimetype=mimetype
-        )
+        response = send_file_with_cache_control(response_file, response_filename, mimetype)
+        if response:
+            return response
+        else:
+            # Fallback jika ada error
+            return send_file(
+                response_file,
+                as_attachment=True,
+                download_name=response_filename,
+                mimetype=mimetype
+            )
 
     except Exception as e:
         print(f"[ERROR] Surat Pernyataan error: {e}")
@@ -750,8 +1018,8 @@ def download_surat_pernyataan(surat_id):
     try:
         print(f"[INFO] Download route called for surat_id: {surat_id}")
         
-        # Redirect ke generate PDF route
-        return redirect(url_for('generate_surat_pernyataan_pdf_route', surat_id=surat_id))
+        # Redirect ke generate PDF route dengan timestamp
+        return redirect(url_for('generate_surat_pernyataan_pdf_route', surat_id=surat_id) + f"?nocache={int(time.time())}")
         
     except Exception as e:
         print(f"[ERROR] Download redirect error: {e}")
@@ -774,6 +1042,661 @@ def test_db_sp():
             "status": "error", 
             "message": f"Database connection failed: {str(e)}"
         }), 500
+
+# ==================== FUNGSI GENERATE USULAN PERUBAHAN DARI TEMPLATE ====================
+
+def generate_usulan_perubahan_docx(proposal_id):
+    """Generate Usulan Perubahan dari template Word"""
+    try:
+        print(f"[DEBUG] Generating usulan perubahan from template for proposal_id: {proposal_id}")
+        
+        if not os.path.exists(TEMPLATE_USULAN_PERUBAHAN):
+            print(f"[ERROR] Template not found: {TEMPLATE_USULAN_PERUBAHAN}")
+            return None
+        
+        # Get proposal data
+        proposal = db.session.get(Proposal, proposal_id)
+        if not proposal:
+            print(f"[ERROR] Proposal not found: {proposal_id}")
+            return None
+        
+        # Get related data
+        evaluation = Evaluation.query.filter_by(proposal_id=proposal_id).first()
+        approval = Approval.query.filter_by(proposal_id=proposal_id).first()
+        implementation = Implementation.query.filter_by(proposal_id=proposal_id).first()
+        
+        # Load template
+        doc = DocxTemplate(TEMPLATE_USULAN_PERUBAHAN)
+        
+        # Format tanggal Indonesia
+        def format_date_indonesia(date_obj):
+            if not date_obj:
+                return ""
+            try:
+                bulan = [
+                    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                ]
+                return f"{date_obj.day} {bulan[date_obj.month-1]} {date_obj.year}"
+            except:
+                return str(date_obj)
+        
+        # Get signature images
+        signature_pemohon = None
+        if proposal.signature_filename:
+            signature_path = os.path.join(DATA_FOLDER, 'signatures', proposal.signature_filename)
+            if os.path.exists(signature_path):
+                try:
+                    signature_pemohon = InlineImage(doc, signature_path, width=Mm(80))
+                except Exception as e:
+                    print(f"[WARN] Failed to load pemohon signature: {e}")
+                    signature_pemohon = "(TTD PEMOHON)"
+        
+        signature_approval = None
+        if approval and approval.tanda_tangan_persetujuan:
+            approval_path = os.path.join(DATA_FOLDER, 'signatures', approval.tanda_tangan_persetujuan)
+            if os.path.exists(approval_path):
+                try:
+                    signature_approval = InlineImage(doc, approval_path, width=Mm(80))
+                except Exception as e:
+                    print(f"[WARN] Failed to load approval signature: {e}")
+                    signature_approval = "(TTD APPROVAL)"
+        
+        signature_implementation = None
+        if implementation and implementation.tanda_tangan_pic:
+            impl_path = os.path.join(DATA_FOLDER, 'signatures', implementation.tanda_tangan_pic)
+            if os.path.exists(impl_path):
+                try:
+                    signature_implementation = InlineImage(doc, impl_path, width=Mm(80))
+                except Exception as e:
+                    print(f"[WARN] Failed to load implementation signature: {e}")
+                    signature_implementation = "(TTD IMPLEMENTASI)"
+        
+        # Prepare template data
+        tipe_perubahan_list = []
+        if evaluation and evaluation.tipe_perubahan:
+            try:
+                tipe_perubahan_list = json.loads(evaluation.tipe_perubahan) if isinstance(evaluation.tipe_perubahan, str) else evaluation.tipe_perubahan
+            except:
+                tipe_perubahan_list = []
+        
+        template_data = {
+            # Header Dokumen
+            'no_dokumen': proposal.nomor_dokumen or '',
+            'revisi': proposal.revisi or '00',
+            'tgl_efektif': format_date_indonesia(proposal.tgl_efektif) if proposal.tgl_efektif else '',
+            
+            # A. USULAN PERUBAHAN
+            'no_usulan': f"{proposal.id:03d}",
+            'tanggal': format_date_indonesia(proposal.tanggal) if proposal.tanggal else '',
+            'diminta_oleh': proposal.diminta_oleh or '',
+            'jabatan': proposal.jabatan or '',
+            'deskripsi_perubahan': proposal.deskripsi_perubahan or '',
+            'tgl_dibutuhkan': format_date_indonesia(proposal.hasil_dibutuhkan_tgl) if proposal.hasil_dibutuhkan_tgl else '',
+            'alasan_perubahan': proposal.alasan_perubahan or '',
+            
+            # Tanda Tangan
+            'tanda_tangan_pemohon': signature_pemohon if signature_pemohon else "(TTD PEMOHON)",
+            'tanda_tangan_persetujuan': signature_approval if signature_approval else "(TTD PEMBERI PERSETUJUAN)",
+            'tanda_tangan_pic': signature_implementation if signature_implementation else "(TTD PELAKSANA)",
+            
+            # B. EVALUASI DAMPAK PERUBAHAN
+            'is_hardware': '✓' if 'Perangkat Keras' in tipe_perubahan_list else '',
+            'is_konfigurasi': '✓' if 'Konfigurasi' in tipe_perubahan_list else '',
+            'is_software': '✓' if 'Software/Aplikasi' in tipe_perubahan_list else '',
+            'is_database': '✓' if 'Database' in tipe_perubahan_list else '',
+            'is_utilities': '✓' if 'Utilities' in tipe_perubahan_list else '',
+            
+            'is_normal': '✓' if evaluation and evaluation.prioritas == 'Normal' else '',
+            'is_emergency': '✓' if evaluation and evaluation.prioritas == 'Emergency' else '',
+            
+            'dampak_produksi': evaluation.dampak_lingkungan if evaluation else '',
+            'upaya_diperlukan': evaluation.upaya_dibutuhkan if evaluation else '',
+            'kebutuhan_sdm': evaluation.sumber_daya if evaluation else '',
+            'rencana_pengujian': evaluation.rencana_pengujian if evaluation else '',
+            'catatan_evaluator': evaluation.catatan_evaluasi if evaluation else '',
+            'tanggal_evaluasi': format_date_indonesia(evaluation.evaluated_at) if evaluation and evaluation.evaluated_at else '',
+            
+            # C. PERSETUJUAN PERUBAHAN
+            'status_diterima': '✓' if approval and approval.keputusan == 'setuju' else '',
+            'status_ditolak': '✓' if approval and approval.keputusan == 'tolak' else '',
+            
+            'tgl_pelaksanaan': format_date_indonesia(approval.tanggal_pelaksanaan) if approval and approval.tanggal_pelaksanaan else '',
+            'pic_pelaksana': approval.pic_pelaksana if approval else '',
+            'catatan_persetujuan': approval.catatan_persetujuan if approval else '',
+            'tanggal_persetujuan': format_date_indonesia(approval.approved_at) if approval and approval.approved_at else '',
+            
+            # D. IMPLEMENTASI PERUBAHAN
+            'hasil_tahapan_perubahan': implementation.hasil_tahapan_perubahan if implementation else '',
+            'hasil_pengujian_implementasi': implementation.hasil_pengujian if implementation else '',
+            'tgl_rilis': format_date_indonesia(implementation.tanggal_rilis) if implementation and implementation.tanggal_rilis else '',
+            'catatan_implementasi': implementation.catatan_implementasi if implementation else '',
+            'tanggal_implementasi': format_date_indonesia(implementation.implemented_at) if implementation and implementation.implemented_at else '',
+            
+            # Metadata tambahan
+            'bulan_tahun': datetime.now().strftime('%B %Y'),
+            'tahun': datetime.now().strftime('%Y'),
+            'nomor_urut': f"{proposal.id:03d}",
+        }
+        
+        # Render template
+        try:
+            doc.render(template_data)
+            print(f"[DEBUG] Template rendered successfully for proposal {proposal_id}")
+        except Exception as e:
+            print(f"[ERROR] Error rendering template: {e}")
+            return None
+        
+        # Save document dengan timestamp untuk menghindari cache
+        timestamp = int(time.time() * 1000)
+        safe_doc_number = proposal.nomor_dokumen.replace('/', '_').replace(' ', '_') if proposal.nomor_dokumen else f"proposal_{proposal_id}"
+        filename_docx = f"Usulan_Perubahan_{safe_doc_number}_{timestamp}.docx"
+        output_docx_path = os.path.join(OUTPUT_DIR, filename_docx)
+        
+        doc.save(output_docx_path)
+        print(f"[SUCCESS] Document saved: {output_docx_path}")
+        
+        # Bersihkan file DOCX lama
+        clear_old_pdf_files(f"Usulan_Perubahan_{safe_doc_number}")
+        
+        return output_docx_path
+        
+    except Exception as e:
+        print(f"[ERROR] Error generating usulan perubahan: {e}")
+        print(f"[ERROR] Traceback: {traceback.format_exc()}")
+        return None
+
+# ==================== TAMBAHKAN ROUTES UNTUK USULAN PERUBAHAN ====================
+
+@app.route('/usulan-perubahan/generate/<int:proposal_id>')
+@disable_cache
+def generate_document(proposal_id):
+    """Generate Word/PDF document untuk Usulan Perubahan - DIPERBAIKI"""
+    try:
+        print(f"[DEBUG] Generating document for proposal {proposal_id}")
+        
+        # Generate DOCX from template dengan timestamp
+        docx_path = generate_usulan_perubahan_docx(proposal_id)
+        
+        if not docx_path:
+            flash('Gagal membuat dokumen dari template', 'danger')
+            return redirect(url_for('view_proposal', proposal_id=proposal_id))
+        
+        # Convert to PDF using robust method
+        proposal = db.session.get(Proposal, proposal_id)
+        safe_doc_number = proposal.nomor_dokumen.replace('/', '_').replace(' ', '_') if proposal and proposal.nomor_dokumen else f"proposal_{proposal_id}"
+        prefix = f"Usulan_Perubahan_{safe_doc_number}"
+        
+        pdf_path = get_or_create_pdf(docx_path, prefix)
+        
+        if pdf_path and os.path.exists(pdf_path):
+            filename = os.path.basename(pdf_path)
+            print(f"[SUCCESS] PDF generated: {pdf_path}")
+            
+            # Kirim file dengan cache control
+            response = send_file_with_cache_control(pdf_path, filename, 'application/pdf')
+            if response:
+                return response
+        
+        # Fallback to DOCX dengan cache control
+        filename = generate_unique_filename(f"Usulan_Perubahan_{safe_doc_number}", "docx")
+        
+        flash('Konversi ke PDF gagal. File DOCX telah didownload.', 'info')
+        response = send_file_with_cache_control(
+            docx_path,
+            filename,
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+        
+        if response:
+            return response
+        else:
+            # Ultimate fallback
+            return send_file(
+                docx_path,
+                as_attachment=True,
+                download_name=filename,
+                mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            )
+            
+    except Exception as e:
+        print(f"[ERROR] Error generating document: {e}")
+        flash(f'Terjadi kesalahan: {str(e)}', 'danger')
+        return redirect(url_for('view_proposal', proposal_id=proposal_id))
+
+@app.route('/usulan-perubahan/generate-docx/<int:proposal_id>')
+@disable_cache
+def generate_usulan_perubahan_docx_route(proposal_id):
+    """Generate Usulan Perubahan DOCX saja - DIPERBAIKI"""
+    try:
+        print(f"[DEBUG] Generate DOCX for proposal_id: {proposal_id}")
+        
+        docx_path = generate_usulan_perubahan_docx(proposal_id)
+        
+        if not docx_path:
+            flash('Gagal membuat dokumen dari template', 'danger')
+            return redirect(url_for('view_proposal', proposal_id=proposal_id))
+        
+        proposal = db.session.get(Proposal, proposal_id)
+        safe_doc_number = proposal.nomor_dokumen.replace('/', '_').replace(' ', '_') if proposal and proposal.nomor_dokumen else f"proposal_{proposal_id}"
+        filename = generate_unique_filename(f"Usulan_Perubahan_{safe_doc_number}", "docx")
+        
+        response = send_file_with_cache_control(
+            docx_path,
+            filename,
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+        
+        if response:
+            return response
+        else:
+            return send_file(
+                docx_path,
+                as_attachment=True,
+                download_name=filename,
+                mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            )
+        
+    except Exception as e:
+        print(f"[ERROR] Error generating DOCX: {e}")
+        flash(f'Terjadi kesalahan: {str(e)}', 'danger')
+        return redirect(url_for('view_proposal', proposal_id=proposal_id))
+
+@app.route('/usulan-perubahan/generate-pdf/<int:proposal_id>')
+@disable_cache
+def generate_usulan_perubahan_pdf_route(proposal_id):
+    """Generate Usulan Perubahan PDF (konversi dari DOCX) - DIPERBAIKI"""
+    try:
+        print(f"[DEBUG] Generate PDF for proposal_id: {proposal_id}")
+        
+        # Generate DOCX first dengan timestamp
+        docx_path = generate_usulan_perubahan_docx(proposal_id)
+        
+        if not docx_path:
+            flash('Gagal membuat dokumen dari template', 'danger')
+            return redirect(url_for('view_proposal', proposal_id=proposal_id))
+        
+        # Convert to PDF dengan nama file unik
+        proposal = db.session.get(Proposal, proposal_id)
+        safe_doc_number = proposal.nomor_dokumen.replace('/', '_').replace(' ', '_') if proposal and proposal.nomor_dokumen else f"proposal_{proposal_id}"
+        prefix = f"Usulan_Perubahan_{safe_doc_number}"
+        
+        pdf_path = get_or_create_pdf(docx_path, prefix)
+        
+        if pdf_path and os.path.exists(pdf_path):
+            filename = os.path.basename(pdf_path)
+            # Kirim dengan cache control
+            response = send_file_with_cache_control(pdf_path, filename, 'application/pdf')
+            if response:
+                return response
+        
+        # Fallback to DOCX dengan cache control
+        filename = generate_unique_filename(f"Usulan_Perubahan_{safe_doc_number}", "docx")
+        flash('Konversi ke PDF gagal, file DOCX telah didownload', 'info')
+        
+        response = send_file_with_cache_control(
+            docx_path,
+            filename,
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+        
+        if response:
+            return response
+        else:
+            return send_file(
+                docx_path,
+                as_attachment=True,
+                download_name=filename,
+                mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            )
+        
+    except Exception as e:
+        print(f"[ERROR] Error generating PDF: {e}")
+        flash(f'Terjadi kesalahan: {str(e)}', 'danger')
+        return redirect(url_for('view_proposal', proposal_id=proposal_id))
+
+@app.route('/usulan-perubahan/view/<int:proposal_id>')
+def view_proposal(proposal_id):
+    """View proposal details"""
+    try:
+        proposal = db.session.get(Proposal, proposal_id)
+        
+        if not proposal:
+            flash('Proposal tidak ditemukan', 'danger')
+            return redirect(url_for('dashboard_usulan'))
+        
+        evaluation = Evaluation.query.filter_by(proposal_id=proposal_id).first()
+        approval = Approval.query.filter_by(proposal_id=proposal_id).first()
+        implementation = Implementation.query.filter_by(proposal_id=proposal_id).first()
+        
+        proposal_dict = proposal.to_dict()
+        
+        evaluation_dict = {}
+        if evaluation:
+            evaluation_dict = evaluation.to_dict()
+            if isinstance(evaluation_dict.get('tipe_perubahan'), list):
+                evaluation_dict['tipe_perubahan_str'] = ', '.join(evaluation_dict['tipe_perubahan'])
+            else:
+                evaluation_dict['tipe_perubahan_str'] = str(evaluation_dict.get('tipe_perubahan', ''))
+        
+        approval_dict = approval.to_dict() if approval else {}
+        implementation_dict = implementation.to_dict() if implementation else {}
+        
+        # Tambahkan timestamp untuk URL download PDF
+        pdf_url_with_timestamp = url_for('generate_usulan_perubahan_pdf_route', proposal_id=proposal_id) + f"?t={int(time.time())}"
+        
+        return render_template('view_proposal.html',
+                             proposal=proposal_dict,
+                             evaluation=evaluation_dict,
+                             approval=approval_dict,
+                             implementation=implementation_dict,
+                             pdf_url_with_timestamp=pdf_url_with_timestamp,
+                             system_name="usulan-perubahan")
+                             
+    except Exception as e:
+        print(f"[ERROR] View proposal error: {e}")
+        flash(f'Terjadi kesalahan: {str(e)}', 'danger')
+        return redirect(url_for('dashboard_usulan'))
+
+# ==================== PERBAIKI API SUBMIT USULAN PERUBAHAN ====================
+
+@app.route('/api/usulan-perubahan/submit', methods=['POST'])
+def submit_proposal_api():
+    """API untuk submit usulan perubahan - PERBAIKI JSON RESPONSE"""
+    try:
+        print(f"[DEBUG] submit_proposal_api called")
+        
+        # Check if request is JSON
+        if not request.is_json:
+            print(f"[WARN] Request is not JSON, content-type: {request.content_type}")
+            return jsonify({
+                'success': False, 
+                'message': 'Content-Type must be application/json'
+            }), 400
+        
+        data = request.get_json()
+        if not data:
+            print(f"[WARN] No JSON data received")
+            return jsonify({
+                'success': False, 
+                'message': 'Tidak ada data JSON'
+            }), 400
+        
+        print(f"[DEBUG] Data received. Keys: {list(data.keys())}")
+        
+        form_data = data.get('form_data', {})
+        action = data.get('action', 'submit')
+        draft_id = data.get('draft_id')
+        draft_name = data.get('draft_name', '')
+        draft_notes = data.get('draft_notes', '')
+        
+        print(f"[DEBUG] Action: {action}, Draft ID: {draft_id}")
+        
+        # Validate form_data
+        if not isinstance(form_data, dict):
+            print(f"[ERROR] form_data is not a dict: {type(form_data)}")
+            return jsonify({
+                'success': False,
+                'message': 'Format data tidak valid'
+            }), 400
+        
+        # VALIDASI DATA WAJIB
+        required_fields = ['diminta_oleh', 'jabatan', 'deskripsi_perubahan']
+        missing_fields = [field for field in required_fields if not form_data.get(field)]
+        
+        if missing_fields and action != 'draft':
+            print(f"[WARN] Missing required fields: {missing_fields}")
+            return jsonify({
+                'success': False,
+                'message': f'Data wajib tidak lengkap: {", ".join(missing_fields)}'
+            }), 400
+        
+        if action == 'draft':
+            # Simpan sebagai draft
+            print(f"[DEBUG] Saving as draft...")
+            
+            # Panggil fungsi save draft yang benar
+            try:
+                # Parse draft ID
+                actual_id = None
+                if draft_id and isinstance(draft_id, str):
+                    if draft_id.startswith('draft_'):
+                        try:
+                            actual_id = int(draft_id.replace('draft_', ''))
+                        except ValueError:
+                            actual_id = None
+                    elif draft_id.startswith('DRAFT_'):
+                        try:
+                            actual_id = int(draft_id.replace('DRAFT_', ''))
+                        except ValueError:
+                            actual_id = None
+                elif draft_id:
+                    try:
+                        actual_id = int(draft_id)
+                    except:
+                        actual_id = None
+                
+                # Simpan draft
+                result = save_draft_enhanced(form_data, actual_id, draft_name, draft_notes)
+                
+                if isinstance(result, dict) and result.get('success'):
+                    return jsonify({
+                        'success': True,
+                        'message': 'Draft berhasil disimpan!',
+                        'redirect': url_for('main_dashboard')
+                    })
+                else:
+                    return result
+                    
+            except Exception as e:
+                print(f"[ERROR] Error saving draft: {e}")
+                return jsonify({
+                    'success': False,
+                    'message': f'Gagal menyimpan draft: {str(e)}'
+                }), 500
+        else:
+            # Submit langsung
+            print(f"[DEBUG] Submitting proposal...")
+            success = save_proposal_complete(form_data)
+            
+            if success:
+                # Cari proposal terbaru untuk mendapatkan ID
+                latest_proposal = Proposal.query.order_by(Proposal.created_at.desc()).first()
+                proposal_id = latest_proposal.id if latest_proposal else None
+                
+                return jsonify({
+                    'success': True,
+                    'message': 'Usulan perubahan berhasil disimpan!',
+                    'proposal_id': proposal_id,
+                    'redirect': url_for('main_dashboard')
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'message': 'Gagal menyimpan usulan perubahan'
+                }), 500
+                
+    except Exception as e:
+        print(f"[ERROR] Error in submit_proposal_api: {e}")
+        print(f"[ERROR] Traceback: {traceback.format_exc()}")
+        return jsonify({
+            'success': False,
+            'message': f'Terjadi kesalahan server: {str(e)}'
+        }), 500
+
+def save_draft_enhanced(form_data, draft_id=None, draft_name='', draft_notes=''):
+    """Save draft dengan semua data"""
+    try:
+        print(f"[DEBUG] save_draft_enhanced called")
+        
+        # Parse tanggal
+        def parse_date_safe(date_str):
+            if not date_str:
+                return None
+            try:
+                for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y'):
+                    try:
+                        return datetime.strptime(str(date_str), fmt).date()
+                    except:
+                        continue
+                return None
+            except Exception as e:
+                print(f"[WARN] Failed to parse date '{date_str}': {e}")
+                return None
+        
+        # Handle signature
+        signature_pemohon = None
+        if form_data.get('signature_data') and form_data['signature_data'].startswith('data:image'):
+            identifier = f"pemohon_{datetime.now().timestamp()}"
+            signature_pemohon = save_signature_image(
+                form_data.get('signature_data'), 
+                identifier,
+                "usulan"
+            )
+            print(f"[DEBUG] Pemohon signature saved: {signature_pemohon}")
+        
+        # Generate doc number if not exists
+        if not form_data.get('no_dokumen'):
+            proposal_count = Proposal.query.count()
+            form_data['no_dokumen'] = generate_doc_number(proposal_count)
+            print(f"[DEBUG] Generated doc number: {form_data['no_dokumen']}")
+        
+        now = datetime.now()
+        
+        # Update or create proposal
+        if draft_id:
+            proposal = db.session.get(Proposal, draft_id)
+            if proposal and proposal.status == 'draft':
+                # Update existing draft
+                proposal.tanggal = parse_date_safe(form_data.get('tanggal')) or now.date()
+                proposal.nomor_dokumen = form_data.get('no_dokumen', proposal.nomor_dokumen or '')
+                proposal.revisi = form_data.get('revisi', proposal.revisi or '00')
+                proposal.tgl_efektif = parse_date_safe(form_data.get('tgl_efektif'))
+                proposal.diminta_oleh = form_data.get('diminta_oleh', proposal.diminta_oleh or '')
+                proposal.jabatan = form_data.get('jabatan', proposal.jabatan or '')
+                proposal.deskripsi_perubahan = form_data.get('deskripsi_perubahan', proposal.deskripsi_perubahan or '')
+                proposal.hasil_dibutuhkan_tgl = parse_date_safe(form_data.get('hasil_dibutuhkan_tgl'))
+                proposal.alasan_perubahan = form_data.get('alasan_perubahan', proposal.alasan_perubahan or '')
+                proposal.signature_filename = signature_pemohon or proposal.signature_filename
+                proposal.draft_name = draft_name or proposal.draft_name
+                proposal.draft_notes = draft_notes or proposal.draft_notes
+                proposal.updated_at = now
+                print(f"[DEBUG] Updated draft ID: {proposal.id}")
+            else:
+                proposal = None
+        
+        if not draft_id or not proposal:
+            # Create new draft
+            proposal = Proposal(
+                tanggal=parse_date_safe(form_data.get('tanggal')) or now.date(),
+                nomor_dokumen=form_data.get('no_dokumen', ''),
+                revisi=form_data.get('revisi', '00'),
+                tgl_efektif=parse_date_safe(form_data.get('tgl_efektif')),
+                diminta_oleh=form_data.get('diminta_oleh', ''),
+                jabatan=form_data.get('jabatan', ''),
+                deskripsi_perubahan=form_data.get('deskripsi_perubahan', ''),
+                hasil_dibutuhkan_tgl=parse_date_safe(form_data.get('hasil_dibutuhkan_tgl')),
+                alasan_perubahan=form_data.get('alasan_perubahan', ''),
+                status='draft',
+                signature_filename=signature_pemohon or '',
+                draft_name=draft_name,
+                draft_notes=draft_notes,
+                created_at=now,
+                updated_at=now
+            )
+            db.session.add(proposal)
+            print(f"[DEBUG] Created new draft")
+        
+        db.session.flush()
+        proposal_id = proposal.id
+        print(f"[DEBUG] Draft saved. Proposal ID: {proposal_id}")
+        
+        # Save related data
+        save_draft_related_data(proposal_id, form_data, {})
+        
+        db.session.commit()
+        print(f"[DEBUG] All data committed successfully")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Draft berhasil disimpan',
+            'draft_id': f"draft_{proposal_id}",
+            'proposal_number': proposal.nomor_dokumen
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] Error in save_draft_enhanced: {e}")
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Gagal menyimpan draft: {str(e)}'
+        }), 500
+
+def save_draft_related_data(proposal_id, form_data, signatures=None):
+    """Save related data for draft"""
+    try:
+        if signatures is None:
+            signatures = {}
+        
+        print(f"[DEBUG] save_draft_related_data for proposal {proposal_id}")
+        
+        # Handle evaluation data
+        if form_data.get('tipe_perubahan') or form_data.get('prioritas'):
+            evaluation = Evaluation.query.filter_by(proposal_id=proposal_id).first()
+            
+            if evaluation:
+                # Update existing
+                evaluation.tipe_perubahan = json.dumps(
+                    form_data.get('tipe_perubahan', '').split(',') 
+                    if form_data.get('tipe_perubahan') else []
+                )
+                evaluation.prioritas = form_data.get('prioritas', '')
+                evaluation.dampak_lingkungan = form_data.get('dampak_lingkungan', '')
+                evaluation.upaya_dibutuhkan = form_data.get('upaya_diperlukan', '')
+                evaluation.sumber_daya = form_data.get('kebutuhan_sumber_daya', '')
+                evaluation.rencana_pengujian = form_data.get('rencana_pengujian', '')
+                evaluation.catatan_evaluasi = form_data.get('catatan_evaluator', '')
+                evaluation.keputusan = 'draft'
+                evaluation.evaluated_at = parse_date_safe(form_data.get('tanggal_evaluasi'))
+                evaluation.updated_at = datetime.now()
+            else:
+                # Create new
+                evaluation = Evaluation(
+                    proposal_id=proposal_id,
+                    tipe_perubahan=json.dumps(
+                        form_data.get('tipe_perubahan', '').split(',') 
+                        if form_data.get('tipe_perubahan') else []
+                    ),
+                    prioritas=form_data.get('prioritas', ''),
+                    dampak_lingkungan=form_data.get('dampak_lingkungan', ''),
+                    upaya_dibutuhkan=form_data.get('upaya_diperlukan', ''),
+                    sumber_daya=form_data.get('kebutuhan_sumber_daya', ''),
+                    rencana_pengujian=form_data.get('rencana_pengujian', ''),
+                    catatan_evaluasi=form_data.get('catatan_evaluator', ''),
+                    keputusan='draft',
+                    evaluated_at=parse_date_safe(form_data.get('tanggal_evaluasi'))
+                )
+                db.session.add(evaluation)
+        
+        print(f"[DEBUG] Related data saved for proposal {proposal_id}")
+            
+    except Exception as e:
+        print(f"[ERROR] Error in save_draft_related_data: {e}")
+        raise e
+
+# ==================== TAMBAHKAN TEMPLATE FILTER ====================
+
+@app.template_filter('json_load')
+def json_load_filter(value):
+    """JSON load filter untuk template"""
+    if not value:
+        return []
+    try:
+        if isinstance(value, str):
+            return json.loads(value)
+        return value
+    except:
+        return []
 
 def generate_laporan_insiden_docx(laporan_data):
     """Generate Laporan Insiden dari template Word"""
@@ -884,9 +1807,11 @@ def generate_laporan_insiden_docx(laporan_data):
             print(f"[ERROR] Error rendering template: {e}")
             return None
         
+        # Generate unique filename dengan timestamp
+        timestamp = int(time.time() * 1000)
         safe_id = laporan_data.get('id', 'unknown')
         safe_no = laporan_data.get('no_permohonan', 'unknown').replace('/', '_')
-        filename = f"Laporan_Insiden_{safe_no}_{safe_id}.docx"
+        filename = f"Laporan_Insiden_{safe_no}_{timestamp}.docx"
         output_path = os.path.join(OUTPUT_DIR, filename)
         
         doc.save(output_path)
@@ -1021,861 +1946,6 @@ def dashboard_usulan():
                          system_name="usulan-perubahan",
                          show_only_usulan=True)
 
-# ==================== ROUTE UNTUK GENERATE USULAN PERUBAHAN ====================
-
-@app.route('/usulan-perubahan/generate/<int:proposal_id>')
-def generate_usulan_perubahan(proposal_id):
-    """Generate Word/PDF document untuk Usulan Perubahan"""
-    try:
-        print(f"[DEBUG] Generating document for proposal {proposal_id}")
-        
-        # Get ALL proposal data with related tables
-        proposal = Proposal.query.get(proposal_id)
-        
-        if not proposal:
-            flash('Proposal tidak ditemukan', 'danger')
-            return redirect(url_for('dashboard_usulan'))
-        
-        # Pastikan kita mengambil data yang berelasi
-        evaluation = Evaluation.query.filter_by(proposal_id=proposal_id).first()
-        approval = Approval.query.filter_by(proposal_id=proposal_id).first()
-        implementation = Implementation.query.filter_by(proposal_id=proposal_id).first()
-        
-        print(f"[DEBUG] Data ditemukan:")
-        print(f"  - Proposal: {proposal.nomor_dokumen}")
-        print(f"  - Evaluation: {'Ya' if evaluation else 'Tidak'}")
-        print(f"  - Approval: {'Ya' if approval else 'Tidak'}")
-        print(f"  - Implementation: {'Ya' if implementation else 'Tidak'}")
-        
-        if not os.path.exists(TEMPLATE_USULAN_PERUBAHAN):
-            flash(f'Template Word tidak ditemukan', 'danger')
-            return redirect(url_for('view_proposal', proposal_id=proposal_id))
-        
-        doc = DocxTemplate(TEMPLATE_USULAN_PERUBAHAN)
-        
-        # Get signature images
-        signature_pemohon = None
-        if proposal.signature_filename:
-            # Cari di beberapa lokasi yang mungkin
-            possible_paths = [
-                os.path.join(DATA_FOLDER, 'signatures', proposal.signature_filename),
-                os.path.join('data', 'signatures', proposal.signature_filename),
-                os.path.join('uploads', 'signatures', proposal.signature_filename),
-                proposal.signature_filename  # Jika sudah full path
-            ]
-            
-            for sig_path in possible_paths:
-                if os.path.exists(sig_path):
-                    try:
-                        signature_pemohon = InlineImage(doc, sig_path, width=Mm(80))
-                        print(f"[DEBUG] Signature pemohon loaded from: {sig_path}")
-                        break
-                    except Exception as e:
-                        print(f"[WARN] Failed to load signature from {sig_path}: {e}")
-                        continue
-        
-        signature_approval = None
-        if approval and approval.tanda_tangan_persetujuan:
-            approval_path = os.path.join(DATA_FOLDER, 'signatures', approval.tanda_tangan_persetujuan)
-            if os.path.exists(approval_path):
-                try:
-                    signature_approval = InlineImage(doc, approval_path, width=Mm(80))
-                    print(f"[DEBUG] Signature approval loaded")
-                except Exception as e:
-                    print(f"[WARN] Failed to load approval signature: {e}")
-        
-        signature_implementation = None
-        if implementation and implementation.tanda_tangan_pic:
-            impl_path = os.path.join(DATA_FOLDER, 'signatures', implementation.tanda_tangan_pic)
-            if os.path.exists(impl_path):
-                try:
-                    signature_implementation = InlineImage(doc, impl_path, width=Mm(80))
-                    print(f"[DEBUG] Signature implementation loaded")
-                except Exception as e:
-                    print(f"[WARN] Failed to load implementation signature: {e}")
-        
-        # Prepare template data dengan data lengkap
-        tipe_perubahan_list = []
-        if evaluation and evaluation.tipe_perubahan:
-            try:
-                tipe_perubahan_list = json.loads(evaluation.tipe_perubahan) if isinstance(evaluation.tipe_perubahan, str) else evaluation.tipe_perubahan
-                print(f"[DEBUG] Tipe perubahan list: {tipe_perubahan_list}")
-            except:
-                tipe_perubahan_list = []
-        
-        # Format tanggal untuk template
-        def format_date_for_template(date_obj):
-            if not date_obj:
-                return ""
-            try:
-                months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
-                         'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
-                return f"{date_obj.day} {months[date_obj.month-1]} {date_obj.year}"
-            except:
-                return str(date_obj)
-        
-        # Prepare data untuk template - PASTIKAN SEMUA DATA DIMASUKKAN
-        data_form = {
-            # Header Dokumen
-            'no_dokumen': proposal.nomor_dokumen or 'SOP/XX/IMS/XX/XXXX/XX',
-            'revisi': proposal.revisi or '00',
-            'tgl_efektif': format_date_for_template(proposal.tgl_efektif) if proposal.tgl_efektif else '',
-            
-            # A. USULAN PERUBAHAN
-            'no_usulan': f"{proposal.id:03d}",
-            'tanggal': format_date_for_template(proposal.tanggal) if proposal.tanggal else '',
-            'diminta_oleh': proposal.diminta_oleh or '',
-            'jabatan': proposal.jabatan or '',
-            'deskripsi_perubahan': proposal.deskripsi_perubahan or '',
-            'tgl_dibutuhkan': format_date_for_template(proposal.hasil_dibutuhkan_tgl) if proposal.hasil_dibutuhkan_tgl else '',
-            'alasan_perubahan': proposal.alasan_perubahan or '',
-            
-            # Tanda Tangan
-            'tanda_tangan_pemohon': signature_pemohon if signature_pemohon else "TTD PEMOHON",
-            'tanda_tangan_persetujuan': signature_approval if signature_approval else "TTD PEMBERI PERSETUJUAN",
-            'tanda_tangan_pic': signature_implementation if signature_implementation else "TTD PELAKSANA",
-            
-            # B. EVALUASI DAMPAK PERUBAHAN
-            'is_hardware': '✓' if 'Perangkat Keras' in tipe_perubahan_list else '',
-            'is_konfigurasi': '✓' if 'Konfigurasi' in tipe_perubahan_list else '',
-            'is_software': '✓' if 'Software/Aplikasi' in tipe_perubahan_list else '',
-            'is_database': '✓' if 'Database' in tipe_perubahan_list else '',
-            'is_utilities': '✓' if 'Utilities' in tipe_perubahan_list else '',
-            
-            'is_normal': '✓' if evaluation and evaluation.prioritas == 'Normal' else '',
-            'is_emergency': '✓' if evaluation and evaluation.prioritas == 'Emergency' else '',
-            
-            'dampak_produksi': evaluation.dampak_lingkungan if evaluation else '',
-            'upaya_diperlukan': evaluation.upaya_dibutuhkan if evaluation else '',
-            'kebutuhan_sdm': evaluation.sumber_daya if evaluation else '',
-            'rencana_pengujian': evaluation.rencana_pengujian if evaluation else '',
-            'catatan_evaluator': evaluation.catatan_evaluasi if evaluation else '',
-            'tanggal_evaluasi': format_date_for_template(evaluation.evaluated_at) if evaluation and evaluation.evaluated_at else '',
-            
-            # C. PERSETUJUAN PERUBAHAN
-            'status_diterima': '✓' if approval and approval.keputusan == 'setuju' else '',
-            'status_ditolak': '✓' if approval and approval.keputusan == 'tolak' else '',
-            
-            'tgl_pelaksanaan': format_date_for_template(approval.tanggal_pelaksanaan) if approval and approval.tanggal_pelaksanaan else '',
-            'pic_pelaksana': approval.pic_pelaksana if approval else '',
-            'catatan_persetujuan': approval.catatan_persetujuan if approval else '',
-            'tanggal_persetujuan': format_date_for_template(approval.approved_at) if approval and approval.approved_at else '',
-            
-            # D. IMPLEMENTASI PERUBAHAN
-            'hasil_tahapan_perubahan': implementation.hasil_tahapan_perubahan if implementation else '',
-            'hasil_pengujian_implementasi': implementation.hasil_pengujian if implementation else '',
-            'tgl_rilis': format_date_for_template(implementation.tanggal_rilis) if implementation and implementation.tanggal_rilis else '',
-            'catatan_implementasi': implementation.catatan_implementasi if implementation else '',
-            'tanggal_implementasi': format_date_for_template(implementation.implemented_at) if implementation and implementation.implemented_at else '',
-            
-            # Metadata tambahan
-            'bulan_tahun': datetime.now().strftime('%B %Y'),
-            'tahun': datetime.now().strftime('%Y'),
-            'nomor_urut': f"{proposal.id:03d}",
-        }
-        
-        print(f"[DEBUG] Template data prepared with {len(data_form)} fields")
-        
-        # Debug beberapa field penting
-        debug_fields = ['no_dokumen', 'diminta_oleh', 'jabatan', 'deskripsi_perubahan', 
-                       'alasan_perubahan', 'dampak_produksi', 'hasil_tahapan_perubahan']
-        for field in debug_fields:
-            value = data_form.get(field, 'NOT FOUND')
-            print(f"  - {field}: {value[:50] if value else 'EMPTY'}")
-        
-        try:
-            doc.render(data_form)
-            print(f"[DEBUG] Template rendered successfully")
-        except Exception as render_error:
-            print(f"[ERROR] Error rendering template: {render_error}")
-            flash(f'Error rendering template: {str(render_error)}', 'danger')
-            return redirect(url_for('view_proposal', proposal_id=proposal_id))
-        
-        # Save document
-        safe_doc_number = proposal.nomor_dokumen.replace('/', '_').replace(' ', '_')
-        filename_docx = f"Usulan_Perubahan_{safe_doc_number}.docx"
-        output_docx_path = os.path.join(OUTPUT_DIR, filename_docx)
-        
-        try:
-            doc.save(output_docx_path)
-            print(f"[DEBUG] Document saved to: {output_docx_path}")
-        except Exception as save_error:
-            print(f"[ERROR] Error saving document: {save_error}")
-            flash(f'Error saving document: {str(save_error)}', 'danger')
-            return redirect(url_for('view_proposal', proposal_id=proposal_id))
-        
-        # Try to convert to PDF
-        pdf_path = None
-        if HAS_DOCX2PDF:
-            try:
-                pdf_path = output_docx_path.replace(".docx", ".pdf")
-                convert(output_docx_path, pdf_path)
-                
-                if os.path.exists(pdf_path):
-                    filename = f"Usulan_Perubahan_{safe_doc_number}.pdf"
-                    print(f"[SUCCESS] PDF generated: {pdf_path}")
-                    return send_file(
-                        pdf_path,
-                        as_attachment=True,
-                        download_name=filename,
-                        mimetype='application/pdf'
-                    )
-            except Exception as e:
-                print(f"[WARN] PDF conversion failed: {e}")
-        
-        # Serve DOCX if PDF conversion failed
-        flash('Konversi ke PDF gagal. File DOCX telah didownload.', 'info')
-        return send_file(
-            output_docx_path,
-            as_attachment=True,
-            download_name=filename_docx,
-            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        )
-            
-    except Exception as e:
-        print(f"[ERROR] Error generating document: {e}")
-        print(f"[ERROR] Traceback: {traceback.format_exc()}")
-        flash(f'Terjadi kesalahan: {str(e)}', 'danger')
-        return redirect(url_for('view_proposal', proposal_id=proposal_id))
-
-@app.route('/usulan-perubahan/view/<int:proposal_id>')
-def view_proposal(proposal_id):
-    """View proposal details"""
-    proposal = Proposal.query.get(proposal_id)
-    
-    if not proposal:
-        flash('Proposal tidak ditemukan', 'danger')
-        return redirect(url_for('dashboard_usulan'))
-    
-    evaluation = Evaluation.query.filter_by(proposal_id=proposal_id).first()
-    approval = Approval.query.filter_by(proposal_id=proposal_id).first()
-    implementation = Implementation.query.filter_by(proposal_id=proposal_id).first()
-    
-    proposal_dict = proposal.to_dict()
-    
-    evaluation_dict = {}
-    if evaluation:
-        evaluation_dict = evaluation.to_dict()
-        if isinstance(evaluation_dict.get('tipe_perubahan'), list):
-            evaluation_dict['tipe_perubahan_str'] = ', '.join(evaluation_dict['tipe_perubahan'])
-        else:
-            evaluation_dict['tipe_perubahan_str'] = str(evaluation_dict.get('tipe_perubahan', ''))
-    
-    approval_dict = approval.to_dict() if approval else {}
-    implementation_dict = implementation.to_dict() if implementation else {}
-    
-    return render_template('view_proposal.html',
-                         proposal=proposal_dict,
-                         evaluation=evaluation_dict,
-                         approval=approval_dict,
-                         implementation=implementation_dict,
-                         system_name="usulan-perubahan")
-
-@app.route('/usulan-perubahan/edit/<int:proposal_id>', methods=['GET', 'POST'])
-def edit_proposal(proposal_id):
-    """Edit draft proposal"""
-    try:
-        proposal = Proposal.query.get(proposal_id)
-        
-        if not proposal or proposal.status != 'draft':
-            flash('Hanya draft yang bisa diedit', 'danger')
-            return redirect(url_for('dashboard_usulan'))
-        
-        if request.method == 'POST':
-            form_data = request.form.to_dict()
-            tipe_perubahan = request.form.getlist('tipe_perubahan')
-            if tipe_perubahan:
-                form_data['tipe_perubahan'] = ','.join(tipe_perubahan)
-            
-            signature_filename = proposal.signature_filename
-            if form_data.get('signature_data') and form_data['signature_data'].startswith('data:image'):
-                if signature_filename:
-                    old_path = os.path.join(DATA_FOLDER, 'signatures', signature_filename)
-                    if os.path.exists(old_path):
-                        os.remove(old_path)
-                
-                identifier = f"pemohon_{datetime.now().timestamp()}"
-                signature_filename = save_signature_image(
-                    form_data['signature_data'], 
-                    identifier,
-                    "usulan"
-                )
-            
-            proposal.tanggal = form_data.get('tanggal', '')
-            proposal.revisi = form_data.get('revisi', '00')
-            proposal.tgl_efektif = form_data.get('tgl_efektif', '')
-            proposal.deskripsi_perubahan = form_data.get('deskripsi_perubahan', '')
-            proposal.hasil_dibutuhkan_tgl = form_data.get('hasil_dibutuhkan_tgl', '')
-            proposal.alasan_perubahan = form_data.get('alasan_perubahan', '')
-            proposal.signature_filename = signature_filename or proposal.signature_filename
-            proposal.updated_at = datetime.now()
-            
-            action = request.form.get('action', 'draft')
-            if action == 'submit':
-                proposal.status = 'evaluasi'
-                flash_message = 'Draft berhasil dikirim sebagai usulan!'
-            else:
-                proposal.status = 'draft'
-                flash_message = 'Draft berhasil diperbarui!'
-            
-            db.session.commit()
-            flash(flash_message, 'success')
-            return redirect(url_for('dashboard_usulan'))
-        
-        # GET request - load data
-        evaluation = Evaluation.query.filter_by(proposal_id=proposal_id).first()
-        approval = Approval.query.filter_by(proposal_id=proposal_id).first()
-        implementation = Implementation.query.filter_by(proposal_id=proposal_id).first()
-        
-        form_data = {
-            'no_dokumen': proposal.nomor_dokumen,
-            'revisi': proposal.revisi,
-            'tgl_efektif': proposal.tgl_efektif.strftime('%Y-%m-%d') if proposal.tgl_efektif else '',
-            'tanggal': proposal.tanggal.strftime('%Y-%m-%d') if proposal.tanggal else '',
-            'diminta_oleh': proposal.diminta_oleh,
-            'jabatan': proposal.jabatan,
-            'deskripsi_perubahan': proposal.deskripsi_perubahan,
-            'hasil_dibutuhkan_tgl': proposal.hasil_dibutuhkan_tgl.strftime('%Y-%m-%d') if proposal.hasil_dibutuhkan_tgl else '',
-            'alasan_perubahan': proposal.alasan_perubahan,
-        }
-        
-        if evaluation:
-            tipe_perubahan = json.loads(evaluation.tipe_perubahan) if evaluation.tipe_perubahan else []
-            form_data.update({
-                'tipe_perubahan': ','.join(tipe_perubahan) if tipe_perubahan else '',
-                'prioritas': evaluation.prioritas,
-                'dampak_lingkungan': evaluation.dampak_lingkungan,
-                'upaya_diperlukan': evaluation.upaya_dibutuhkan,
-                'kebutuhan_sumber_daya': evaluation.sumber_daya,
-                'rencana_pengujian': evaluation.rencana_pengujian,
-                'catatan_evaluator': evaluation.catatan_evaluasi,
-                'tanggal_evaluasi': evaluation.evaluated_at.strftime('%Y-%m-%d') if evaluation.evaluated_at else '',
-            })
-        
-        if approval:
-            form_data.update({
-                'status_persetujuan': approval.status,
-                'tanggal_pelaksanaan': approval.tanggal_pelaksanaan.strftime('%Y-%m-%d') if approval.tanggal_pelaksanaan else '',
-                'pic_pelaksana': approval.pic_pelaksana,
-                'catatan_persetujuan': approval.catatan_persetujuan,
-                'catatan_penolakan': approval.catatan_persetujuan,
-                'tanggal_persetujuan': approval.approved_at.strftime('%Y-%m-%d') if approval.approved_at else '',
-            })
-        
-        if implementation:
-            form_data.update({
-                'hasil_tahapan': implementation.hasil_tahapan_perubahan,
-                'hasil_pengujian': implementation.hasil_pengujian,
-                'tanggal_rilis': implementation.tanggal_rilis.strftime('%Y-%m-%d') if implementation.tanggal_rilis else '',
-                'catatan_implementasi': implementation.catatan_implementasi,
-                'tanggal_implementasi': implementation.implemented_at.strftime('%Y-%m-%d') if implementation.implemented_at else '',
-            })
-        
-        signature_data = None
-        if proposal.signature_filename:
-            signature_path = os.path.join(DATA_FOLDER, 'signatures', proposal.signature_filename)
-            if os.path.exists(signature_path):
-                with open(signature_path, 'rb') as f:
-                    signature_bytes = f.read()
-                    signature_data = f"data:image/png;base64,{base64.b64encode(signature_bytes).decode('utf-8')}"
-        
-        today = datetime.now()
-        proposals_all = Proposal.query.count()
-        
-        return render_template('form_complete.html',
-                             edit_mode=True,
-                             proposal=proposal.to_dict(),
-                             form_data=form_data,
-                             signature_data=signature_data,
-                             draft_name=proposal.draft_name,
-                             draft_notes=proposal.draft_notes,
-                             today_date=today.strftime('%Y-%m-%d'),
-                             tomorrow_date=(today + timedelta(days=1)).strftime('%Y-%m-%d'),
-                             next_week_date=(today + timedelta(days=7)).strftime('%Y-%m-%d'),
-                             current_year=today.year,
-                             proposal_count=proposals_all,
-                             system_name="usulan-perubahan")
-                             
-    except Exception as e:
-        print(f"Error editing proposal: {e}")
-        flash(f'Terjadi kesalahan: {str(e)}', 'danger')
-        return redirect(url_for('dashboard_usulan'))
-
-# ==================== API ROUTES UNTUK USULAN PERUBAHAN ====================
-
-@app.route('/api/usulan-perubahan/submit', methods=['POST'])
-def submit_proposal_api():
-    try:
-        print(f"[DEBUG] submit_proposal_api called")
-        
-        # Cek content type
-        if request.content_type != 'application/json':
-            print(f"[WARN] Invalid content type: {request.content_type}")
-            return jsonify({'success': False, 'message': 'Content type must be application/json'}), 400
-        
-        data = request.get_json()
-        if not data:
-            print(f"[WARN] No JSON data received")
-            return jsonify({'success': False, 'message': 'Tidak ada data'}), 400
-        
-        print(f"[DEBUG] Data received. Keys: {list(data.keys())}")
-        
-        form_data = data.get('form_data', {})
-        action = data.get('action', 'submit')
-        draft_id = data.get('draft_id')
-        draft_name = data.get('draft_name', '')
-        draft_notes = data.get('draft_notes', '')
-        
-        print(f"[DEBUG] Action: {action}, Draft ID: {draft_id}")
-        
-        # Validasi form_data
-        if not isinstance(form_data, dict):
-            print(f"[ERROR] form_data is not a dict: {type(form_data)}")
-            return jsonify({
-                'success': False,
-                'message': 'Format data tidak valid'
-            }), 400
-        
-        # VALIDASI DATA WAJIB
-        required_fields = ['no_dokumen', 'diminta_oleh', 'jabatan', 'deskripsi_perubahan']
-        missing_fields = [field for field in required_fields if not form_data.get(field)]
-        
-        if missing_fields and action != 'draft':
-            print(f"[WARN] Missing required fields: {missing_fields}")
-            return jsonify({
-                'success': False,
-                'message': f'Data wajib tidak lengkap: {", ".join(missing_fields)}'
-            }), 400
-        
-        if action == 'draft':
-            # Simpan sebagai draft
-            print(f"[DEBUG] Saving as draft...")
-            result = save_draft_enhanced(form_data, draft_id, draft_name, draft_notes)
-            
-            # Jika draft berhasil disimpan, redirect ke dashboard
-            if isinstance(result, dict) and result.get('success'):
-                return jsonify({
-                    'success': True,
-                    'message': 'Draft berhasil disimpan!',
-                    'redirect': url_for('main_dashboard')
-                })
-            return result
-            
-        else:
-            # Submit langsung
-            print(f"[DEBUG] Submitting proposal...")
-            success = save_proposal_complete(form_data)
-            
-            if success:
-                return jsonify({
-                    'success': True,
-                    'message': 'Usulan perubahan berhasil disimpan!',
-                    'redirect': url_for('main_dashboard')
-                })
-            else:
-                return jsonify({
-                    'success': False,
-                    'message': 'Gagal menyimpan usulan perubahan'
-                }), 500
-                
-    except Exception as e:
-        print(f"[ERROR] Error in submit_proposal_api: {e}")
-        print(f"[ERROR] Traceback: {traceback.format_exc()}")
-        return jsonify({
-            'success': False,
-            'message': f'Terjadi kesalahan server: {str(e)}'
-        }), 500
-
-def save_draft_enhanced(form_data, draft_id=None, draft_name='', draft_notes=''):
-    """Save draft dengan nama lama tapi implementasi baru"""
-    try:
-        print(f"[DEBUG] save_draft_enhanced called")
-        print(f"[DEBUG] Draft ID: {draft_id}, Draft Name: {draft_name}")
-        
-        # PARSE DRAFT ID
-        actual_id = None
-        if draft_id and isinstance(draft_id, str):
-            if draft_id.startswith('draft_'):
-                try:
-                    actual_id = int(draft_id.replace('draft_', ''))
-                    print(f"[DEBUG] Parsed draft ID: {actual_id}")
-                except ValueError:
-                    print(f"[DEBUG] Invalid draft ID format: {draft_id}")
-                    actual_id = None
-            elif draft_id.startswith('DRAFT_'):
-                try:
-                    actual_id = int(draft_id.replace('DRAFT_', ''))
-                    print(f"[DEBUG] Parsed DRAFT ID: {actual_id}")
-                except ValueError:
-                    print(f"[DEBUG] Invalid DRAFT ID format: {draft_id}")
-                    actual_id = None
-        elif draft_id:
-            try:
-                actual_id = int(draft_id)
-            except:
-                actual_id = None
-        
-        # CARI PROPOSAL
-        proposal = None
-        is_new = True
-        
-        if actual_id:
-            proposal = Proposal.query.get(actual_id)
-            if proposal and proposal.status == 'draft':
-                is_new = False
-                print(f"[DEBUG] Found existing draft: {proposal.id}")
-            else:
-                proposal = None
-                print(f"[DEBUG] Draft not found or not a draft, creating new")
-        
-        # HANDLE SIGNATURE PEMOHON
-        signature_pemohon = None
-        if form_data.get('signature_data'):
-            print(f"[DEBUG] Processing signature data")
-            identifier = f"pemohon_{datetime.now().timestamp()}"
-            signature_pemohon = save_signature_image(
-                form_data.get('signature_data'), 
-                identifier,
-                "usulan"
-            )
-            print(f"[DEBUG] Signature saved: {signature_pemohon}")
-        
-        # GENERATE DOC NUMBER
-        proposal_count = Proposal.query.count()
-        if not form_data.get('no_dokumen'):
-            form_data['no_dokumen'] = generate_doc_number(proposal_count)
-            print(f"[DEBUG] Generated doc number: {form_data['no_dokumen']}")
-        
-        now = datetime.now()
-        
-        # UPDATE ATAU CREATE PROPOSAL
-        if proposal:
-            # UPDATE EXISTING DRAFT
-            proposal.tanggal = parse_date_safe(form_data.get('tanggal')) or now.date()
-            proposal.nomor_dokumen = form_data.get('no_dokumen', proposal.nomor_dokumen or '')
-            proposal.revisi = form_data.get('revisi', proposal.revisi or '00')
-            proposal.tgl_efektif = parse_date_safe(form_data.get('tgl_efektif'))
-            proposal.diminta_oleh = form_data.get('diminta_oleh', proposal.diminta_oleh or '')
-            proposal.jabatan = form_data.get('jabatan', proposal.jabatan or '')
-            proposal.deskripsi_perubahan = form_data.get('deskripsi_perubahan', proposal.deskripsi_perubahan or '')
-            proposal.hasil_dibutuhkan_tgl = parse_date_safe(form_data.get('hasil_dibutuhkan_tgl'))
-            proposal.alasan_perubahan = form_data.get('alasan_perubahan', proposal.alasan_perubahan or '')
-            proposal.signature_filename = signature_pemohon or proposal.signature_filename
-            proposal.draft_name = draft_name or proposal.draft_name
-            proposal.draft_notes = draft_notes or proposal.draft_notes
-            proposal.updated_at = now
-            print(f"[DEBUG] Updated draft ID: {proposal.id}")
-        else:
-            # CREATE NEW DRAFT
-            proposal = Proposal(
-                tanggal=parse_date_safe(form_data.get('tanggal')) or now.date(),
-                nomor_dokumen=form_data.get('no_dokumen', ''),
-                revisi=form_data.get('revisi', '00'),
-                tgl_efektif=parse_date_safe(form_data.get('tgl_efektif')),
-                diminta_oleh=form_data.get('diminta_oleh', ''),
-                jabatan=form_data.get('jabatan', ''),
-                deskripsi_perubahan=form_data.get('deskripsi_perubahan', ''),
-                hasil_dibutuhkan_tgl=parse_date_safe(form_data.get('hasil_dibutuhkan_tgl')),
-                alasan_perubahan=form_data.get('alasan_perubahan', ''),
-                status='draft',
-                signature_filename=signature_pemohon or '',
-                draft_name=draft_name,
-                draft_notes=draft_notes,
-                created_at=now,
-                updated_at=now
-            )
-            db.session.add(proposal)
-            print(f"[DEBUG] Created new draft")
-        
-        db.session.flush()
-        print(f"[DEBUG] Draft saved. Proposal ID: {proposal.id}")
-        
-        # SIMPAN DATA TERKAIT
-        save_draft_related_data(proposal.id, form_data, {})
-        
-        db.session.commit()
-        print(f"[DEBUG] All data committed successfully")
-        
-        return jsonify({
-            'success': True,
-            'message': 'Draft berhasil disimpan' if is_new else 'Draft berhasil diperbarui',
-            'draft_id': f"draft_{proposal.id}",
-            'is_new': is_new,
-            'timestamp': now.strftime('%Y-%m-%d %H:%M:%S'),
-            'proposal_number': proposal.nomor_dokumen
-        })
-        
-    except Exception as e:
-        print(f"[ERROR] Error in save_draft_enhanced: {e}")
-        print(f"[ERROR] Traceback: {traceback.format_exc()}")
-        db.session.rollback()
-        return jsonify({
-            'success': False,
-            'message': f'Gagal menyimpan draft: {str(e)}'
-        }), 500
-
-def parse_date_safe(date_str):
-    """Parse tanggal dengan berbagai format secara aman"""
-    if not date_str:
-        return None
-    try:
-        # Coba berbagai format tanggal
-        for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y'):
-            try:
-                return datetime.strptime(str(date_str), fmt).date()
-            except ValueError:
-                continue
-        return None
-    except Exception as e:
-        print(f"[WARN] Failed to parse date '{date_str}': {e}")
-        return None
-    
-def save_draft_related_data(proposal_id, form_data, signatures=None):
-    """Save related data for draft"""
-    try:
-        if signatures is None:
-            signatures = {}
-        
-        print(f"[DEBUG] save_draft_related_data for proposal {proposal_id}")
-        
-        # HANDLE EVALUATION DATA
-        if form_data.get('tipe_perubahan') or form_data.get('prioritas'):
-            evaluation = Evaluation.query.filter_by(proposal_id=proposal_id).first()
-            
-            if evaluation:
-                # UPDATE EXISTING
-                evaluation.tipe_perubahan = json.dumps(
-                    form_data.get('tipe_perubahan', '').split(',') 
-                    if form_data.get('tipe_perubahan') else []
-                )
-                evaluation.prioritas = form_data.get('prioritas', '')
-                evaluation.dampak_lingkungan = form_data.get('dampak_lingkungan', '')
-                evaluation.upaya_dibutuhkan = form_data.get('upaya_diperlukan', '')
-                evaluation.sumber_daya = form_data.get('kebutuhan_sumber_daya', '')
-                evaluation.rencana_pengujian = form_data.get('rencana_pengujian', '')
-                evaluation.catatan_evaluasi = form_data.get('catatan_evaluator', '')
-                evaluation.keputusan = 'draft'
-                evaluation.evaluated_at = parse_date_safe(form_data.get('tanggal_evaluasi'))
-                evaluation.updated_at = datetime.now()
-                print(f"[DEBUG] Updated evaluation")
-            else:
-                # CREATE NEW
-                evaluation = Evaluation(
-                    proposal_id=proposal_id,
-                    tipe_perubahan=json.dumps(
-                        form_data.get('tipe_perubahan', '').split(',') 
-                        if form_data.get('tipe_perubahan') else []
-                    ),
-                    prioritas=form_data.get('prioritas', ''),
-                    dampak_lingkungan=form_data.get('dampak_lingkungan', ''),
-                    upaya_dibutuhkan=form_data.get('upaya_diperlukan', ''),
-                    sumber_daya=form_data.get('kebutuhan_sumber_daya', ''),
-                    rencana_pengujian=form_data.get('rencana_pengujian', ''),
-                    catatan_evaluasi=form_data.get('catatan_evaluator', ''),
-                    keputusan='draft',
-                    evaluated_at=parse_date_safe(form_data.get('tanggal_evaluasi'))
-                )
-                db.session.add(evaluation)
-                print(f"[DEBUG] Created new evaluation")
-        
-        # HANDLE APPROVAL SIGNATURE
-        approval_signature = None
-        if form_data.get('signature_approval'):
-            identifier = f"approval_{datetime.now().timestamp()}_{proposal_id}"
-            approval_signature = save_signature_image(
-                form_data.get('signature_approval'),
-                identifier,
-                "usulan"
-            )
-            print(f"[DEBUG] Approval signature saved: {approval_signature}")
-        
-        # HANDLE APPROVAL DATA
-        if form_data.get('status_persetujuan'):
-            approval = Approval.query.filter_by(proposal_id=proposal_id).first()
-            
-            if approval:
-                # UPDATE EXISTING
-                approval.status = form_data.get('status_persetujuan')
-                approval.catatan_persetujuan = form_data.get('catatan_persetujuan') or form_data.get('catatan_penolakan', '')
-                approval.keputusan = 'draft'
-                approval.tanggal_pelaksanaan = parse_date_safe(form_data.get('tanggal_pelaksanaan'))
-                approval.pic_pelaksana = form_data.get('pic_pelaksana', '')
-                approval.approved_at = parse_date_safe(form_data.get('tanggal_persetujuan'))
-                approval.tanda_tangan_persetujuan = approval_signature or approval.tanda_tangan_persetujuan
-                approval.updated_at = datetime.now()
-                print(f"[DEBUG] Updated approval")
-            else:
-                # CREATE NEW
-                approval = Approval(
-                    proposal_id=proposal_id,
-                    status=form_data.get('status_persetujuan'),
-                    catatan_persetujuan=form_data.get('catatan_persetujuan') or form_data.get('catatan_penolakan', ''),
-                    keputusan='draft',
-                    tanggal_pelaksanaan=parse_date_safe(form_data.get('tanggal_pelaksanaan')),
-                    pic_pelaksana=form_data.get('pic_pelaksana', ''),
-                    approved_at=parse_date_safe(form_data.get('tanggal_persetujuan')),
-                    tanda_tangan_persetujuan=approval_signature or ''
-                )
-                db.session.add(approval)
-                print(f"[DEBUG] Created new approval")
-        
-        # HANDLE IMPLEMENTATION SIGNATURE
-        implementation_signature = None
-        if form_data.get('signature_implementation'):
-            identifier = f"implementation_{datetime.now().timestamp()}_{proposal_id}"
-            implementation_signature = save_signature_image(
-                form_data.get('signature_implementation'),
-                identifier,
-                "usulan"
-            )
-            print(f"[DEBUG] Implementation signature saved: {implementation_signature}")
-        
-        # HANDLE IMPLEMENTATION DATA
-        if form_data.get('hasil_tahapan'):
-            implementation = Implementation.query.filter_by(proposal_id=proposal_id).first()
-            
-            if implementation:
-                # UPDATE EXISTING
-                implementation.hasil_tahapan_perubahan = form_data.get('hasil_tahapan', '')
-                implementation.hasil_pengujian = form_data.get('hasil_pengujian', '')
-                implementation.tanggal_rilis = parse_date_safe(form_data.get('tanggal_rilis'))
-                implementation.catatan_implementasi = form_data.get('catatan_implementasi', '')
-                implementation.implemented_at = parse_date_safe(form_data.get('tanggal_implementasi'))
-                implementation.tanda_tangan_pic = implementation_signature or implementation.tanda_tangan_pic
-                implementation.updated_at = datetime.now()
-                print(f"[DEBUG] Updated implementation")
-            else:
-                # CREATE NEW
-                implementation = Implementation(
-                    proposal_id=proposal_id,
-                    hasil_tahapan_perubahan=form_data.get('hasil_tahapan', ''),
-                    hasil_pengujian=form_data.get('hasil_pengujian', ''),
-                    tanggal_rilis=parse_date_safe(form_data.get('tanggal_rilis')),
-                    catatan_implementasi=form_data.get('catatan_implementasi', ''),
-                    implemented_at=parse_date_safe(form_data.get('tanggal_implementasi')),
-                    tanda_tangan_pic=implementation_signature or ''
-                )
-                db.session.add(implementation)
-                print(f"[DEBUG] Created new implementation")
-        
-        print(f"[DEBUG] All related data saved for proposal {proposal_id}")
-            
-    except Exception as e:
-        print(f"[ERROR] Error in save_draft_related_data: {e}")
-        print(f"[ERROR] Traceback: {traceback.format_exc()}")
-        raise e
-
-@app.route('/api/usulan-perubahan/load-draft/<draft_id>', methods=['GET'])
-def load_draft_api(draft_id):
-    """Load draft data"""
-    try:
-        if draft_id.startswith('draft_'):
-            actual_id = int(draft_id.replace('draft_', ''))
-        elif draft_id.startswith('DRAFT_'):
-            actual_id = int(draft_id.replace('DRAFT_', ''))
-        else:
-            actual_id = int(draft_id)
-        
-        proposal = Proposal.query.get(actual_id)
-        
-        if not proposal or proposal.status != 'draft':
-            return jsonify({'success': False, 'message': 'Draft tidak ditemukan'}), 404
-        
-        evaluation = Evaluation.query.filter_by(proposal_id=actual_id).first()
-        
-        signature_data = None
-        if proposal.signature_filename:
-            signature_path = os.path.join(DATA_FOLDER, 'signatures', proposal.signature_filename)
-            if os.path.exists(signature_path):
-                with open(signature_path, 'rb') as f:
-                    signature_bytes = f.read()
-                    signature_data = f"data:image/png;base64,{base64.b64encode(signature_bytes).decode('utf-8')}"
-        
-        form_data = {
-            'no_dokumen': proposal.nomor_dokumen,
-            'revisi': proposal.revisi,
-            'tgl_efektif': proposal.tgl_efektif.strftime('%Y-%m-%d') if proposal.tgl_efektif else '',
-            'tanggal': proposal.tanggal.strftime('%Y-%m-%d') if proposal.tanggal else '',
-            'diminta_oleh': proposal.diminta_oleh,
-            'jabatan': proposal.jabatan,
-            'deskripsi_perubahan': proposal.deskripsi_perubahan,
-            'hasil_dibutuhkan_tgl': proposal.hasil_dibutuhkan_tgl.strftime('%Y-%m-%d') if proposal.hasil_dibutuhkan_tgl else '',
-            'alasan_perubahan': proposal.alasan_perubahan,
-            'signature_data': signature_data,
-        }
-        
-        if evaluation:
-            tipe_perubahan = json.loads(evaluation.tipe_perubahan) if evaluation.tipe_perubahan else []
-            form_data.update({
-                'tipe_perubahan': ','.join(tipe_perubahan) if tipe_perubahan else '',
-                'prioritas': evaluation.prioritas,
-                'dampak_lingkungan': evaluation.dampak_lingkungan,
-                'upaya_diperlukan': evaluation.upaya_dibutuhkan,
-                'kebutuhan_sumber_daya': evaluation.sumber_daya,
-                'rencana_pengujian': evaluation.rencana_pengujian,
-                'catatan_evaluator': evaluation.catatan_evaluasi,
-                'tanggal_evaluasi': evaluation.evaluated_at.strftime('%Y-%m-%d') if evaluation.evaluated_at else '',
-            })
-        
-        return jsonify({
-            'success': True,
-            'draft': {
-                'id': f"draft_{proposal.id}",
-                'draft_id': f"draft_{proposal.id}",
-                'form_data': form_data,
-                'draft_name': proposal.draft_name,
-                'draft_notes': proposal.draft_notes,
-                'created_at': proposal.created_at.strftime('%Y-%m-%d %H:%M:%S') if proposal.created_at else '',
-                'updated_at': proposal.updated_at.strftime('%Y-%m-%d %H:%M:%S') if proposal.updated_at else '',
-                'proposal_number': proposal.nomor_dokumen
-            }
-        })
-        
-    except Exception as e:
-        print(f"Error loading draft: {e}")
-        return jsonify({
-            'success': False,
-            'message': f'Gagal memuat draft: {str(e)}'
-        }), 500
-
-@app.route('/api/usulan-perubahan/delete-draft/<draft_id>', methods=['DELETE'])
-def delete_draft_api(draft_id):
-    """Delete draft"""
-    try:
-        if draft_id.startswith('draft_'):
-            actual_id = int(draft_id.replace('draft_', ''))
-        elif draft_id.startswith('DRAFT_'):
-            actual_id = int(draft_id.replace('DRAFT_', ''))
-        else:
-            actual_id = int(draft_id)
-        
-        proposal = Proposal.query.get(actual_id)
-        
-        if not proposal or proposal.status != 'draft':
-            return jsonify({'success': False, 'message': 'Draft tidak ditemukan'}), 404
-        
-        if proposal.signature_filename and not proposal.signature_filename.startswith('data:image'):
-            signature_path = os.path.join(DATA_FOLDER, 'signatures', proposal.signature_filename)
-            if os.path.exists(signature_path):
-                os.remove(signature_path)
-        
-        Evaluation.query.filter_by(proposal_id=actual_id).delete()
-        Approval.query.filter_by(proposal_id=actual_id).delete()
-        Implementation.query.filter_by(proposal_id=actual_id).delete()
-        
-        db.session.delete(proposal)
-        db.session.commit()
-        
-        return jsonify({'success': True, 'message': 'Draft berhasil dihapus'})
-        
-    except Exception as e:
-        print(f"Error deleting draft: {e}")
-        db.session.rollback()
-        return jsonify({
-            'success': False,
-            'message': f'Gagal menghapus draft: {str(e)}'
-        }), 500
-
 @app.route('/surat-pernyataan/dashboard')
 def surat_pernyataan_dashboard():
     """Dashboard khusus untuk Surat Pernyataan"""
@@ -1952,6 +2022,7 @@ def surat_pernyataan_home():
     return render_template("form_02.html", system_name="surat-pernyataan")
 
 @app.route('/surat-pernyataan/generate-template', methods=["POST"])
+@disable_cache
 def generate_surat_pernyataan_template():
     """Generate Surat Pernyataan menggunakan template Word DAN convert ke PDF"""
     try:
@@ -2015,51 +2086,49 @@ def generate_surat_pernyataan_template():
 
         print(f"[DEBUG] DOCX created: {docx_path}")
         
-        # Convert ke PDF JIKA ADA docx2pdf
-        pdf_path = None
-        if HAS_DOCX2PDF and os.path.exists(docx_path):
-            try:
-                pdf_path = docx_path.replace('.docx', '.pdf')
-                print(f"[DEBUG] Converting DOCX to PDF: {pdf_path}")
-                convert(docx_path, pdf_path)
-                
-                if os.path.exists(pdf_path):
-                    print(f"[SUCCESS] PDF created: {pdf_path}")
-                    
-                    # Update database dengan nama file PDF
-                    filename = os.path.basename(pdf_path)
-                    surat.pdf_object = filename
-                    db.session.commit()
-                    
-                    # Kirim file PDF
-                    return send_file(
-                        pdf_path,
-                        as_attachment=True,
-                        download_name=filename,
-                        mimetype='application/pdf'
-                    )
-                else:
-                    print(f"[WARN] PDF not created, sending DOCX instead")
-                    
-            except Exception as pdf_error:
-                print(f"[ERROR] PDF conversion failed: {pdf_error}")
+        # Convert ke PDF menggunakan robust method
+        prefix = f"Surat_Pernyataan_{safe_filename(nama)}"
+        pdf_path = get_or_create_pdf(docx_path, prefix)
+        
+        if pdf_path and os.path.exists(pdf_path):
+            pdf_filename = os.path.basename(pdf_path)
+            print(f"[SUCCESS] PDF created: {pdf_path}")
+            
+            # Update database dengan nama file PDF
+            surat.pdf_object = pdf_filename
+            db.session.commit()
+            
+            # Kirim file PDF dengan cache control
+            response = send_file_with_cache_control(pdf_path, pdf_filename, 'application/pdf')
+            if response:
+                return response
         
         # FALLBACK: Kirim DOCX jika PDF gagal
         if os.path.exists(docx_path):
-            filename = os.path.basename(docx_path)
+            docx_filename = os.path.basename(docx_path)
             
             # Update database dengan nama file DOCX
-            surat.pdf_object = filename
+            surat.pdf_object = docx_filename
             db.session.commit()
             
-            print(f"[INFO] Sending DOCX as fallback: {filename}")
+            print(f"[INFO] Sending DOCX as fallback: {docx_filename}")
             
-            return send_file(
+            response = send_file_with_cache_control(
                 docx_path,
-                as_attachment=True,
-                download_name=filename,
-                mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                docx_filename,
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
             )
+            
+            if response:
+                return response
+            else:
+                # Ultimate fallback
+                return send_file(
+                    docx_path,
+                    as_attachment=True,
+                    download_name=docx_filename,
+                    mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                )
         else:
             db.session.rollback()
             flash("Gagal membuat dokumen", "error")
@@ -2081,7 +2150,7 @@ def generate_surat_pernyataan_template():
 def view_surat_pernyataan(surat_id):
     """View detail surat pernyataan"""
     try:
-        surat = SuratPernyataan.query.get(surat_id)
+        surat = db.session.get(SuratPernyataan, surat_id)
         
         if not surat:
             flash('Surat tidak ditemukan', 'danger')
@@ -2099,8 +2168,14 @@ def view_surat_pernyataan(surat_id):
         surat_dict = surat.to_dict()
         surat_dict['signature_base64'] = signature_base64
         
+        # Tambahkan timestamp untuk URL download
+        pdf_url_with_timestamp = url_for('generate_surat_pernyataan_pdf_route', surat_id=surat_id) + f"?t={int(time.time())}"
+        docx_url_with_timestamp = url_for('generate_surat_pernyataan_docx_route', surat_id=surat_id) + f"?t={int(time.time())}"
+        
         return render_template('view_surat_pernyataan.html',
                              surat=surat_dict,
+                             pdf_url_with_timestamp=pdf_url_with_timestamp,
+                             docx_url_with_timestamp=docx_url_with_timestamp,
                              system_name="surat-pernyataan")
                              
     except Exception as e:
@@ -2109,12 +2184,13 @@ def view_surat_pernyataan(surat_id):
         return redirect(url_for('surat_pernyataan_dashboard'))
 
 @app.route('/surat-pernyataan/generate-docx/<int:surat_id>')
+@disable_cache
 def generate_surat_pernyataan_docx_route(surat_id):
-    """Generate Surat Pernyataan DOCX dari database"""
+    """Generate Surat Pernyataan DOCX dari database - DIPERBAIKI"""
     try:
         print(f"[DEBUG] Generate DOCX for surat_id: {surat_id}")
         
-        surat = SuratPernyataan.query.get(surat_id)
+        surat = db.session.get(SuratPernyataan, surat_id)
         
         if not surat:
             flash('Surat tidak ditemukan', 'danger')
@@ -2129,14 +2205,26 @@ def generate_surat_pernyataan_docx_route(surat_id):
             flash('Gagal membuat dokumen dari template', 'danger')
             return redirect(url_for('surat_pernyataan_dashboard'))
         
-        filename = os.path.basename(docx_path)
+        # Generate unique filename
+        timestamp = int(time.time() * 1000)
+        unique_id = str(uuid.uuid4())[:8]
+        filename = f"Surat_Pernyataan_{safe_filename(surat.nama)}_{timestamp}_{unique_id}.docx"
         
-        return send_file(
+        response = send_file_with_cache_control(
             docx_path,
-            as_attachment=True,
-            download_name=filename,
-            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            filename,
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         )
+        
+        if response:
+            return response
+        else:
+            return send_file(
+                docx_path,
+                as_attachment=True,
+                download_name=filename,
+                mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            )
         
     except Exception as e:
         print(f"[ERROR] Error generating DOCX: {e}")
@@ -2144,12 +2232,13 @@ def generate_surat_pernyataan_docx_route(surat_id):
         return redirect(url_for('surat_pernyataan_dashboard'))
 
 @app.route('/surat-pernyataan/generate-pdf/<int:surat_id>')
+@disable_cache
 def generate_surat_pernyataan_pdf_route(surat_id):
-    """Generate Surat Pernyataan PDF (konversi dari DOCX)"""
+    """Generate Surat Pernyataan PDF (konversi dari DOCX) - DIPERBAIKI"""
     try:
         print(f"[DEBUG] Generate PDF for surat_id: {surat_id}")
         
-        surat = SuratPernyataan.query.get(surat_id)
+        surat = db.session.get(SuratPernyataan, surat_id)
         
         if not surat:
             flash('Surat tidak ditemukan', 'danger')
@@ -2164,34 +2253,38 @@ def generate_surat_pernyataan_pdf_route(surat_id):
             flash('Gagal membuat dokumen dari template', 'danger')
             return redirect(url_for('surat_pernyataan_dashboard'))
         
-        # Convert to PDF
-        if HAS_DOCX2PDF:
-            try:
-                pdf_path = docx_path.replace('.docx', '.pdf')
-                convert(docx_path, pdf_path)
-                
-                if os.path.exists(pdf_path):
-                    filename = os.path.basename(pdf_path)
-                    
-                    return send_file(
-                        pdf_path,
-                        as_attachment=True,
-                        download_name=filename,
-                        mimetype='application/pdf'
-                    )
-            except Exception as e:
-                print(f"[WARN] PDF conversion failed: {e}")
+        # Convert to PDF dengan robust method
+        prefix = f"Surat_Pernyataan_{safe_filename(surat.nama)}"
+        pdf_path = get_or_create_pdf(docx_path, prefix)
+        
+        if pdf_path and os.path.exists(pdf_path):
+            filename = os.path.basename(pdf_path)
+            # Kirim dengan cache control
+            response = send_file_with_cache_control(pdf_path, filename, 'application/pdf')
+            if response:
+                return response
         
         # Fallback to DOCX
-        filename = os.path.basename(docx_path)
+        timestamp = int(time.time() * 1000)
+        unique_id = str(uuid.uuid4())[:8]
+        filename = f"Surat_Pernyataan_{safe_filename(surat.nama)}_{timestamp}_{unique_id}.docx"
         flash('Konversi ke PDF gagal, file DOCX telah didownload', 'info')
         
-        return send_file(
+        response = send_file_with_cache_control(
             docx_path,
-            as_attachment=True,
-            download_name=filename,
-            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            filename,
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         )
+        
+        if response:
+            return response
+        else:
+            return send_file(
+                docx_path,
+                as_attachment=True,
+                download_name=filename,
+                mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            )
         
     except Exception as e:
         print(f"[ERROR] Error generating PDF: {e}")
@@ -2206,8 +2299,9 @@ def laporan_insiden_form():
     return render_template("form_03.html", system_name="laporan-insiden")
 
 @app.route('/laporan-insiden/generate-docx/<int:laporan_id>')
+@disable_cache
 def generate_laporan_insiden_docx_route(laporan_id):
-    """Generate Laporan Insiden DOCX dari database"""
+    """Generate Laporan Insiden DOCX dari database - DIPERBAIKI"""
     try:
         print(f"[DEBUG] Generate DOCX for laporan_id: {laporan_id}")
         
@@ -2223,67 +2317,72 @@ def generate_laporan_insiden_docx_route(laporan_id):
             flash('Gagal membuat dokumen dari template', 'danger')
             return redirect(url_for('dashboard_laporan_insiden'))
         
-        filename = os.path.basename(docx_path)
+        # Generate unique filename
+        timestamp = int(time.time() * 1000)
+        unique_id = str(uuid.uuid4())[:8]
+        safe_no = laporan_data.get('no_permohonan', f"laporan_{laporan_id}").replace('/', '_')
+        filename = f"Laporan_Insiden_{safe_no}_{timestamp}_{unique_id}.docx"
         
-        return send_file(
+        response = send_file_with_cache_control(
             docx_path,
-            as_attachment=True,
-            download_name=filename,
-            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            filename,
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         )
+        
+        if response:
+            return response
+        else:
+            return send_file(
+                docx_path,
+                as_attachment=True,
+                download_name=filename,
+                mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            )
         
     except Exception as e:
         print(f"[ERROR] Error generating DOCX: {e}")
         flash(f'Terjadi kesalahan: {str(e)}', 'danger')
         return redirect(url_for('dashboard_laporan_insiden'))
 
-# ==================== ALIAS ROUTE UNTUK KOMPATIBILITAS ====================
+# ==================== UPDATE ROUTE LAPORAN INSIDEN UNTUK PDF ====================
 
-@app.route('/laporan-insiden/print-by-id/<int:laporan_id>')
-@app.route('/laporan-insiden/print/<int:laporan_id>')  # Route yang sudah ada
-def laporan_insiden_print_by_id(laporan_id):
-    """Alias untuk laporan_insiden_print - UNTUK KOMPATIBILITAS"""
-    print(f"[DEBUG] laporan_insiden_print_by_id called for ID: {laporan_id}")
-    
-    # Panggil fungsi yang sudah ada
+@app.route('/laporan-insiden/print/<int:laporan_id>')
+@disable_cache
+def laporan_insiden_print(laporan_id):
+    """Print Laporan Insiden - DAPATKAN PDF (bukan DOCX)"""
     try:
-        # Cari data dari database
-        laporan_data = get_laporan_from_database(laporan_id)
+        print(f"[DEBUG] laporan_insiden_print called for ID: {laporan_id}")
         
-        if not laporan_data:
-            flash('Laporan tidak ditemukan', 'danger')
-            return redirect(url_for('dashboard_laporan_insiden'))
-        
-        # Generate DOCX dari template
-        docx_path = generate_laporan_insiden_docx(laporan_data)
-        
-        if not docx_path:
-            flash('Gagal membuat dokumen dari template', 'danger')
-            return redirect(url_for('dashboard_laporan_insiden'))
-        
-        filename = os.path.basename(docx_path)
-        
-        return send_file(
-            docx_path,
-            as_attachment=True,
-            download_name=filename,
-            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        )
+        # Langsung generate PDF
+        return generate_laporan_insiden_pdf_route(laporan_id)
         
     except Exception as e:
-        print(f"[ERROR] Error in laporan_insiden_print_by_id: {e}")
+        print(f"[ERROR] laporan_insiden_print error: {e}")
         flash(f'Terjadi kesalahan: {str(e)}', 'danger')
         return redirect(url_for('dashboard_laporan_insiden'))
 
-# Atau jika ingin lebih sederhana, redirect saja:
+# ==================== PERBAIKI ROUTE PRINT-BY-ID ====================
+
 @app.route('/laporan-insiden/print-by-id/<int:laporan_id>')
-def laporan_insiden_print_by_id_redirect(laporan_id):
-    """Redirect ke endpoint yang benar"""
-    return redirect(url_for('generate_laporan_insiden_docx_route', laporan_id=laporan_id))
+@disable_cache
+def laporan_insiden_print_by_id(laporan_id):
+    """Alias untuk laporan_insiden_print - UNTUK KOMPATIBILITAS DASHBOARD"""
+    try:
+        print(f"[DEBUG] print-by-id called for ID: {laporan_id}")
+        # Panggil fungsi print yang sudah diperbarui
+        return laporan_insiden_print(laporan_id)
+        
+    except Exception as e:
+        print(f"[ERROR] print-by-id error: {e}")
+        flash(f'Terjadi kesalahan: {str(e)}', 'danger')
+        return redirect(url_for('dashboard_laporan_insiden'))
+
+# ==================== ROUTE GENERATE PDF YANG DIPERBAIKI ====================
 
 @app.route('/laporan-insiden/generate-pdf/<int:laporan_id>')
+@disable_cache
 def generate_laporan_insiden_pdf_route(laporan_id):
-    """Generate Laporan Insiden PDF (konversi dari DOCX)"""
+    """Generate Laporan Insiden PDF (konversi dari DOCX) - DIPERBAIKI"""
     try:
         print(f"[DEBUG] Generate PDF for laporan_id: {laporan_id}")
         
@@ -2293,38 +2392,49 @@ def generate_laporan_insiden_pdf_route(laporan_id):
             flash('Laporan tidak ditemukan', 'danger')
             return redirect(url_for('dashboard_laporan_insiden'))
         
+        # Generate DOCX first
         docx_path = generate_laporan_insiden_docx(laporan_data)
         
         if not docx_path:
             flash('Gagal membuat dokumen dari template', 'danger')
             return redirect(url_for('dashboard_laporan_insiden'))
         
-        if HAS_DOCX2PDF:
-            try:
-                pdf_path = docx_path.replace('.docx', '.pdf')
-                convert(docx_path, pdf_path)
-                
-                if os.path.exists(pdf_path):
-                    filename = os.path.basename(pdf_path)
-                    
-                    return send_file(
-                        pdf_path,
-                        as_attachment=True,
-                        download_name=filename,
-                        mimetype='application/pdf'
-                    )
-            except Exception as e:
-                print(f"[WARN] PDF conversion failed: {e}")
+        print(f"[DEBUG] DOCX created: {docx_path}")
         
-        filename = os.path.basename(docx_path)
+        # Convert to PDF dengan robust method
+        safe_no = laporan_data.get('no_permohonan', f"laporan_{laporan_id}").replace('/', '_')
+        prefix = f"Laporan_Insiden_{safe_no}"
+        
+        pdf_path = get_or_create_pdf(docx_path, prefix)
+        
+        if pdf_path and os.path.exists(pdf_path):
+            filename = os.path.basename(pdf_path)
+            response = send_file_with_cache_control(pdf_path, filename, 'application/pdf')
+            if response:
+                return response
+        
+        # FALLBACK: Kirim DOCX jika PDF gagal
+        timestamp = int(time.time() * 1000)
+        unique_id = str(uuid.uuid4())[:8]
+        filename = f"Laporan_Insiden_{safe_no}_{timestamp}_{unique_id}.docx"
+        
         flash('Konversi ke PDF gagal, file DOCX telah didownload', 'info')
         
-        return send_file(
+        response = send_file_with_cache_control(
             docx_path,
-            as_attachment=True,
-            download_name=filename,
-            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            filename,
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         )
+        
+        if response:
+            return response
+        else:
+            return send_file(
+                docx_path,
+                as_attachment=True,
+                download_name=filename,
+                mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            )
         
     except Exception as e:
         print(f"[ERROR] Error generating PDF: {e}")
@@ -2367,8 +2477,14 @@ def view_laporan_insiden(laporan_id):
             if laporan_data.get(field):
                 laporan_data[f'{field}_formatted'] = format_date(str(laporan_data[field]))
         
+        # Tambahkan timestamp untuk URL download
+        pdf_url_with_timestamp = url_for('generate_laporan_insiden_pdf_route', laporan_id=laporan_id) + f"?t={int(time.time())}"
+        docx_url_with_timestamp = url_for('generate_laporan_insiden_docx_route', laporan_id=laporan_id) + f"?t={int(time.time())}"
+        
         return render_template('view_laporan_insiden.html',
                              laporan=laporan_data,
+                             pdf_url_with_timestamp=pdf_url_with_timestamp,
+                             docx_url_with_timestamp=docx_url_with_timestamp,
                              system_name="laporan-insiden")
                              
     except Exception as e:
@@ -2382,7 +2498,7 @@ def view_laporan_insiden(laporan_id):
 def delete_surat_pernyataan(surat_id):
     """Delete Surat Pernyataan"""
     try:
-        surat = SuratPernyataan.query.get(surat_id)
+        surat = db.session.get(SuratPernyataan, surat_id)
         
         if not surat:
             return jsonify({"success": False, "message": "Surat tidak ditemukan"}), 404
@@ -2559,8 +2675,8 @@ def save_laporan_insiden():
             "id": last_id,
             "message": "Laporan berhasil disimpan",
             "data": saved_data,
-            "docx_url": url_for('generate_laporan_insiden_docx_route', laporan_id=last_id),
-            "pdf_url": url_for('generate_laporan_insiden_pdf_route', laporan_id=last_id),
+            "docx_url": url_for('generate_laporan_insiden_docx_route', laporan_id=last_id) + f"?t={int(time.time())}",
+            "pdf_url": url_for('generate_laporan_insiden_pdf_route', laporan_id=last_id) + f"?t={int(time.time())}",
             "redirect": url_for('main_dashboard')
         }), 200
 
@@ -2981,6 +3097,11 @@ if __name__ == '__main__':
     if not os.path.exists(TEMPLATE_LAPORAN_INSIDEN):
         print(f"\n[WARNING] Template laporan insiden tidak ditemukan")
         print(f"          Pastikan file laporan_insiden_template.docx ada di {TEMPLATE_DIR}/")
+    
+    print("\n[IMPORTANT] Untuk konversi PDF yang sempurna:")
+    print("1. Pastikan Microsoft Word terinstall")
+    print("2. Atau install LibreOffice untuk konversi alternatif")
+    print("3. Untuk Windows, install pywin32: pip install pywin32 pypiwin32")
     
     print("\n" + "="*80)
     print("[READY] Server berjalan di http://localhost:5000")
