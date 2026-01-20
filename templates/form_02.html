@@ -26,15 +26,6 @@
             <i class="fas fa-file-signature"></i>
             Surat Pernyataan Menjaga Kerahasiaan Informasi
           </h1>
-
-          <div class="user-info">
-            <span class="user-name">
-              <i class="fas fa-user"></i> Sistem BMKG Wilayah VI
-            </span>
-            <span class="user-role pelapor">
-              <i class="fas fa-briefcase"></i> Form Online
-            </span>
-          </div>
         </div>
       </header>
 
@@ -403,11 +394,6 @@
               <!-- Actions Step 2 -->
               <div class="review-actions">
                 <div class="action-section">
-                  <h4><i class="fas fa-paper-plane"></i> Opsi Penyimpanan</h4>
-                  <p class="action-description">
-                    Pilih salah satu opsi di bawah ini:
-                  </p>
-
                   <div class="submit-options">
                     <!-- Checkbox Persetujuan -->
                     <div class="form-check">
@@ -432,21 +418,14 @@
                         class="btn-secondary"
                         onclick="goToStep(1)"
                       >
-                        <i class="fas fa-edit"></i> Edit Data
+                        <i class="fas fa-arrow-left"></i> Kembali ke Form
                       </button>
 
                       <!-- Tombol Simpan Draft -->
-                      <button
-                        type="button"
-                        class="btn-draft"
-                        onclick="saveDraftAndExit()"
-                      >
-                        <i class="fas fa-save"></i> Simpan Draft
-                      </button>
 
                       <!-- Tombol Submit menggunakan template -->
                       <button type="submit" class="btn-submit" id="submitBtn">
-                        <i class="fas fa-file-word"></i> Buat dari Template
+                        <i class="fas fa-file-word"></i> Submit Surat Pernyataan
                       </button>
                     </div>
 
@@ -457,7 +436,7 @@
                       style="display: none"
                     >
                       <i class="fas fa-spinner fa-spin"></i>
-                      <span>Menyimpan data dan membuat PDF...</span>
+                      <span>Menyimpan data</span>
                     </div>
 
                     <!-- Error display -->

@@ -829,11 +829,11 @@ body {
   flex-wrap: wrap;
 }
 
-/* ===== NOTIFICATION TOAST ===== */
+/* ===== NOTIFICATION TOAST - MODIFIED ===== */
 .notification {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  top: 20px;
+  right: 20px;
   padding: 16px 24px;
   border-radius: var(--radius-lg);
   display: flex;
@@ -841,10 +841,22 @@ body {
   gap: 12px;
   box-shadow: var(--shadow-lg);
   z-index: 4000;
-  animation: slideIn 0.3s ease;
+  animation: slideInFromTop 0.3s ease;
   max-width: 400px;
   background: var(--bmkg-white);
   border-left: 4px solid var(--bmkg-green);
+  display: none;
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .notification.success {
@@ -884,20 +896,21 @@ body {
   font-size: 14px;
   opacity: 0.7;
   transition: opacity 0.3s ease;
+  padding: 0;
+  min-width: 20px;
 }
 
 .notification-close:hover {
   opacity: 1;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+/* Responsive untuk notifikasi */
+@media (max-width: 768px) {
+  .notification {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
   }
 }
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
   <head>
     <meta charset="utf-8" />
@@ -27,10 +27,6 @@
             <i class="fas fa-file-medical"></i>
             Form Laporan Insiden
           </h1>
-          <div class="user-info">
-            <span class="user-name">BMKG Wil. VI Makassar</span>
-            <span class="user-role pelapor">Pelapor Insiden</span>
-          </div>
         </div>
       </header>
 
@@ -91,18 +87,20 @@
                 />
               </div>
 
+              <!-- Ganti input no_revisi dengan select -->
               <div class="form-group">
                 <label class="form-label">
                   <i class="fas fa-redo label-icon"></i>
                   No. Revisi
                 </label>
-                <input
-                  type="text"
-                  id="no_revisi"
-                  name="no_revisi"
-                  class="form-input"
-                  placeholder="Masukkan nomor revisi"
-                />
+                <select name="no_revisi" id="no_revisi" class="form-select">
+                  <option value="00">00</option>
+                  <option value="01">01</option>
+                  <option value="02">02</option>
+                  <option value="03">03</option>
+                  <option value="04">04</option>
+                  <option value="05">05</option>
+                </select>
               </div>
 
               <div class="form-group">
@@ -805,20 +803,6 @@
                 style="display: none"
               >
                 <div class="action-section">
-                  <h4><i class="fas fa-save"></i> Opsi Simpan</h4>
-                  <div class="draft-options">
-                    <button
-                      type="button"
-                      class="btn btn-draft"
-                      id="saveAsDraftBtn"
-                    >
-                      <i class="fas fa-save"></i>
-                      Simpan sebagai Draft
-                    </button>
-                  </div>
-                </div>
-
-                <div class="action-section">
                   <h4><i class="fas fa-paper-plane"></i> Submit Laporan</h4>
                   <div class="submit-options">
                     <div class="form-check">
@@ -834,15 +818,6 @@
                     </div>
 
                     <div class="submit-buttons">
-                      <button
-                        type="button"
-                        class="btn btn-secondary"
-                        id="printReviewBtn"
-                      >
-                        <i class="fas fa-print"></i>
-                        Cetak Review
-                      </button>
-
                       <!-- PERBAIKAN: Ganti type menjadi submit -->
                       <button
                         type="submit"
@@ -973,10 +948,10 @@
 
         // Setup radio button untuk tanggal penyelesaian
         const selesaiRadios = document.querySelectorAll(
-          'input[name="selesai"]'
+          'input[name="selesai"]',
         );
         const tanggalPenyelesaianGroup = document.getElementById(
-          "tanggalPenyelesaianGroup"
+          "tanggalPenyelesaianGroup",
         );
 
         if (selesaiRadios.length > 0 && tanggalPenyelesaianGroup) {
@@ -989,7 +964,7 @@
 
           // Set initial state
           const checkedRadio = document.querySelector(
-            'input[name="selesai"]:checked'
+            'input[name="selesai"]:checked',
           );
           if (checkedRadio) {
             tanggalPenyelesaianGroup.style.display =

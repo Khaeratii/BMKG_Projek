@@ -46,7 +46,18 @@
   width: 40px;
   height: 40px;
   object-fit: contain;
-  filter: brightness(0) invert(1);
+
+  /* Glassmorphism effect */
+  padding: 5px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+
+  /* Shadow glass */
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
 }
 
 .navbar-title {

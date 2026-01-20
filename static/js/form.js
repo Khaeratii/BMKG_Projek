@@ -1,7 +1,7 @@
 /**
  * Form Complete - BMKG
  * JavaScript untuk form lengkap semua tahap (5 Steps)
- * Versi: 2.1 - With Editable Fields
+ * Versi: 2.2 - Simplified (No Draft, No Print)
  */
 
 // ==================== GLOBAL VARIABLES ====================
@@ -12,7 +12,7 @@ const signatures = {
   approval: null,
   implementation: null,
 };
-let currentDraftId = null;
+let lastValidationTime = 0; // Untuk mencegah peringatan terlalu sering
 
 // ==================== INITIALIZATION ====================
 
@@ -23,7 +23,6 @@ document.addEventListener("DOMContentLoaded", function () {
   initializeForm();
   initializeSignatures();
   setupEventListeners();
-  setupDraftManagement();
   setupReviewStep();
 
   // Set initial step
@@ -45,7 +44,7 @@ function initializeForm() {
   // Setup editable fields
   setupEditableFields();
 
-  // Setup form submission - PASTIKAN INI DIPANGGIL
+  // Setup form submission
   setupFormSubmission();
 
   console.log("✅ Form initialization complete");
@@ -188,8 +187,6 @@ function setupEditableFields() {
     }
   });
 }
-
-// ==================== TOAST NOTIFICATION ====================
 
 // ==================== SIGNATURE SYSTEMS ====================
 
@@ -626,645 +623,6 @@ function clearUploadedSignatureByType(type) {
   if (dataInput) dataInput.value = "";
 }
 
-// ==================== DRAFT MANAGEMENT ====================
-
-// ==================== DRAFT MANAGEMENT ====================
-
-// ==================== DRAFT MANAGEMENT ====================
-
-// ==================== DRAFT MANAGEMENT ====================
-
-function setupDraftManagement() {
-  console.log("Setting up draft management...");
-
-  const saveAsDraftBtn = document.getElementById("saveAsDraftBtn");
-  const loadDraftBtn = document.getElementById("loadDraftFromReviewBtn");
-
-  if (saveAsDraftBtn) {
-    saveAsDraftBtn.addEventListener("click", async function (e) {
-      e.preventDefault();
-      console.log("💾 Save as draft button clicked");
-
-      // Validasi step 1 minimal
-      if (currentStep < 1 || !validateStep(1)) {
-        showToast(
-          "⚠️ Harap lengkapi data usulan (Step 1) terlebih dahulu!",
-          "warning",
-        );
-        goToStep(1);
-        return;
-      }
-
-      // Simpan draft langsung
-      await saveDraftDirect();
-    });
-  }
-
-  if (loadDraftBtn) {
-    // HAPUS modal, ganti dengan alert atau langsung load draft terakhir
-    loadDraftBtn.addEventListener("click", () => {
-      console.log("Load draft button clicked");
-      showToast("Fitur muat draft sedang dalam pengembangan", "info");
-      // Atau bisa langsung load draft terakhir
-      // loadLastDraft();
-    });
-  }
-
-  console.log("Draft management setup complete");
-}
-// ==================== SAVE DRAFT DIRECTLY ====================
-
-// ==================== SAVE DRAFT DIRECTLY ====================
-
-async function saveDraftDirect() {
-  console.log("💾 saveDraftDirect called");
-
-  // Validasi minimal step 1
-  if (!validateStep(1)) {
-    showToast(
-      "⚠️ Harap lengkapi data usulan (Step 1) terlebih dahulu!",
-      "warning",
-    );
-    return false;
-  }
-
-  // Kumpulkan data form
-  const formData = collectFormData();
-
-  // Generate nama draft otomatis
-  let draftName = "Draft Usulan Perubahan";
-  const now = new Date();
-  const timestamp = now.toLocaleString("id-ID", {
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  if (formData.no_dokumen) {
-    draftName = `Draft ${formData.no_dokumen} (${timestamp})`;
-  } else if (formData.deskripsi_perubahan) {
-    const desc = formData.deskripsi_perubahan.substring(0, 20);
-    draftName = `Draft: ${desc}... (${timestamp})`;
-  } else {
-    draftName = `Draft ${timestamp}`;
-  }
-
-  const draftNotes = "Draft otomatis disimpan";
-
-  console.log("📊 Saving draft:", draftName);
-
-  // Show loading
-  const saveBtn = document.getElementById("saveAsDraftBtn");
-  if (saveBtn) {
-    const originalText = saveBtn.innerHTML;
-    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-    saveBtn.disabled = true;
-
-    try {
-      const success = await saveDraftToServer(draftName, draftNotes);
-
-      if (success) {
-        console.log("✅ Draft saved successfully");
-        showToast(`✅ Draft berhasil disimpan!`, "success");
-
-        // Update tombol
-        saveBtn.innerHTML = '<i class="fas fa-check"></i> Tersimpan';
-        saveBtn.classList.add("saved");
-
-        // Kembalikan setelah 3 detik
-        setTimeout(() => {
-          saveBtn.innerHTML = originalText;
-          saveBtn.classList.remove("saved");
-          saveBtn.disabled = false;
-        }, 3000);
-
-        return true;
-      } else {
-        throw new Error("Gagal menyimpan draft");
-      }
-    } catch (error) {
-      console.error("❌ Save draft failed:", error);
-      showToast(`❌ Gagal menyimpan draft: ${error.message}`, "error");
-      saveBtn.innerHTML = originalText;
-      saveBtn.disabled = false;
-      return false;
-    }
-  }
-
-  return false;
-}
-// ==================== SERVER DRAFT MANAGEMENT ====================
-
-// ==================== LOAD DRAFT FROM SERVER ====================
-
-async function loadDraftFromServer(draftId) {
-  console.log("📂 loadDraftFromServer called for:", draftId);
-
-  try {
-    const response = await fetch(`/api/load-draft/${draftId}`);
-    console.log("📥 Load draft response status:", response.status);
-
-    const result = await response.json();
-    console.log("📊 Load draft result:", result);
-
-    if (result.success) {
-      const draft = result.draft;
-
-      // Populate form with draft data
-      populateFormWithDraft(draft.form_data);
-
-      // Set current draft ID
-      currentDraftId = draft.draft_id;
-
-      // Update URL with draft ID
-      updateUrlWithDraftId(draftId);
-
-      // Update draft info display
-      updateDraftInfoDisplay();
-
-      showToast(
-        `✅ Draft "${draft.draft_name || "tanpa nama"}" berhasil dimuat!`,
-        "success",
-      );
-
-      return true;
-    } else {
-      throw new Error(result.message || "Gagal memuat draft");
-    }
-  } catch (error) {
-    console.error("❌ Load draft error:", error);
-    showToast(`❌ Gagal memuat draft: ${error.message}`, "error");
-    return false;
-  }
-}
-
-// ==================== DELETE DRAFT FROM SERVER ====================
-
-async function deleteDraftFromServer(draftId) {
-  console.log("deleteDraftFromServer called for:", draftId);
-
-  if (!confirm("Apakah Anda yakin ingin menghapus draft ini dari server?")) {
-    return;
-  }
-
-  try {
-    const response = await fetch(`/api/delete-draft/${draftId}`, {
-      method: "DELETE",
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-      showToast("Draft berhasil dihapus dari server!", "success");
-
-      // If current draft is deleted, clear it
-      if (currentDraftId === draftId) {
-        currentDraftId = null;
-        updateDraftInfoDisplay();
-      }
-
-      // Reload drafts list
-      loadDraftsListFromServer();
-    } else {
-      throw new Error(result.message || "Gagal menghapus draft");
-    }
-  } catch (error) {
-    console.error("Delete draft error:", error);
-    showToast("Gagal menghapus draft: " + error.message, "error");
-  }
-}
-
-// ==================== LOAD DRAFTS LIST FROM SERVER ====================
-
-// ==================== UPDATE DRAFT INFO DISPLAY ====================
-
-function updateDraftInfoDisplay() {
-  console.log("updateDraftInfoDisplay called, currentDraftId:", currentDraftId);
-
-  const draftInfo = document.getElementById("currentDraftInfo");
-  const draftNameDisplay = document.getElementById("draftNameDisplay");
-
-  if (!draftInfo || !draftNameDisplay) {
-    console.log("Draft info elements not found");
-    return;
-  }
-
-  if (currentDraftId) {
-    // Try to get draft name from local storage first
-    const draftData = localStorage.getItem(`draft_${currentDraftId}`);
-    if (draftData) {
-      try {
-        const draft = JSON.parse(draftData);
-        draftNameDisplay.textContent = draft.draft_name || "Draft Tanpa Nama";
-      } catch (e) {
-        draftNameDisplay.textContent = "Draft Aktif";
-      }
-    } else {
-      // Try to get from server via API
-      fetch(`/api/load-draft/${currentDraftId}`)
-        .then((response) => response.json())
-        .then((result) => {
-          if (result.success && result.draft) {
-            draftNameDisplay.textContent =
-              result.draft.draft_name || "Draft Tanpa Nama";
-          } else {
-            draftNameDisplay.textContent = "Draft Aktif";
-          }
-        })
-        .catch(() => {
-          draftNameDisplay.textContent = "Draft Aktif";
-        });
-    }
-
-    draftInfo.style.display = "block";
-    console.log("Draft info displayed:", draftNameDisplay.textContent);
-  } else {
-    draftInfo.style.display = "none";
-    console.log("No draft active, hiding draft info");
-  }
-}
-
-function showDraftModal(tab) {
-  const modal = document.getElementById("draftModal");
-  modal.classList.add("active");
-  document.body.classList.add("modal-open");
-
-  // Activate selected tab
-  document
-    .querySelectorAll(".tab-btn")
-    .forEach((btn) => btn.classList.remove("active"));
-  document
-    .querySelectorAll(".tab-content")
-    .forEach((content) => content.classList.remove("active"));
-
-  document.querySelector(`[data-tab="${tab}"]`).classList.add("active");
-  document.getElementById(`${tab}Tab`).classList.add("active");
-}
-
-// ==================== SAVE DRAFT TO SERVER ====================
-async function saveDraftToServer(draftName = "", draftNotes = "") {
-  // <- BARIS INI SEKITAR 700
-  console.log("💾 saveDraftToServer called with:", { draftName, draftNotes });
-
-  // Jika parameter tidak diberikan, ambil dari form
-  if (!draftName) {
-    draftName =
-      document.getElementById("draftName")?.value?.trim() || "Draft Tanpa Nama";
-  }
-  if (!draftNotes && draftNotes !== "") {
-    draftNotes = document.getElementById("draftNotes")?.value?.trim() || "";
-  }
-
-  if (!validateStep(1)) {
-    showToast(
-      "⚠️ Harap lengkapi data usulan (Step 1) terlebih dahulu!",
-      "warning",
-    );
-    throw new Error("Data usulan tidak lengkap");
-  }
-
-  const formData = collectFormData();
-
-  console.log("📊 Draft data to save:", {
-    draftName: draftName,
-    currentDraftId: currentDraftId,
-    hasSignature: !!formData.signature_data,
-    fieldsCount: Object.keys(formData).filter((k) => formData[k]).length,
-  });
-
-  const draftData = {
-    action: "draft",
-    form_data: formData,
-    draft_id: currentDraftId || null,
-    draft_name: draftName,
-    draft_notes: draftNotes,
-  };
-
-  try {
-    console.log("📤 Sending draft to server...");
-    const response = await fetch("/api/usulan-perubahan/submit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(draftData),
-    });
-
-    console.log("📥 Response status:", response.status);
-
-    if (!response.ok) {
-      throw new Error(`Server error: ${response.status}`);
-    }
-
-    const result = await response.json();
-    console.log("📊 Server response:", result);
-
-    if (result.success) {
-      currentDraftId = result.draft_id;
-
-      // Simpan draft info ke localStorage untuk cache
-      try {
-        localStorage.setItem(
-          `draft_cache_${currentDraftId}`,
-          JSON.stringify({
-            draft_name: draftName,
-            draft_notes: draftNotes,
-            timestamp: new Date().toISOString(),
-          }),
-        );
-      } catch (e) {
-        console.warn("⚠️ Could not cache draft to localStorage:", e);
-      }
-
-      return true;
-    } else {
-      throw new Error(result.message || "Gagal menyimpan draft");
-    }
-  } catch (error) {
-    console.error("❌ Save draft error:", error);
-    throw error; // Re-throw error untuk ditangani di caller
-  }
-}
-
-function loadDraftsList() {
-  const draftsList = document.getElementById("draftsList");
-
-  try {
-    const draftList = JSON.parse(localStorage.getItem("draft_list") || "[]");
-
-    if (draftList.length > 0) {
-      let html = '<div class="drafts-grid">';
-
-      draftList.reverse().forEach((draftId) => {
-        const draftData = localStorage.getItem(`draft_${draftId}`);
-        if (draftData) {
-          try {
-            const draft = JSON.parse(draftData);
-            const formData = draft.form_data || {};
-            const draftName = draft.draft_name || "Draft Tanpa Nama";
-
-            html += `
-                            <div class="draft-card" data-draft-id="${draftId}">
-                                <div class="draft-header">
-                                    <h4>${draftName}</h4>
-                                    <span class="draft-date">${formatDateDisplay(
-                                      draft.timestamp,
-                                    )}</span>
-                                </div>
-                                <div class="draft-body">
-                                    <p><strong>No. Dokumen:</strong> ${
-                                      formData.no_dokumen || "Belum diisi"
-                                    }</p>
-                                    <p><strong>Diminta Oleh:</strong> ${
-                                      formData.diminta_oleh || "Belum diisi"
-                                    }</p>
-                                    <p><strong>Jabatan:</strong> ${
-                                      formData.jabatan || "Belum diisi"
-                                    }</p>
-                                    <p><strong>Deskripsi:</strong> ${
-                                      formData.deskripsi_perubahan
-                                        ? formData.deskripsi_perubahan.substring(
-                                            0,
-                                            100,
-                                          ) + "..."
-                                        : "Belum diisi"
-                                    }</p>
-                                    ${
-                                      draft.draft_notes
-                                        ? `<p><em>${draft.draft_notes}</em></p>`
-                                        : ""
-                                    }
-                                </div>
-                                <div class="draft-actions">
-                                    <button class="btn-sm btn-primary load-draft-btn" data-id="${draftId}">
-                                        <i class="fas fa-folder-open"></i> Muat
-                                    </button>
-                                    <button class="btn-sm btn-danger delete-draft-btn" data-id="${draftId}">
-                                        <i class="fas fa-trash"></i> Hapus
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-          } catch (e) {
-            console.error(`Error parsing draft ${draftId}:`, e);
-          }
-        }
-      });
-
-      html += "</div>";
-      draftsList.innerHTML = html;
-
-      // Add event listeners
-      document.querySelectorAll(".load-draft-btn").forEach((btn) => {
-        btn.addEventListener("click", () => loadDraft(btn.dataset.id));
-      });
-
-      document.querySelectorAll(".delete-draft-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          if (confirm("Apakah Anda yakin ingin menghapus draft ini?")) {
-            deleteDraft(btn.dataset.id);
-          }
-        });
-      });
-    } else {
-      draftsList.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-folder-open"></i>
-                    <p>Belum ada draft tersimpan</p>
-                </div>
-            `;
-    }
-  } catch (e) {
-    console.error("Error loading drafts:", e);
-    draftsList.innerHTML = `
-            <div class="error-state">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Gagal memuat draft</p>
-            </div>
-        `;
-  }
-}
-
-function loadDraft(draftId) {
-  const draftData = localStorage.getItem(`draft_${draftId}`);
-  if (!draftData) {
-    showToast("Draft tidak ditemukan", "error");
-    return;
-  }
-
-  try {
-    const draft = JSON.parse(draftData);
-    const formData = draft.form_data || {};
-
-    // Populate form
-    populateFormWithDraft(formData);
-
-    currentDraftId = draftId;
-    updateDraftInfoDisplay();
-
-    showToast("Draft berhasil dimuat!", "success");
-    document.getElementById("draftModal").classList.remove("active");
-    document.body.classList.remove("modal-open");
-    goToStep(1);
-  } catch (e) {
-    showToast("Gagal memuat draft: " + e.message, "error");
-  }
-}
-
-function deleteDraft(draftId) {
-  try {
-    localStorage.removeItem(`draft_${draftId}`);
-    localStorage.removeItem(`draft_name_${draftId}`);
-
-    let draftList = JSON.parse(localStorage.getItem("draft_list") || "[]");
-    draftList = draftList.filter((id) => id !== draftId);
-    localStorage.setItem("draft_list", JSON.stringify(draftList));
-
-    loadDraftsList();
-
-    if (currentDraftId === draftId) {
-      currentDraftId = null;
-      updateDraftInfoDisplay();
-    }
-
-    showToast("Draft berhasil dihapus!", "success");
-  } catch (e) {
-    showToast("Gagal menghapus draft: " + e.message, "error");
-  }
-}
-
-function populateFormWithDraft(data) {
-  // Helper function to set value
-  function setValue(name, value) {
-    const element = document.querySelector(`[name="${name}"]`);
-    if (element && value !== undefined && value !== null) {
-      if (element.type === "checkbox" || element.type === "radio") {
-        if (Array.isArray(value)) {
-          document.querySelectorAll(`[name="${name}"]`).forEach((cb) => {
-            cb.checked = value.includes(cb.value);
-          });
-        } else {
-          element.checked = element.value === value;
-        }
-      } else {
-        element.value = value;
-      }
-    }
-  }
-
-  // Populate Step 1 (including editable fields)
-  const step1Fields = [
-    "no_dokumen",
-    "revisi",
-    "tgl_efektif",
-    "tanggal",
-    "diminta_oleh",
-    "jabatan",
-    "deskripsi_perubahan",
-    "hasil_dibutuhkan_tgl",
-    "alasan_perubahan",
-  ];
-
-  step1Fields.forEach((field) => setValue(field, data[field]));
-
-  // Handle signature
-  if (data.signature_data) {
-    const signatureData = document.getElementById("signatureData");
-    if (signatureData) {
-      signatureData.value = data.signature_data;
-      signatures.pemohon = data.signature_data;
-    }
-  }
-
-  // Populate Step 2
-  if (data.tipe_perubahan) {
-    const tipePerubahan = Array.isArray(data.tipe_perubahan)
-      ? data.tipe_perubahan
-      : data.tipe_perubahan.split(",");
-    document.querySelectorAll('[name="tipe_perubahan"]').forEach((cb) => {
-      cb.checked = tipePerubahan.includes(cb.value);
-    });
-  }
-
-  const step2Fields = [
-    "prioritas",
-    "dampak_lingkungan",
-    "upaya_diperlukan",
-    "kebutuhan_sumber_daya",
-    "rencana_pengujian",
-    "catatan_evaluator",
-    "tanggal_evaluasi",
-  ];
-  step2Fields.forEach((field) => setValue(field, data[field]));
-
-  // Populate Step 3
-  const step3Fields = [
-    "status_persetujuan",
-    "tanggal_pelaksanaan",
-    "pic_pelaksana",
-    "catatan_persetujuan",
-    "catatan_penolakan",
-    "tanggal_persetujuan",
-  ];
-  step3Fields.forEach((field) => setValue(field, data[field]));
-
-  if (data.signature_approval) {
-    const signatureData2 = document.getElementById("signatureData2");
-    if (signatureData2) {
-      signatureData2.value = data.signature_approval;
-      signatures.approval = data.signature_approval;
-    }
-  }
-
-  // Populate Step 4
-  const step4Fields = [
-    "hasil_tahapan",
-    "hasil_pengujian",
-    "tanggal_rilis",
-    "catatan_implementasi",
-    "tanggal_implementasi",
-  ];
-  step4Fields.forEach((field) => setValue(field, data[field]));
-
-  if (data.signature_implementation) {
-    const signatureData3 = document.getElementById("signatureData3");
-    if (signatureData3) {
-      signatureData3.value = data.signature_implementation;
-      signatures.implementation = data.signature_implementation;
-    }
-  }
-
-  // Trigger approval status change if needed
-  if (data.status_persetujuan) {
-    const radio = document.querySelector(
-      `input[name="status_persetujuan"][value="${data.status_persetujuan}"]`,
-    );
-    if (radio) {
-      radio.checked = true;
-      radio.dispatchEvent(new Event("change"));
-    }
-  }
-
-  // Update character counters
-  setupCharacterCounters();
-}
-
-function updateDraftInfoDisplay() {
-  const draftInfo = document.getElementById("currentDraftInfo");
-  const draftNameDisplay = document.getElementById("draftNameDisplay");
-
-  if (currentDraftId) {
-    const draftName =
-      localStorage.getItem(`draft_name_${currentDraftId}`) ||
-      "Draft Tanpa Nama";
-    if (draftNameDisplay) draftNameDisplay.textContent = draftName;
-    if (draftInfo) draftInfo.style.display = "block";
-  } else if (draftInfo) {
-    draftInfo.style.display = "none";
-  }
-}
-
 // ==================== REVIEW STEP SETUP ====================
 
 function setupReviewStep() {
@@ -1275,11 +633,6 @@ function setupReviewStep() {
     confirmCheckbox.addEventListener("change", () => {
       submitBtn.disabled = !confirmCheckbox.checked;
     });
-  }
-
-  const printBtn = document.getElementById("printReviewBtn");
-  if (printBtn) {
-    printBtn.addEventListener("click", printReview);
   }
 }
 
@@ -1355,14 +708,10 @@ async function handleFormSubmission() {
   const submissionData = {
     action: "submit",
     form_data: formData,
-    draft_id: currentDraftId || null,
-    draft_name: document.getElementById("draftName")?.value || "",
-    draft_notes: document.getElementById("draftNotes")?.value || "",
   };
 
   console.log("📤 Preparing to send data to server...");
   console.log("  - Action:", submissionData.action);
-  console.log("  - Draft ID:", submissionData.draft_id);
   console.log("  - Field count:", Object.keys(formData).length);
 
   // Show loading
@@ -1381,23 +730,9 @@ async function handleFormSubmission() {
     });
 
     console.log("📥 Response status:", response.status);
-    console.log(
-      "📥 Response headers:",
-      Object.fromEntries(response.headers.entries()),
-    );
 
-    // Try to get response text for debugging
-    const responseText = await response.text();
-    console.log("📥 Response text:", responseText.substring(0, 500));
-
-    let result;
-    try {
-      result = JSON.parse(responseText);
-      console.log("📊 Server response parsed:", result);
-    } catch (parseError) {
-      console.error("❌ Failed to parse JSON response:", parseError);
-      throw new Error("Server returned invalid JSON");
-    }
+    const result = await response.json();
+    console.log("📊 Server response:", result);
 
     if (!response.ok) {
       throw new Error(result.message || `Server error: ${response.status}`);
@@ -1409,33 +744,24 @@ async function handleFormSubmission() {
         "success",
       );
 
-      // Clear current draft
-      currentDraftId = null;
-
-      // PERUBAHAN: Redirect ke main_dashboard setelah berhasil
+      // Redirect ke main_dashboard setelah berhasil
       setTimeout(() => {
-        // Priority: Use redirect from server, otherwise go to main_dashboard
         if (result.redirect) {
-          console.log("↪️ Redirecting to:", result.redirect);
           window.location.href = result.redirect;
         } else {
-          console.log("↪️ Redirecting to main dashboard");
-          window.location.href = "/dashboard"; // <-- INI DIUBAH
+          window.location.href = "/dashboard";
         }
-      }, 1500); // <-- Dikurangi dari 2000 menjadi 1500
+      }, 1500);
     } else {
       throw new Error(result.message || "Gagal mengirim usulan");
     }
   } catch (error) {
     console.error("❌ Submission error:", error);
-    console.error("❌ Error stack:", error.stack);
 
     let errorMessage = "Gagal mengirim usulan: ";
     if (error.message.includes("Network")) {
       errorMessage +=
         "Koneksi jaringan bermasalah. Periksa koneksi internet Anda.";
-    } else if (error.message.includes("JSON")) {
-      errorMessage += "Respons server tidak valid.";
     } else {
       errorMessage += error.message;
     }
@@ -1445,6 +771,7 @@ async function handleFormSubmission() {
     submitBtn.disabled = false;
   }
 }
+
 // ==================== STEP NAVIGATION ====================
 
 function goToStep(stepNumber) {
@@ -1453,10 +780,6 @@ function goToStep(stepNumber) {
   // Validasi sebelum pindah ke step 5
   if (stepNumber === 5) {
     if (!validateCurrentStep()) {
-      showToast(
-        "Harap lengkapi data pada tahap implementasi terlebih dahulu",
-        "warning",
-      );
       return;
     }
     generateReviewContent();
@@ -1465,10 +788,6 @@ function goToStep(stepNumber) {
   // Validasi sebelum moving forward untuk step lain
   if (stepNumber > currentStep && stepNumber < 5) {
     if (!validateCurrentStep()) {
-      showToast(
-        "Harap lengkapi data pada tahap ini terlebih dahulu",
-        "warning",
-      );
       return;
     }
   }
@@ -1512,7 +831,6 @@ function updateProgressSteps(activeStep) {
 
 function nextStep() {
   if (!validateCurrentStep()) {
-    showToast("Harap lengkapi data pada tahap ini terlebih dahulu", "warning");
     return;
   }
   if (currentStep < totalSteps) goToStep(currentStep + 1);
@@ -1544,60 +862,6 @@ function setupEventListeners() {
       if (stepNumber <= currentStep) goToStep(stepNumber);
     });
   });
-
-  // Form submission
-  const form = document.getElementById("completeForm");
-  if (form) {
-    form.addEventListener("submit", function (e) {
-      console.log("Form submit triggered from step", currentStep);
-
-      if (currentStep !== 5) {
-        e.preventDefault();
-        showToast(
-          "Harap selesaikan review di step 5 sebelum submit",
-          "warning",
-        );
-        goToStep(5);
-        return false;
-      }
-
-      // Collect all signature data
-      collectAllSignatureData();
-
-      if (!validateAllSteps()) {
-        e.preventDefault();
-        showToast(
-          "Harap lengkapi semua data dengan benar sebelum submit!",
-          "error",
-        );
-        for (let i = 1; i <= totalSteps; i++) {
-          if (!validateStep(i)) {
-            goToStep(i);
-            break;
-          }
-        }
-        return false;
-      }
-
-      if (!document.getElementById("confirmReview").checked) {
-        e.preventDefault();
-        showToast("Harap centang konfirmasi review sebelum submit", "warning");
-        return false;
-      }
-
-      if (
-        !confirm(
-          "Apakah Anda yakin ingin mengirim usulan perubahan ini?\nData yang sudah dikirim tidak dapat diedit.",
-        )
-      ) {
-        e.preventDefault();
-        return false;
-      }
-
-      console.log("Form submitted successfully");
-      showToast("Usulan perubahan berhasil dikirim!", "success");
-    });
-  }
 }
 
 function collectAllSignatureData() {
@@ -1625,9 +889,19 @@ function validateStep(stepNumber) {
     2: validateStep2,
     3: validateStep3,
     4: validateStep4,
-    5: validateStep5,
   };
   return validators[stepNumber] ? validators[stepNumber]() : true;
+}
+
+// Helper untuk mencegah peringatan terlalu sering
+function canShowWarning() {
+  const now = Date.now();
+  if (now - lastValidationTime > 2000) {
+    // Hanya tampilkan peringatan setiap 2 detik
+    lastValidationTime = now;
+    return true;
+  }
+  return false;
 }
 
 function validateStep1() {
@@ -1641,6 +915,8 @@ function validateStep1() {
     { name: "deskripsi_perubahan", label: "Deskripsi Perubahan" },
   ];
 
+  let firstErrorField = null;
+
   // Validate critical fields
   criticalFields.forEach(({ name, label }) => {
     const element = document.querySelector(`[name="${name}"]`);
@@ -1648,46 +924,12 @@ function validateStep1() {
       if (!element.value || element.value.trim() === "") {
         markError(element, `${label} wajib diisi`);
         isValid = false;
+        if (!firstErrorField) firstErrorField = element;
       } else {
         clearError(element);
       }
     }
   });
-
-  // Field opsional - hanya warning jika kosong
-  const optionalFields = [
-    { name: "tgl_efektif", label: "Tanggal Efektif" },
-    { name: "hasil_dibutuhkan_tgl", label: "Hasil Dibutuhkan Tanggal" },
-    { name: "alasan_perubahan", label: "Alasan Perubahan" },
-  ];
-
-  optionalFields.forEach(({ name, label }) => {
-    const element = document.querySelector(`[name="${name}"]`);
-    if (element && (!element.value || element.value.trim() === "")) {
-      console.log(`⚠️ ${label} kosong - diperbolehkan`);
-      clearError(element); // Tidak error, hanya kosong
-    }
-  });
-
-  // Validate signature - opsional untuk draft, wajib untuk submit
-  const signatureData = document.getElementById("signatureData");
-  const isReviewStep = currentStep === 5;
-
-  if (
-    isReviewStep &&
-    (!signatureData ||
-      !signatureData.value ||
-      !signatureData.value.startsWith("data:image"))
-  ) {
-    showToast("Tanda tangan pemohon wajib diisi!", "error");
-    isValid = false;
-  } else if (
-    signatureData &&
-    signatureData.value &&
-    signatureData.value.startsWith("data:image")
-  ) {
-    signatures.pemohon = signatureData.value;
-  }
 
   // Validate dates only if they exist
   const tanggal = document.querySelector('[name="tanggal"]');
@@ -1719,142 +961,43 @@ function validateStep1() {
     }
   }
 
+  // Only show toast if validation failed and we can show warning
+  if (!isValid && canShowWarning()) {
+    showToast("Harap lengkapi data pada tahap ini terlebih dahulu", "warning");
+
+    // Scroll to first error field
+    if (firstErrorField) {
+      firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => {
+        firstErrorField.focus();
+      }, 300);
+    }
+  }
+
   console.log(`✅ Step 1 validation: ${isValid ? "PASS" : "FAIL"}`);
   return isValid;
 }
 
-// ===============================
-// DEBUG UTILITIES
-// ===============================
-function debugFormState() {
-  console.log("🔍 === DEBUG FORM STATE ===");
-  console.log("Current step:", state.currentStep);
-
-  // Check localStorage
-  const keys = Object.keys(localStorage);
-  const laporanKeys = keys.filter((k) => k.includes("laporan"));
-  console.log("LocalStorage keys with 'laporan':", laporanKeys);
-
-  laporanKeys.forEach((key) => {
-    try {
-      const data = JSON.parse(localStorage.getItem(key));
-      console.log(`Key: ${key}, Type: ${typeof data}, Has data: ${!!data}`);
-    } catch (e) {
-      console.log(`Key: ${key}, Error parsing`);
-    }
-  });
-
-  // Check form data
-  const formData = collectFormData();
-  console.log("Form data collected:", {
-    fieldCount: Object.keys(formData).length,
-    hasTTD: {
-      pelapor: !!formData.ttd_pelapor,
-      atasan: !!formData.ttd_atasan,
-      smki: !!formData.ttd_smki,
-      ketua: !!formData.ttd_ketua,
-      smki2: !!formData.ttd_smki2,
-    },
-  });
-}
-
-// Panggil debug saat pindah ke step 3
-function navigateToStep(stepNumber) {
-  console.log(`🔄 [DEBUG] navigateToStep(${stepNumber}) called`);
-
-  if (stepNumber < 1 || stepNumber > state.totalSteps) return;
-
-  console.log(`🔄 Navigating to step ${stepNumber}`);
-
-  // Update UI
-  showStep(stepNumber);
-
-  // Update state
-  state.currentStep = stepNumber;
-
-  // Update progress bar
-  updateProgressSteps(stepNumber);
-
-  // Scroll to top
-  window.scrollTo({ top: 0, behavior: "smooth" });
-
-  // Generate review if step 3
-  if (stepNumber === 3) {
-    console.log("🔄 [DEBUG] Step 3 detected, calling generateReview()");
-
-    // Debug current state
-    debugFormState();
-
-    // Simpan data ke localStorage sebelum generate review
-    try {
-      const formData = collectFormData();
-      localStorage.setItem(
-        "laporanReviewData",
-        JSON.stringify({
-          data: formData,
-          timestamp: new Date().toISOString(),
-          step: 3,
-        }),
-      );
-      console.log("✅ [DEBUG] Saved data to localStorage for review");
-    } catch (e) {
-      console.error("❌ [DEBUG] Failed to save to localStorage:", e);
-    }
-
-    setTimeout(generateReview, 500);
-  }
-}
-
-function debugFormData() {
-  const formData = collectFormData();
-
-  console.group("🔍 FORM DATA DEBUG");
-  console.log("Total fields:", Object.keys(formData).length);
-
-  // Check each field
-  const fieldsToCheck = [
-    "no_dokumen",
-    "revisi",
-    "tgl_efektif",
-    "tanggal",
-    "diminta_oleh",
-    "jabatan",
-    "deskripsi_perubahan",
-    "hasil_dibutuhkan_tgl",
-    "alasan_perubahan",
-    "tipe_perubahan",
-    "prioritas",
-    "status_persetujuan",
-    "hasil_tahapan",
-  ];
-
-  fieldsToCheck.forEach((field) => {
-    const value = formData[field];
-    console.log(
-      `  ${field}:`,
-      value
-        ? typeof value === "string"
-          ? value.substring(0, 50) + "..."
-          : value
-        : "❌ MISSING",
-    );
-  });
-
-  console.groupEnd();
-
-  return formData;
-}
-
 function validateStep2() {
   let isValid = true;
+  let firstErrorField = null;
 
   // Check at least one change type
   const changeTypes = document.querySelectorAll(
     'input[name="tipe_perubahan"]:checked',
   );
   if (changeTypes.length === 0) {
-    showToast("Pilih minimal satu tipe perubahan", "error");
-    isValid = false;
+    const checkboxes = document.querySelectorAll(
+      'input[name="tipe_perubahan"]',
+    );
+    if (checkboxes.length > 0) {
+      markError(
+        checkboxes[0].closest(".checkbox-group"),
+        "Pilih minimal satu tipe perubahan",
+      );
+      isValid = false;
+      firstErrorField = checkboxes[0];
+    }
   }
 
   // Validate required fields
@@ -1872,32 +1015,66 @@ function validateStep2() {
         `input[name="${name}"]:checked`,
       );
       if (!radioSelected) {
-        showToast(`${label} wajib dipilih`, "error");
-        isValid = false;
+        const radios = document.querySelectorAll(`input[name="${name}"]`);
+        if (radios.length > 0) {
+          markError(
+            radios[0].closest(".radio-group"),
+            `${label} wajib dipilih`,
+          );
+          isValid = false;
+          if (!firstErrorField) firstErrorField = radios[0];
+        }
       }
     } else {
       const element = document.querySelector(`[name="${name}"]`);
       if (element && (!element.value || element.value.trim() === "")) {
         markError(element, `${label} wajib diisi`);
         isValid = false;
+        if (!firstErrorField) firstErrorField = element;
       } else if (element) {
         clearError(element);
       }
     }
   });
 
+  // Only show toast if validation failed and we can show warning
+  if (!isValid && canShowWarning()) {
+    showToast("Harap lengkapi data pada tahap ini terlebih dahulu", "warning");
+
+    // Scroll to first error field
+    if (firstErrorField) {
+      firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => {
+        if (firstErrorField.type !== "radio") {
+          firstErrorField.focus();
+        }
+      }, 300);
+    }
+  }
+
   return isValid;
 }
 
 function validateStep3() {
   let isValid = true;
+  let firstErrorField = null;
+
   const approvalStatus = document.querySelector(
     'input[name="status_persetujuan"]:checked',
   );
 
   if (!approvalStatus) {
-    showToast("Pilih status persetujuan (Disetujui/Ditolak)", "error");
-    isValid = false;
+    const radios = document.querySelectorAll(
+      'input[name="status_persetujuan"]',
+    );
+    if (radios.length > 0) {
+      markError(
+        radios[0].closest(".radio-group"),
+        "Pilih status persetujuan (Disetujui/Ditolak)",
+      );
+      isValid = false;
+      firstErrorField = radios[0];
+    }
   } else {
     if (approvalStatus.value === "disetujui") {
       const requiredFields = [
@@ -1910,6 +1087,7 @@ function validateStep3() {
         if (element && (!element.value || element.value.trim() === "")) {
           markError(element, `${label} wajib diisi`);
           isValid = false;
+          if (!firstErrorField) firstErrorField = element;
         } else if (element) {
           clearError(element);
         }
@@ -1929,6 +1107,7 @@ function validateStep3() {
             "Tanggal pelaksanaan tidak boleh di masa lalu",
           );
           isValid = false;
+          if (!firstErrorField) firstErrorField = tanggalPelaksanaan;
         }
       }
     } else {
@@ -1941,6 +1120,7 @@ function validateStep3() {
       ) {
         markError(catatanElement, "Alasan penolakan wajib diisi");
         isValid = false;
+        if (!firstErrorField) firstErrorField = catatanElement;
       } else if (catatanElement) {
         clearError(catatanElement);
       }
@@ -1954,10 +1134,33 @@ function validateStep3() {
     !signatureData2.value ||
     !signatureData2.value.startsWith("data:image")
   ) {
-    showToast("Tanda tangan pemberi persetujuan wajib diisi!", "error");
-    isValid = false;
+    const signatureSection = document.querySelector(
+      "#step3 .signature-section",
+    );
+    if (signatureSection) {
+      markError(
+        signatureSection,
+        "Tanda tangan pemberi persetujuan wajib diisi!",
+      );
+      isValid = false;
+    }
   } else {
     signatures.approval = signatureData2.value;
+  }
+
+  // Only show toast if validation failed and we can show warning
+  if (!isValid && canShowWarning()) {
+    showToast("Harap lengkapi data pada tahap ini terlebih dahulu", "warning");
+
+    // Scroll to first error field
+    if (firstErrorField) {
+      firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => {
+        if (firstErrorField.tagName !== "DIV") {
+          firstErrorField.focus();
+        }
+      }, 300);
+    }
   }
 
   return isValid;
@@ -1965,6 +1168,8 @@ function validateStep3() {
 
 function validateStep4() {
   let isValid = true;
+  let firstErrorField = null;
+
   const requiredFields = [
     { name: "hasil_tahapan", label: "Hasil Tahapan Perubahan" },
     { name: "hasil_pengujian", label: "Hasil pengujian Implementasi" },
@@ -1976,6 +1181,7 @@ function validateStep4() {
     if (element && (!element.value || element.value.trim() === "")) {
       markError(element, `${label} wajib diisi`);
       isValid = false;
+      if (!firstErrorField) firstErrorField = element;
     } else if (element) {
       clearError(element);
     }
@@ -1990,6 +1196,7 @@ function validateStep4() {
     if (date < today) {
       markError(tanggalRilis, "Tanggal rilis tidak boleh di masa lalu");
       isValid = false;
+      if (!firstErrorField) firstErrorField = tanggalRilis;
     }
   }
 
@@ -2000,32 +1207,31 @@ function validateStep4() {
     !signatureData3.value ||
     !signatureData3.value.startsWith("data:image")
   ) {
-    showToast("Tanda tangan pelaksana wajib diisi!", "error");
-    isValid = false;
+    const signatureSection = document.querySelector(
+      "#step4 .signature-section",
+    );
+    if (signatureSection) {
+      markError(signatureSection, "Tanda tangan pelaksana wajib diisi!");
+      isValid = false;
+    }
   } else {
     signatures.implementation = signatureData3.value;
   }
 
-  return isValid;
-}
+  // Only show toast if validation failed and we can show warning
+  if (!isValid && canShowWarning()) {
+    showToast("Harap lengkapi data pada tahap ini terlebih dahulu", "warning");
 
-function validateStep5() {
-  const confirmCheckbox = document.getElementById("confirmReview");
-  if (!confirmCheckbox || !confirmCheckbox.checked) {
-    showToast("Harap centang konfirmasi review sebelum submit", "warning");
-    return false;
-  }
-  return true;
-}
-
-function validateAllSteps() {
-  for (let i = 1; i <= totalSteps; i++) {
-    if (!validateStep(i)) {
-      console.log(`Validation failed at step ${i}`);
-      return false;
+    // Scroll to first error field
+    if (firstErrorField) {
+      firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => {
+        firstErrorField.focus();
+      }, 300);
     }
   }
-  return true;
+
+  return isValid;
 }
 
 function markError(element, message) {
@@ -2046,153 +1252,6 @@ function clearError(element) {
 }
 
 // ==================== REVIEW CONTENT ====================
-// ===============================
-// GENERATE REVIEW (DIPERBAIKI DENGAN DEBUG)
-// ===============================
-function generateReview() {
-  console.log("🔍 [DEBUG] generateReview() called");
-
-  const reviewLoading = document.getElementById("reviewLoading");
-  const reviewContent = document.getElementById("reviewContent");
-  const reviewActions = document.getElementById("reviewActions");
-
-  // Debug: Cek apakah element ada
-  console.log("🔍 [DEBUG] Elements found:", {
-    reviewLoading: !!reviewLoading,
-    reviewContent: !!reviewContent,
-    reviewActions: !!reviewActions,
-  });
-
-  if (!reviewContent) {
-    console.error("❌ [ERROR] reviewContent element not found!");
-    alert("Error: Review content element not found. Please refresh page.");
-    return;
-  }
-
-  // Show loading
-  if (reviewLoading) reviewLoading.style.display = "flex";
-  if (reviewContent) reviewContent.style.display = "none";
-  if (reviewActions) reviewActions.style.display = "none";
-
-  setTimeout(() => {
-    try {
-      console.log("🔍 [DEBUG] Attempting to generate review...");
-
-      // Coba ambil data dari localStorage
-      const reviewData = localStorage.getItem("laporanReviewData");
-      const laporanDraft = localStorage.getItem("laporanDraft");
-      const formDataSession = sessionStorage.getItem("formDataSession");
-
-      console.log("🔍 [DEBUG] Data sources:", {
-        reviewData: reviewData ? "Found" : "Not found",
-        laporanDraft: laporanDraft ? "Found" : "Not found",
-        formDataSession: formDataSession ? "Found" : "Not found",
-      });
-
-      let formData = null;
-
-      // Priority 1: Review data dari localStorage
-      if (reviewData) {
-        try {
-          const parsed = JSON.parse(reviewData);
-          formData = parsed.data;
-          console.log("✅ [DEBUG] Using data from laporanReviewData");
-        } catch (e) {
-          console.error("❌ [ERROR] Failed to parse reviewData:", e);
-        }
-      }
-
-      // Priority 2: Draft data
-      if (!formData && laporanDraft) {
-        try {
-          const parsed = JSON.parse(laporanDraft);
-          formData = parsed.data;
-          console.log("✅ [DEBUG] Using data from laporanDraft");
-        } catch (e) {
-          console.error("❌ [ERROR] Failed to parse laporanDraft:", e);
-        }
-      }
-
-      // Priority 3: Collect langsung dari form
-      if (!formData) {
-        console.log("ℹ️ [DEBUG] Collecting fresh data from form...");
-        formData = collectFormData();
-        console.log("✅ [DEBUG] Using fresh form data");
-      }
-
-      if (!formData) {
-        throw new Error("No form data available for review");
-      }
-
-      // Debug: log data yang akan ditampilkan
-      console.log("📊 [DEBUG] Form data to display:", {
-        no_dok: formData.no_dok,
-        nama_pelapor: formData.nama_pelapor,
-        tanggal_kejadian: formData.tanggal_kejadian,
-        deskripsi_length: formData.deskripsi_insiden
-          ? formData.deskripsi_insiden.length
-          : 0,
-        ttd_count: Object.keys(formData).filter((k) => k.startsWith("ttd_"))
-          .length,
-        ttd_status: {
-          pelapor: formData.ttd_pelapor ? "✓" : "✗",
-          atasan: formData.ttd_atasan ? "✓" : "✗",
-          smki: formData.ttd_smki ? "✓" : "✗",
-          ketua: formData.ttd_ketua ? "✓" : "✗",
-          smki2: formData.ttd_smki2 ? "✓" : "✗",
-        },
-      });
-
-      // Update review fields
-      console.log("🔄 [DEBUG] Updating review fields...");
-      updateReviewFields(formData);
-
-      // Update signature status
-      console.log("🔏 [DEBUG] Updating signature status...");
-      updateSignatureStatus(formData);
-
-      // Show content
-      console.log("👁️ [DEBUG] Showing review content...");
-      if (reviewLoading) reviewLoading.style.display = "none";
-      if (reviewContent) reviewContent.style.display = "block";
-      if (reviewActions) reviewActions.style.display = "block";
-
-      // Setup review actions
-      console.log("🔧 [DEBUG] Setting up review actions...");
-      setupReviewActions(formData);
-
-      console.log("✅ [DEBUG] Review generated successfully");
-    } catch (error) {
-      console.error("❌ [ERROR] Error generating review:", error);
-      console.error("❌ [ERROR] Stack trace:", error.stack);
-
-      if (reviewLoading) reviewLoading.style.display = "none";
-
-      // Show error in review area
-      if (reviewContent) {
-        reviewContent.innerHTML = `
-                    <div class="review-error" style="text-align: center; padding: 40px; color: #dc3545;">
-                        <i class="fas fa-exclamation-triangle fa-3x"></i>
-                        <h3>Error Loading Review</h3>
-                        <p><strong>Error:</strong> ${error.message}</p>
-                        <p style="font-size: 14px; margin-top: 10px;">
-                            Please check browser console for details.
-                        </p>
-                        <div style="margin-top: 20px;">
-                            <button class="btn btn-secondary" onclick="navigateToStep(1)" style="margin-right: 10px;">
-                                <i class="fas fa-redo"></i> Back to Form
-                            </button>
-                            <button class="btn btn-primary" onclick="location.reload()">
-                                <i class="fas fa-sync-alt"></i> Refresh Page
-                            </button>
-                        </div>
-                    </div>
-                `;
-        reviewContent.style.display = "block";
-      }
-    }
-  }, 1000); // Increased timeout for debugging
-}
 
 function generateReviewContent() {
   const reviewLoading = document.getElementById("reviewLoading");
@@ -2209,7 +1268,6 @@ function generateReviewContent() {
     reviewLoading.style.display = "none";
     reviewContent.style.display = "block";
     reviewActions.style.display = "block";
-    updateDraftInfoDisplay();
   }, 500);
 }
 
@@ -2450,7 +1508,6 @@ function createTableRows(data) {
 
 // ==================== UTILITY FUNCTIONS ====================
 
-// Di dalam collectFormData() di form.js, tambahkan:
 function collectFormData() {
   console.log("📝 collectFormData called");
 
@@ -2489,49 +1546,20 @@ function collectFormData() {
 
   // Debug: Log all collected data
   console.log("📊 Form data collected:");
-  console.log("  - Basic Fields:");
-  console.log(`    • no_dokumen: ${data.no_dokumen || "MISSING"}`);
-  console.log(`    • diminta_oleh: ${data.diminta_oleh || "MISSING"}`);
-  console.log(`    • jabatan: ${data.jabatan || "MISSING"}`);
+  console.log(`  • no_dokumen: ${data.no_dokumen || "MISSING"}`);
+  console.log(`  • diminta_oleh: ${data.diminta_oleh || "MISSING"}`);
+  console.log(`  • jabatan: ${data.jabatan || "MISSING"}`);
   console.log(
-    `    • deskripsi_perubahan: ${
+    `  • deskripsi_perubahan: ${
       data.deskripsi_perubahan
         ? data.deskripsi_perubahan.substring(0, 30) + "..."
         : "MISSING"
     }`,
   );
+  console.log(`  • pemohon_signature: ${data.signature_data ? "✓" : "✗"}`);
+  console.log(`  • approval_signature: ${data.signature_approval ? "✓" : "✗"}`);
   console.log(
-    `    • alasan_perubahan: ${
-      data.alasan_perubahan
-        ? data.alasan_perubahan.substring(0, 30) + "..."
-        : "MISSING"
-    }`,
-  );
-
-  if (data.tipe_perubahan) {
-    console.log(`  - Evaluation Fields:`);
-    console.log(`    • tipe_perubahan: ${data.tipe_perubahan}`);
-    console.log(`    • prioritas: ${data.prioritas || "MISSING"}`);
-  }
-
-  if (data.status_persetujuan) {
-    console.log(`  - Approval Fields:`);
-    console.log(`    • status_persetujuan: ${data.status_persetujuan}`);
-    console.log(`    • pic_pelaksana: ${data.pic_pelaksana || "MISSING"}`);
-  }
-
-  if (data.hasil_tahapan) {
-    console.log(`  - Implementation Fields:`);
-    console.log(
-      `    • hasil_tahapan: ${data.hasil_tahapan.substring(0, 30) + "..."}`,
-    );
-  }
-
-  console.log(`  - Signatures:`);
-  console.log(`    • pemohon: ${data.signature_data ? "✓" : "✗"}`);
-  console.log(`    • approval: ${data.signature_approval ? "✓" : "✗"}`);
-  console.log(
-    `    • implementation: ${data.signature_implementation ? "✓" : "✗"}`,
+    `  • implementation_signature: ${data.signature_implementation ? "✓" : "✗"}`,
   );
 
   return data;
@@ -2551,189 +1579,8 @@ function formatDateDisplay(dateStr) {
   }
 }
 
-function printReview() {
-  const printWindow = window.open("", "_blank");
-  const reviewContent = document.getElementById("reviewContent").innerHTML;
-
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Review Usulan Perubahan</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          h3 { color: #1e3c72; }
-          .review-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-          .review-table td, .review-table th { border: 1px solid #ddd; padding: 8px; }
-          .review-table tr:nth-child(even) { background-color: #f9f9f9; }
-          .status-success { color: green; font-weight: bold; }
-          .status-error { color: red; font-weight: bold; }
-          .highlight { color: #1e3c72; font-weight: bold; }
-          .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-          .summary-item { display: flex; justify-content: space-between; padding: 5px 0; }
-          @media print {
-            body { margin: 0; padding: 10px; }
-            .no-print { display: none; }
-          }
-        </style>
-      </head>
-      <body>
-        <h2><i class="fas fa-file-alt"></i> Review Usulan Perubahan</h2>
-        <p>Dicetak pada: ${new Date().toLocaleString("id-ID")}</p>
-        ${reviewContent}
-        <div class="no-print" style="margin-top: 20px;">
-          <button onclick="window.print()">Cetak Dokumen</button>
-          <button onclick="window.close()">Tutup</button>
-        </div>
-        <script>
-          setTimeout(() => window.print(), 500);
-        </script>
-      </body>
-    </html>
-  `);
-  printWindow.document.close();
-}
-
 // ==================== GLOBAL EXPORTS ====================
 
 window.goToStep = goToStep;
 window.nextStep = nextStep;
 window.prevStep = prevStep;
-// ==================== MODAL HELPER FUNCTIONS ====================
-
-function showDraftModal(tab = "load") {
-  console.log(`📋 Showing draft modal with tab: ${tab}`);
-
-  const modal = document.getElementById("draftModal");
-  if (!modal) {
-    console.error("❌ Draft modal not found!");
-    return;
-  }
-
-  // Show modal
-  modal.classList.add("active");
-  document.body.classList.add("modal-open");
-
-  // Switch to requested tab
-  const tabBtn = document.querySelector(`[data-tab="${tab}"]`);
-  if (tabBtn) {
-    // Remove active class from all tabs
-    document
-      .querySelectorAll(".tab-btn")
-      .forEach((t) => t.classList.remove("active"));
-    document
-      .querySelectorAll(".tab-content")
-      .forEach((c) => c.classList.remove("active"));
-
-    // Add active class to selected tab
-    tabBtn.classList.add("active");
-    document.getElementById(`${tab}Tab`).classList.add("active");
-
-    // Load drafts if load tab
-    if (tab === "load") {
-      setTimeout(() => {
-        loadDraftsListFromServer();
-      }, 100);
-    }
-  }
-
-  console.log("✅ Draft modal shown");
-}
-
-// ==================== URL PARAMETER MANAGEMENT ====================
-
-function updateUrlWithDraftId(draftId) {
-  if (draftId) {
-    const url = new URL(window.location);
-    url.searchParams.set("draft_id", draftId);
-    window.history.replaceState({}, "", url);
-  } else {
-    // Remove draft_id from URL
-    const url = new URL(window.location);
-    url.searchParams.delete("draft_id");
-    window.history.replaceState({}, "", url);
-  }
-}
-// ==================== EDIT MODE SUPPORT ====================
-
-function initializeFormForEditMode() {
-  console.log("📝 Initializing form for edit mode");
-
-  // Load existing signature data jika ada
-  const signatureDataInput = document.getElementById("signatureData");
-  if (signatureDataInput && signatureDataInput.value) {
-    try {
-      // Jika ada base64 signature, load ke canvas
-      const canvas = document.getElementById("signatureCanvas");
-      if (canvas && canvas.loadSignatureFromData) {
-        canvas.loadSignatureFromData(signatureDataInput.value);
-      }
-    } catch (error) {
-      console.error("Error loading signature:", error);
-    }
-  }
-
-  // Setup edit mode validation (lebih ringan)
-  setupEditModeValidation();
-
-  // Update button texts
-  const finalSubmitBtn = document.getElementById("finalSubmitBtn");
-  if (finalSubmitBtn) {
-    finalSubmitBtn.innerHTML = '<i class="fas fa-save"></i> Update Draft';
-  }
-
-  // Skip draft modal for edit mode
-  window.showDraftModal = function () {
-    showToast(
-      "Gunakan tombol Update di Step 5 untuk menyimpan perubahan",
-      "info",
-    );
-  };
-}
-
-function setupEditModeValidation() {
-  // Override validasi untuk edit mode
-  window.validateAllSteps = function () {
-    // Hanya validasi step 1 wajib untuk edit mode
-    return validateStep(1);
-  };
-
-  // Kurangi requirement untuk signature di edit mode
-  const originalValidateStep1 = window.validateStep1;
-  window.validateStep1 = function () {
-    let isValid = originalValidateStep1();
-
-    // Untuk edit mode, signature tidak wajib (bisa menggunakan yang lama)
-    const isEditMode = document.body.classList.contains("edit-mode");
-    if (isEditMode) {
-      const signatureData = document.getElementById("signatureData");
-      if (!signatureData || !signatureData.value) {
-        // Tidak error jika signature kosong di edit mode
-        console.log("Signature optional in edit mode");
-      }
-    }
-
-    return isValid;
-  };
-}
-
-// Tambahkan di DOMContentLoaded
-document.addEventListener("DOMContentLoaded", function () {
-  // Cek apakah ini edit mode
-  const isEditMode = document.body.classList.contains("edit-mode");
-
-  if (isEditMode) {
-    console.log("🔄 Running in EDIT MODE");
-    initializeFormForEditMode();
-  } else {
-    console.log("🆕 Running in CREATE MODE");
-    initializeForm();
-  }
-
-  // Common initialization
-  initializeSignatures();
-  setupEventListeners();
-  setupReviewStep();
-
-  // Set initial step
-  showStep(1);
-});

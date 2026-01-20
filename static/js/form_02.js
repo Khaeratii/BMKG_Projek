@@ -1,6 +1,6 @@
 /* ================================================
    FORM SCRIPT - SURAT PERNYATAAN BMKG
-   VERSION: 4.0 - NO DRAFT POPUP, AUTO REDIRECT
+   VERSION: 5.0 - SIMPLIFIED, NO DRAFT, BETTER NOTIFICATIONS
    ================================================ */
 
 // Global variables
@@ -11,45 +11,20 @@ let drawing = false;
 let lastX = 0;
 let lastY = 0;
 let formSubmitted = false;
+let lastNotificationTime = 0;
 
 // Initialize when page loads
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("🚀 DOM Content Loaded - Form Surat Pernyataan v4.0");
+  console.log("🚀 DOM Content Loaded - Form Surat Pernyataan v5.0");
 
-  // 1. CLEAR SEMUA DRAFT OTOMATIS - TIDAK ADA POPUP
-  clearAllDrafts();
-
-  // 2. Setup dasar
+  // Setup dasar
   initSignaturePad();
   setupButtonListeners();
   setupFormValidation();
   updateProgressSteps();
 
-  // 3. Setup auto-save (draft dihapus, jadi tidak perlu)
-  // setupAutoSave(); // DISABLED KARENA TIDAK ADA DRAFT
-
-  console.log("✅ Form initialization complete - No draft system");
+  console.log("✅ Form initialization complete");
 });
-
-// ===== CLEAR ALL DRAFTS - TANPA POPUP =====
-function clearAllDrafts() {
-  console.log("🗑️ AUTOMATIC: Clearing ALL drafts without popup");
-  localStorage.removeItem("suratDraft");
-
-  // Juga clear sessionStorage jika ada
-  sessionStorage.removeItem("suratDraft");
-
-  // Reset form state otomatis
-  resetFormState();
-
-  // Hapus parameter dari URL jika ada
-  const url = new URL(window.location);
-  if (url.searchParams.has("new") || url.searchParams.has("clear")) {
-    url.searchParams.delete("new");
-    url.searchParams.delete("clear");
-    window.history.replaceState({}, "", url.toString());
-  }
-}
 
 // ===== SETUP BUTTON LISTENERS =====
 function setupButtonListeners() {
@@ -64,13 +39,12 @@ function setupButtonListeners() {
     btn.addEventListener("click", clearSignature);
   });
 
-  // 2. Navigation buttons - FIXED
+  // 2. Navigation buttons
   document
     .querySelectorAll(".btn-next, [onclick*='goToStep(2)']")
     .forEach((btn) => {
       btn.addEventListener("click", function (e) {
         e.preventDefault();
-        console.log("➡️ Next button clicked");
         goToStep(2);
       });
     });
@@ -78,12 +52,11 @@ function setupButtonListeners() {
   document.querySelectorAll("[onclick*='goToStep(1)']").forEach((btn) => {
     btn.addEventListener("click", function (e) {
       e.preventDefault();
-      console.log("⬅️ Back button clicked");
       goToStep(1);
     });
   });
 
-  // 3. Form actions
+  // 3. Form reset
   document.querySelectorAll("[onclick*='resetForm']").forEach((btn) => {
     btn.addEventListener("click", function (e) {
       e.preventDefault();
@@ -91,67 +64,24 @@ function setupButtonListeners() {
     });
   });
 
-  // 4. TOMBOL SIMPAN DRAFT DIHAPUS - Redirect langsung ke dashboard
-  document
-    .querySelectorAll(".btn-draft, [onclick*='saveDraftAndExit']")
-    .forEach((btn) => {
-      btn.addEventListener("click", function (e) {
-        e.preventDefault();
-        console.log("🏠 Draft button clicked - Redirecting to dashboard");
-        showNotification("Mengarahkan ke dashboard...", "info");
-        setTimeout(() => {
-          window.location.href = "/dashboard";
-        }, 1000);
-      });
-
-      // Ganti text tombol
-      btn.innerHTML = '<i class="fas fa-home"></i> Ke Dashboard';
-      btn.className = btn.className.replace("btn-draft", "btn-secondary");
-      btn.removeAttribute("onclick");
-    });
-
-  // 5. Submit button - PERBAIKAN UTAMA
+  // 4. Submit button
   const submitBtn = document.getElementById("submitBtn");
   if (submitBtn) {
     submitBtn.addEventListener("click", async function (e) {
       e.preventDefault();
-      console.log("📤 Submit button clicked - Template route");
-
-      // Validasi cepat
-      if (!validateCurrentStep()) {
-        showNotification("Harap lengkapi semua data dengan benar", "error");
-        return;
-      }
-
-      const agreeCheckbox = document.getElementById("agreeTerms");
-      if (!agreeCheckbox || !agreeCheckbox.checked) {
-        showNotification(
-          "❌ Harap setujui persyaratan terlebih dahulu!",
-          "error",
-        );
-        agreeCheckbox.scrollIntoView({ behavior: "smooth", block: "center" });
-        agreeCheckbox.focus();
-        return;
-      }
-
-      // Submit form
       await handleFormSubmission();
     });
-
-    // Update text tombol submit
-    submitBtn.innerHTML =
-      '<i class="fas fa-file-pdf"></i> Simpan & Ke Dashboard';
   }
 
-  // 6. Agreement checkbox
+  // 5. Agreement checkbox
   const agreeCheckbox = document.getElementById("agreeTerms");
   if (agreeCheckbox) {
     agreeCheckbox.addEventListener("change", function () {
-      console.log(`✅ Agreement: ${this.checked ? "checked" : "unchecked"}`);
+      // Optional: bisa tambahkan feedback visual
     });
   }
 
-  // 7. Real-time validation
+  // 6. Real-time validation
   const formInputs = document.querySelectorAll(
     "#suratForm input, #suratForm textarea",
   );
@@ -159,13 +89,6 @@ function setupButtonListeners() {
     input.addEventListener("blur", function () {
       validateField(this);
     });
-
-    // Auto-uppercase untuk nama, instansi, kota
-    if (["nama", "instansi", "kota"].includes(input.name)) {
-      input.addEventListener("input", function () {
-        this.value = this.value.toUpperCase();
-      });
-    }
 
     // Format NIP hanya angka
     if (input.name === "nip") {
@@ -178,10 +101,23 @@ function setupButtonListeners() {
   console.log(`✅ Button listeners setup complete`);
 }
 
-// ===== HANDLE FORM SUBMISSION - REDIRECT KE DASHBOARD =====
+// ===== HANDLE FORM SUBMISSION =====
 async function handleFormSubmission() {
   if (formSubmitted) {
-    console.log("⚠️ Form already submitted");
+    return;
+  }
+
+  // Validasi sebelum submit
+  if (!validateCurrentStep()) {
+    showNotification("Harap lengkapi semua data dengan benar", "error");
+    return;
+  }
+
+  const agreeCheckbox = document.getElementById("agreeTerms");
+  if (!agreeCheckbox || !agreeCheckbox.checked) {
+    showNotification("Harap setujui persyaratan terlebih dahulu", "error");
+    agreeCheckbox.scrollIntoView({ behavior: "smooth", block: "center" });
+    agreeCheckbox.focus();
     return;
   }
 
@@ -200,15 +136,12 @@ async function handleFormSubmission() {
   if (loadingDiv) loadingDiv.style.display = "block";
   if (errorDiv) errorDiv.style.display = "none";
 
-  showNotification("Menyimpan data dan membuat dokumen...", "info");
-
   try {
     // Collect form data
     const form = document.getElementById("suratForm");
     const formData = new FormData(form);
 
     // Submit ke template route
-    console.log("🚀 Submitting to /surat-pernyataan/generate-template");
     const response = await fetch("/surat-pernyataan/generate-template", {
       method: "POST",
       body: formData,
@@ -217,21 +150,12 @@ async function handleFormSubmission() {
       },
     });
 
-    console.log(`📥 Response status: ${response.status}`);
-
     if (response.ok) {
       // PDF akan langsung di-download oleh browser
-      console.log("✅ Dokumen berhasil dibuat");
+      showNotification("✅ Data berhasil disimpan!", "success");
 
-      // Tampilkan notifikasi sukses
-      showNotification(
-        "✅ Data berhasil disimpan! Mengarahkan ke dashboard...",
-        "success",
-      );
-
-      // **PERUBAHAN UTAMA: Redirect ke dashboard setelah 2 detik**
+      // Redirect ke dashboard setelah 2 detik
       setTimeout(() => {
-        console.log("↪️ Redirecting to dashboard");
         window.location.href = "/dashboard";
       }, 2000);
     } else {
@@ -427,7 +351,7 @@ function saveSignature() {
     if (previewContainer) previewContainer.style.display = "block";
 
     isSignatureSaved = true;
-    showNotification("✓ Tanda tangan berhasil disimpan", "success");
+    showNotification("Tanda tangan berhasil disimpan", "success");
   } catch (error) {
     console.error("❌ Error saving signature:", error);
     showNotification("Gagal menyimpan tanda tangan", "error");
@@ -436,14 +360,12 @@ function saveSignature() {
 
 // ===== FORM VALIDATION =====
 function setupFormValidation() {
-  const formInputs = document.querySelectorAll(
-    "#suratForm input, #suratForm textarea",
-  );
-  console.log(`✅ Form validation setup for ${formInputs.length} fields`);
+  console.log("✅ Form validation setup");
 }
 
 function validateCurrentStep() {
   let isValid = true;
+  let firstErrorField = null;
 
   if (currentStep === 1) {
     // Validasi required fields
@@ -454,6 +376,7 @@ function validateCurrentStep() {
     requiredFields.forEach((field) => {
       if (!validateField(field)) {
         isValid = false;
+        if (!firstErrorField) firstErrorField = field;
       }
     });
 
@@ -465,6 +388,19 @@ function validateCurrentStep() {
         "warning",
       );
       isValid = false;
+    }
+
+    // Show notification hanya jika ada error dan bisa tampilkan
+    if (!isValid && canShowNotification()) {
+      showNotification("Harap lengkapi data pada tahap ini", "warning");
+
+      // Scroll ke field error pertama
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(() => {
+          firstErrorField.focus();
+        }, 300);
+      }
     }
   }
 
@@ -601,61 +537,68 @@ function loadReviewData() {
       if (content) content.style.display = "block";
     } catch (error) {
       console.error("❌ Error loading review data:", error);
-      showNotification("Gagal memuat data review", "error");
     }
   }, 300);
 }
 
 // ===== FORM RESET =====
-function resetFormState() {
-  // Reset form fields
-  const form = document.getElementById("suratForm");
-  if (form) form.reset();
-
-  // Clear signature
-  if (canvas && ctx) {
-    const rect = canvas.getBoundingClientRect();
-    ctx.clearRect(0, 0, rect.width, rect.height);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, rect.width, rect.height);
-  }
-
-  // Reset signature state
-  document.getElementById("ttd_base64").value = "";
-  const previewContainer = document.getElementById("signaturePreview");
-  if (previewContainer) previewContainer.style.display = "none";
-
-  const placeholder = document.getElementById("signaturePlaceholder");
-  if (placeholder) placeholder.style.display = "block";
-
-  isSignatureSaved = false;
-
-  // Reset agreement
-  const agreeCheckbox = document.getElementById("agreeTerms");
-  if (agreeCheckbox) agreeCheckbox.checked = false;
-
-  // Go to step 1
-  currentStep = 1;
-  updateProgressSteps();
-
-  // Show only step 1
-  document.querySelectorAll(".form-section").forEach((section, index) => {
-    if (index === 0) {
-      section.classList.add("active");
-    } else {
-      section.classList.remove("active");
-    }
-  });
-}
-
 function resetForm() {
   if (confirm("Apakah Anda yakin ingin mengosongkan semua data?")) {
-    resetFormState();
+    // Reset form fields
+    const form = document.getElementById("suratForm");
+    if (form) form.reset();
+
+    // Clear signature
+    if (canvas && ctx) {
+      const rect = canvas.getBoundingClientRect();
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, rect.width, rect.height);
+    }
+
+    // Reset signature state
+    document.getElementById("ttd_base64").value = "";
+    const previewContainer = document.getElementById("signaturePreview");
+    if (previewContainer) previewContainer.style.display = "none";
+
+    const placeholder = document.getElementById("signaturePlaceholder");
+    if (placeholder) placeholder.style.display = "block";
+
+    isSignatureSaved = false;
+
+    // Reset agreement
+    const agreeCheckbox = document.getElementById("agreeTerms");
+    if (agreeCheckbox) agreeCheckbox.checked = false;
+
+    // Go to step 1
+    currentStep = 1;
+    updateProgressSteps();
+
+    // Show only step 1
+    document.querySelectorAll(".form-section").forEach((section, index) => {
+      if (index === 0) {
+        section.classList.add("active");
+      } else {
+        section.classList.remove("active");
+      }
+    });
+
     showNotification("Form telah direset", "info");
   }
 }
 
 // ===== NOTIFICATION SYSTEM =====
+// ===== NOTIFICATION SYSTEM =====
+function canShowNotification() {
+  const now = Date.now();
+  if (now - lastNotificationTime > 2000) {
+    // Hanya tampilkan setiap 2 detik
+    lastNotificationTime = now;
+    return true;
+  }
+  return false;
+}
+
 function showNotification(message, type = "info") {
   console.log(`📢 Notification [${type}]: ${message}`);
 
@@ -663,9 +606,12 @@ function showNotification(message, type = "info") {
   const messageElement = document.getElementById("notificationMessage");
 
   if (!notification || !messageElement) {
-    alert(message);
+    console.log(message);
     return;
   }
+
+  // Hapus class hiding jika ada
+  notification.classList.remove("hiding");
 
   messageElement.textContent = message;
   notification.className = `notification ${type}`;
@@ -689,63 +635,35 @@ function showNotification(message, type = "info") {
 
   notification.style.display = "flex";
 
+  // Auto hide setelah 3 detik
   setTimeout(() => {
-    notification.style.display = "none";
-  }, 5000);
+    hideNotification();
+  }, 3000);
 }
 
 function hideNotification() {
   const notification = document.getElementById("notification");
   if (notification) {
-    notification.style.display = "none";
+    notification.classList.add("hiding");
+
+    // Setelah animasi selesai, hide element
+    setTimeout(() => {
+      notification.style.display = "none";
+      notification.classList.remove("hiding");
+    }, 300);
   }
 }
 
-// ===== DEBUG FUNCTIONS =====
-function debugFormData() {
-  console.log("🔍 === DEBUG FORM DATA ===");
-
-  const form = document.getElementById("suratForm");
-  if (!form) {
-    console.error("❌ Form not found");
-    return;
-  }
-
-  const formData = new FormData(form);
-  console.log("📋 Form Data:");
-
-  for (let [key, value] of formData.entries()) {
-    if (key === "ttd_base64") {
-      console.log(
-        `  ${key}: ${value ? "Present (" + value.length + " chars)" : "Empty"}`,
-      );
-    } else if (key === "agree_terms") {
-      console.log(`  ${key}: ${value}`);
-    } else {
-      console.log(`  ${key}: "${value}"`);
-    }
-  }
-
-  console.log("📊 Current State:");
-  console.log(`  - currentStep: ${currentStep}`);
-  console.log(`  - isSignatureSaved: ${isSignatureSaved}`);
-  console.log(`  - formSubmitted: ${formSubmitted}`);
-  console.log(
-    `  - agreement checked: ${document.getElementById("agreeTerms")?.checked || false}`,
-  );
-
-  console.log("🔍 === END DEBUG ===");
-}
+// Panggil hideNotification saat tombol close diklik
+document
+  .querySelector(".notification-close")
+  ?.addEventListener("click", hideNotification);
 
 // ===== EXPORT FUNCTIONS =====
-window.debugFormData = debugFormData;
 window.goToStep = goToStep;
 window.saveSignature = saveSignature;
 window.clearSignature = clearSignature;
 window.resetForm = resetForm;
 window.handleFormSubmission = handleFormSubmission;
-window.validateCurrentStep = validateCurrentStep;
 
-console.log(
-  "✅ form_02.js v4.0 loaded - No draft system, auto redirect to dashboard",
-);
+console.log("✅ form_02.js v5.0 loaded - Simplified, better notifications");
