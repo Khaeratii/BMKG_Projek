@@ -106,7 +106,7 @@ function updateCounter(counter, count) {
 
 function setupApprovalListeners() {
   const approvalRadios = document.querySelectorAll(
-    'input[name="status_persetujuan"]'
+    'input[name="status_persetujuan"]',
   );
 
   approvalRadios.forEach((radio) => {
@@ -116,11 +116,11 @@ function setupApprovalListeners() {
       // Toggle visibility based on approval status
       const elements = {
         tanggalPelaksanaanGroup: document.getElementById(
-          "tanggalPelaksanaanGroup"
+          "tanggalPelaksanaanGroup",
         ),
         picPelaksanaGroup: document.getElementById("picPelaksanaGroup"),
         catatanPersetujuanGroup: document.getElementById(
-          "catatanPersetujuanGroup"
+          "catatanPersetujuanGroup",
         ),
         catatanPenolakanGroup: document.getElementById("catatanPenolakanGroup"),
       };
@@ -138,7 +138,7 @@ function setupApprovalListeners() {
       const tanggalInput = document.getElementById("tanggalPelaksanaan");
       const picInput = document.querySelector('input[name="pic_pelaksana"]');
       const catatanInput = document.querySelector(
-        'textarea[name="catatan_penolakan"]'
+        'textarea[name="catatan_penolakan"]',
       );
 
       if (tanggalInput) tanggalInput.required = isApproved;
@@ -262,7 +262,7 @@ function initializeSignature(canvasId, dataId, type) {
 
     // Hide placeholder
     const placeholder = canvas.parentElement.querySelector(
-      ".signature-placeholder"
+      ".signature-placeholder",
     );
     if (placeholder) placeholder.style.display = "none";
 
@@ -331,7 +331,7 @@ function initializeSignature(canvasId, dataId, type) {
 
     // Show placeholder
     const placeholder = canvas.parentElement.querySelector(
-      ".signature-placeholder"
+      ".signature-placeholder",
     );
     if (placeholder) placeholder.style.display = "block";
 
@@ -358,7 +358,7 @@ function initializeSignature(canvasId, dataId, type) {
       img.src = drawingHistory[drawingHistory.length - 1];
     } else {
       const placeholder = canvas.parentElement.querySelector(
-        ".signature-placeholder"
+        ".signature-placeholder",
       );
       if (placeholder) placeholder.style.display = "block";
       signatures[type] = null;
@@ -368,10 +368,10 @@ function initializeSignature(canvasId, dataId, type) {
 
   // Set up clear and undo buttons
   const clearBtn = document.getElementById(
-    `clear${canvasId.replace("signatureCanvas", "SignatureBtn")}`
+    `clear${canvasId.replace("signatureCanvas", "SignatureBtn")}`,
   );
   const undoBtn = document.getElementById(
-    `undo${canvasId.replace("signatureCanvas", "SignatureBtn")}`
+    `undo${canvasId.replace("signatureCanvas", "SignatureBtn")}`,
   );
 
   if (clearBtn) clearBtn.addEventListener("click", canvas.clear);
@@ -395,7 +395,7 @@ function setupFileUploads() {
       `signaturePreview${suffix}`,
       `removePreviewBtn${suffix}`,
       `signatureData${section === 1 ? "" : section}`,
-      type
+      type,
     );
   });
 }
@@ -407,7 +407,7 @@ function setupFileUpload(
   previewImgId,
   removeBtnId,
   dataInputId,
-  signatureType
+  signatureType,
 ) {
   const uploadArea = document.getElementById(uploadAreaId);
   const fileInput = document.getElementById(fileInputId);
@@ -428,7 +428,7 @@ function setupFileUpload(
   });
 
   uploadArea.addEventListener("dragleave", () =>
-    uploadArea.classList.remove("dragover")
+    uploadArea.classList.remove("dragover"),
   );
 
   uploadArea.addEventListener("drop", (e) => {
@@ -442,7 +442,7 @@ function setupFileUpload(
         previewContainer,
         uploadArea,
         dataInput,
-        signatureType
+        signatureType,
       );
     }
   });
@@ -455,8 +455,8 @@ function setupFileUpload(
       previewContainer,
       uploadArea,
       dataInput,
-      signatureType
-    )
+      signatureType,
+    ),
   );
 
   // Remove preview
@@ -468,8 +468,8 @@ function setupFileUpload(
         uploadArea,
         previewImg,
         dataInput,
-        signatureType
-      )
+        signatureType,
+      ),
     );
   }
 }
@@ -480,7 +480,7 @@ function handleFileSelect(
   previewContainer,
   uploadArea,
   dataInput,
-  signatureType
+  signatureType,
 ) {
   const file = fileInput.files[0];
   if (!file) return;
@@ -517,7 +517,7 @@ function removeUploadedSignature(
   uploadArea,
   previewImg,
   dataInput,
-  signatureType
+  signatureType,
 ) {
   if (fileInput) fileInput.value = "";
   if (previewContainer) previewContainer.classList.remove("active");
@@ -532,10 +532,10 @@ function removeUploadedSignature(
 function updateSignatureData(type) {
   const sectionNum = type === "pemohon" ? 1 : type === "approval" ? 2 : 3;
   const canvas = document.getElementById(
-    `signatureCanvas${sectionNum === 1 ? "" : sectionNum}`
+    `signatureCanvas${sectionNum === 1 ? "" : sectionNum}`,
   );
   const dataInput = document.getElementById(
-    `signatureData${sectionNum === 1 ? "" : sectionNum}`
+    `signatureData${sectionNum === 1 ? "" : sectionNum}`,
   );
 
   if (canvas && dataInput) {
@@ -553,19 +553,19 @@ function setupSignatureOptions() {
 
   sections.forEach(({ section, type }) => {
     const canvasBtn = document.querySelector(
-      `[data-option="canvas${section === 1 ? "" : section}"]`
+      `[data-option="canvas${section === 1 ? "" : section}"]`,
     );
     const uploadBtn = document.querySelector(
-      `[data-option="upload${section === 1 ? "" : section}"]`
+      `[data-option="upload${section === 1 ? "" : section}"]`,
     );
 
     if (canvasBtn)
       canvasBtn.addEventListener("click", () =>
-        switchSignatureOption(section, "canvas", type)
+        switchSignatureOption(section, "canvas", type),
       );
     if (uploadBtn)
       uploadBtn.addEventListener("click", () =>
-        switchSignatureOption(section, "upload", type)
+        switchSignatureOption(section, "upload", type),
       );
   });
 }
@@ -577,7 +577,7 @@ function switchSignatureOption(sectionNum, optionType, signatureType) {
   // Update active button
   document
     .querySelectorAll(
-      `[data-option^="canvas${suffix}"], [data-option^="upload${suffix}"]`
+      `[data-option^="canvas${suffix}"], [data-option^="upload${suffix}"]`,
     )
     .forEach((btn) => btn.classList.remove("active"));
   document
@@ -649,7 +649,7 @@ function setupDraftManagement() {
       if (currentStep < 1 || !validateStep(1)) {
         showToast(
           "⚠️ Harap lengkapi data usulan (Step 1) terlebih dahulu!",
-          "warning"
+          "warning",
         );
         goToStep(1);
         return;
@@ -683,7 +683,7 @@ async function saveDraftDirect() {
   if (!validateStep(1)) {
     showToast(
       "⚠️ Harap lengkapi data usulan (Step 1) terlebih dahulu!",
-      "warning"
+      "warning",
     );
     return false;
   }
@@ -785,7 +785,7 @@ async function loadDraftFromServer(draftId) {
 
       showToast(
         `✅ Draft "${draft.draft_name || "tanpa nama"}" berhasil dimuat!`,
-        "success"
+        "success",
       );
 
       return true;
@@ -919,7 +919,7 @@ async function saveDraftToServer(draftName = "", draftNotes = "") {
   if (!validateStep(1)) {
     showToast(
       "⚠️ Harap lengkapi data usulan (Step 1) terlebih dahulu!",
-      "warning"
+      "warning",
     );
     throw new Error("Data usulan tidak lengkap");
   }
@@ -971,7 +971,7 @@ async function saveDraftToServer(draftName = "", draftNotes = "") {
             draft_name: draftName,
             draft_notes: draftNotes,
             timestamp: new Date().toISOString(),
-          })
+          }),
         );
       } catch (e) {
         console.warn("⚠️ Could not cache draft to localStorage:", e);
@@ -1009,7 +1009,7 @@ function loadDraftsList() {
                                 <div class="draft-header">
                                     <h4>${draftName}</h4>
                                     <span class="draft-date">${formatDateDisplay(
-                                      draft.timestamp
+                                      draft.timestamp,
                                     )}</span>
                                 </div>
                                 <div class="draft-body">
@@ -1026,7 +1026,7 @@ function loadDraftsList() {
                                       formData.deskripsi_perubahan
                                         ? formData.deskripsi_perubahan.substring(
                                             0,
-                                            100
+                                            100,
                                           ) + "..."
                                         : "Belum diisi"
                                     }</p>
@@ -1238,7 +1238,7 @@ function populateFormWithDraft(data) {
   // Trigger approval status change if needed
   if (data.status_persetujuan) {
     const radio = document.querySelector(
-      `input[name="status_persetujuan"][value="${data.status_persetujuan}"]`
+      `input[name="status_persetujuan"][value="${data.status_persetujuan}"]`,
     );
     if (radio) {
       radio.checked = true;
@@ -1329,7 +1329,7 @@ async function handleFormSubmission() {
   // Confirm submission
   if (
     !confirm(
-      "Apakah Anda yakin ingin mengirim usulan perubahan ini?\nData yang sudah dikirim tidak dapat diedit."
+      "Apakah Anda yakin ingin mengirim usulan perubahan ini?\nData yang sudah dikirim tidak dapat diedit.",
     )
   ) {
     return;
@@ -1346,7 +1346,7 @@ async function handleFormSubmission() {
   ) {
     showToast(
       "Data wajib (No. Dokumen, Diminta Oleh, Deskripsi) harus diisi!",
-      "error"
+      "error",
     );
     return;
   }
@@ -1383,7 +1383,7 @@ async function handleFormSubmission() {
     console.log("📥 Response status:", response.status);
     console.log(
       "📥 Response headers:",
-      Object.fromEntries(response.headers.entries())
+      Object.fromEntries(response.headers.entries()),
     );
 
     // Try to get response text for debugging
@@ -1406,7 +1406,7 @@ async function handleFormSubmission() {
     if (result.success) {
       showToast(
         result.message || "✅ Usulan perubahan berhasil dikirim!",
-        "success"
+        "success",
       );
 
       // Clear current draft
@@ -1455,7 +1455,7 @@ function goToStep(stepNumber) {
     if (!validateCurrentStep()) {
       showToast(
         "Harap lengkapi data pada tahap implementasi terlebih dahulu",
-        "warning"
+        "warning",
       );
       return;
     }
@@ -1467,7 +1467,7 @@ function goToStep(stepNumber) {
     if (!validateCurrentStep()) {
       showToast(
         "Harap lengkapi data pada tahap ini terlebih dahulu",
-        "warning"
+        "warning",
       );
       return;
     }
@@ -1555,7 +1555,7 @@ function setupEventListeners() {
         e.preventDefault();
         showToast(
           "Harap selesaikan review di step 5 sebelum submit",
-          "warning"
+          "warning",
         );
         goToStep(5);
         return false;
@@ -1568,7 +1568,7 @@ function setupEventListeners() {
         e.preventDefault();
         showToast(
           "Harap lengkapi semua data dengan benar sebelum submit!",
-          "error"
+          "error",
         );
         for (let i = 1; i <= totalSteps; i++) {
           if (!validateStep(i)) {
@@ -1587,7 +1587,7 @@ function setupEventListeners() {
 
       if (
         !confirm(
-          "Apakah Anda yakin ingin mengirim usulan perubahan ini?\nData yang sudah dikirim tidak dapat diedit."
+          "Apakah Anda yakin ingin mengirim usulan perubahan ini?\nData yang sudah dikirim tidak dapat diedit.",
         )
       ) {
         e.preventDefault();
@@ -1693,7 +1693,7 @@ function validateStep1() {
   const tanggal = document.querySelector('[name="tanggal"]');
   const tglEfektif = document.querySelector('[name="tgl_efektif"]');
   const hasilDibutuhkan = document.querySelector(
-    '[name="hasil_dibutuhkan_tgl"]'
+    '[name="hasil_dibutuhkan_tgl"]',
   );
 
   if (tanggal && tglEfektif && tglEfektif.value) {
@@ -1713,7 +1713,7 @@ function validateStep1() {
     if (hasil <= tgl) {
       markError(
         hasilDibutuhkan,
-        "Tanggal hasil dibutuhkan harus setelah tanggal usulan"
+        "Tanggal hasil dibutuhkan harus setelah tanggal usulan",
       );
       isValid = false;
     }
@@ -1794,7 +1794,7 @@ function navigateToStep(stepNumber) {
           data: formData,
           timestamp: new Date().toISOString(),
           step: 3,
-        })
+        }),
       );
       console.log("✅ [DEBUG] Saved data to localStorage for review");
     } catch (e) {
@@ -1836,7 +1836,7 @@ function debugFormData() {
         ? typeof value === "string"
           ? value.substring(0, 50) + "..."
           : value
-        : "❌ MISSING"
+        : "❌ MISSING",
     );
   });
 
@@ -1850,7 +1850,7 @@ function validateStep2() {
 
   // Check at least one change type
   const changeTypes = document.querySelectorAll(
-    'input[name="tipe_perubahan"]:checked'
+    'input[name="tipe_perubahan"]:checked',
   );
   if (changeTypes.length === 0) {
     showToast("Pilih minimal satu tipe perubahan", "error");
@@ -1869,7 +1869,7 @@ function validateStep2() {
   requiredFields.forEach(({ name, label, type }) => {
     if (type === "radio") {
       const radioSelected = document.querySelector(
-        `input[name="${name}"]:checked`
+        `input[name="${name}"]:checked`,
       );
       if (!radioSelected) {
         showToast(`${label} wajib dipilih`, "error");
@@ -1892,7 +1892,7 @@ function validateStep2() {
 function validateStep3() {
   let isValid = true;
   const approvalStatus = document.querySelector(
-    'input[name="status_persetujuan"]:checked'
+    'input[name="status_persetujuan"]:checked',
   );
 
   if (!approvalStatus) {
@@ -1917,7 +1917,7 @@ function validateStep3() {
 
       // Validate date
       const tanggalPelaksanaan = document.querySelector(
-        '[name="tanggal_pelaksanaan"]'
+        '[name="tanggal_pelaksanaan"]',
       );
       if (tanggalPelaksanaan && tanggalPelaksanaan.value) {
         const date = new Date(tanggalPelaksanaan.value);
@@ -1926,14 +1926,14 @@ function validateStep3() {
         if (date < today) {
           markError(
             tanggalPelaksanaan,
-            "Tanggal pelaksanaan tidak boleh di masa lalu"
+            "Tanggal pelaksanaan tidak boleh di masa lalu",
           );
           isValid = false;
         }
       }
     } else {
       const catatanElement = document.querySelector(
-        '[name="catatan_penolakan"]'
+        '[name="catatan_penolakan"]',
       );
       if (
         catatanElement &&
@@ -2242,7 +2242,7 @@ function createReviewHTML(formData) {
   function formatRadio(value, name) {
     if (!value) return "-";
     const element = document.querySelector(
-      `[name="${name}"][value="${value}"]`
+      `[name="${name}"][value="${value}"]`,
     );
     return element ? `✓ ${element.value}` : value;
   }
@@ -2259,7 +2259,7 @@ function createReviewHTML(formData) {
                   formData.diminta_oleh || "-"
                 }</span></div>
                 <div class="summary-item"><label>Tanggal Usulan:</label><span>${formatDateDisplay(
-                  formData.tanggal
+                  formData.tanggal,
                 )}</span></div>
             </div>
         </div>
@@ -2305,7 +2305,7 @@ function createReviewHTML(formData) {
                             "Tipe Perubahan",
                             formatCheckboxes(
                               formData.tipe_perubahan,
-                              "tipe_perubahan"
+                              "tipe_perubahan",
                             ),
                           ],
                           [
@@ -2361,7 +2361,7 @@ function createReviewHTML(formData) {
                               ? [
                                   "Tanggal Pelaksanaan",
                                   formatDateDisplay(
-                                    formData.tanggal_pelaksanaan
+                                    formData.tanggal_pelaksanaan,
                                   ),
                                 ]
                               : null,
@@ -2387,7 +2387,7 @@ function createReviewHTML(formData) {
                                 ? '<span class="status-success"><i class="fas fa-check-circle"></i> Tersedia</span>'
                                 : '<span class="status-error"><i class="fas fa-times-circle"></i> Belum ada</span>',
                             ],
-                          ].filter(Boolean)
+                          ].filter(Boolean),
                         )}
                     </table>
                 </div>
@@ -2443,7 +2443,7 @@ function createTableRows(data) {
             <td width="30%">${label}</td>
             <td width="70%">${value}</td>
         </tr>
-    `
+    `,
     )
     .join("");
 }
@@ -2498,14 +2498,14 @@ function collectFormData() {
       data.deskripsi_perubahan
         ? data.deskripsi_perubahan.substring(0, 30) + "..."
         : "MISSING"
-    }`
+    }`,
   );
   console.log(
     `    • alasan_perubahan: ${
       data.alasan_perubahan
         ? data.alasan_perubahan.substring(0, 30) + "..."
         : "MISSING"
-    }`
+    }`,
   );
 
   if (data.tipe_perubahan) {
@@ -2523,7 +2523,7 @@ function collectFormData() {
   if (data.hasil_tahapan) {
     console.log(`  - Implementation Fields:`);
     console.log(
-      `    • hasil_tahapan: ${data.hasil_tahapan.substring(0, 30) + "..."}`
+      `    • hasil_tahapan: ${data.hasil_tahapan.substring(0, 30) + "..."}`,
     );
   }
 
@@ -2531,7 +2531,7 @@ function collectFormData() {
   console.log(`    • pemohon: ${data.signature_data ? "✓" : "✗"}`);
   console.log(`    • approval: ${data.signature_approval ? "✓" : "✗"}`);
   console.log(
-    `    • implementation: ${data.signature_implementation ? "✓" : "✗"}`
+    `    • implementation: ${data.signature_implementation ? "✓" : "✗"}`,
   );
 
   return data;
@@ -2685,7 +2685,7 @@ function initializeFormForEditMode() {
   window.showDraftModal = function () {
     showToast(
       "Gunakan tombol Update di Step 5 untuk menyimpan perubahan",
-      "info"
+      "info",
     );
   };
 }

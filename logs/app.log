@@ -3412,3 +3412,578 @@
 2026-01-19 11:11:51,773 | INFO | 127.0.0.1 - - [19/Jan/2026 11:11:51] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
 2026-01-19 11:11:51,779 | INFO | 127.0.0.1 - - [19/Jan/2026 11:11:51] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
 2026-01-19 11:11:55,392 | INFO | 127.0.0.1 - - [19/Jan/2026 11:11:55] "GET /laporan-insiden/print/13 HTTP/1.1" 200 -
+2026-01-19 15:06:10,782 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.9.7.114:5000
+2026-01-19 15:06:10,782 | INFO | [33mPress CTRL+C to quit[0m
+2026-01-19 15:06:10,803 | INFO |  * Restarting with stat
+2026-01-19 15:06:12,203 | WARNING |  * Debugger is active!
+2026-01-19 15:06:12,232 | INFO |  * Debugger PIN: 220-703-075
+2026-01-19 15:06:19,897 | INFO | 127.0.0.1 - - [19/Jan/2026 15:06:19] "[32mGET / HTTP/1.1[0m" 302 -
+2026-01-19 15:06:20,195 | INFO | 127.0.0.1 - - [19/Jan/2026 15:06:20] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 15:06:20,572 | INFO | 127.0.0.1 - - [19/Jan/2026 15:06:20] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-19 15:06:20,587 | INFO | 127.0.0.1 - - [19/Jan/2026 15:06:20] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 15:06:20,713 | INFO | 127.0.0.1 - - [19/Jan/2026 15:06:20] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-19 15:06:20,730 | INFO | 127.0.0.1 - - [19/Jan/2026 15:06:20] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-19 15:06:20,744 | INFO | 127.0.0.1 - - [19/Jan/2026 15:06:20] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-19 15:06:38,035 | INFO | 127.0.0.1 - - [19/Jan/2026 15:06:38] "GET /surat-pernyataan/preview/8 HTTP/1.1" 200 -
+2026-01-19 15:06:38,098 | INFO | 127.0.0.1 - - [19/Jan/2026 15:06:38] "[36mGET /static/css/form.css HTTP/1.1[0m" 304 -
+2026-01-19 15:06:56,210 | INFO | 127.0.0.1 - - [19/Jan/2026 15:06:56] "[32mGET / HTTP/1.1[0m" 302 -
+2026-01-19 15:06:56,241 | INFO | 127.0.0.1 - - [19/Jan/2026 15:06:56] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 15:06:56,273 | INFO | 127.0.0.1 - - [19/Jan/2026 15:06:56] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 15:06:56,273 | INFO | 127.0.0.1 - - [19/Jan/2026 15:06:56] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-19 15:06:56,273 | INFO | 127.0.0.1 - - [19/Jan/2026 15:06:56] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-19 15:06:56,273 | INFO | 127.0.0.1 - - [19/Jan/2026 15:06:56] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-19 15:06:56,288 | INFO | 127.0.0.1 - - [19/Jan/2026 15:06:56] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-19 20:48:40,927 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.14:5000
+2026-01-19 20:48:40,927 | INFO | [33mPress CTRL+C to quit[0m
+2026-01-19 20:48:40,945 | INFO |  * Restarting with stat
+2026-01-19 20:48:42,272 | WARNING |  * Debugger is active!
+2026-01-19 20:48:42,277 | INFO |  * Debugger PIN: 220-703-075
+2026-01-19 20:48:48,419 | INFO | 127.0.0.1 - - [19/Jan/2026 20:48:48] "[32mGET / HTTP/1.1[0m" 302 -
+2026-01-19 20:48:48,661 | INFO | 127.0.0.1 - - [19/Jan/2026 20:48:48] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 20:48:49,188 | INFO | 127.0.0.1 - - [19/Jan/2026 20:48:49] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 20:48:49,215 | INFO | 127.0.0.1 - - [19/Jan/2026 20:48:49] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-19 20:48:49,312 | INFO | 127.0.0.1 - - [19/Jan/2026 20:48:49] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-19 20:48:49,423 | INFO | 127.0.0.1 - - [19/Jan/2026 20:48:49] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-19 20:48:49,435 | INFO | 127.0.0.1 - - [19/Jan/2026 20:48:49] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-19 20:48:55,155 | INFO | 127.0.0.1 - - [19/Jan/2026 20:48:55] "GET /usulan-perubahan/baru HTTP/1.1" 200 -
+2026-01-19 20:48:55,206 | INFO | 127.0.0.1 - - [19/Jan/2026 20:48:55] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 20:48:55,210 | INFO | 127.0.0.1 - - [19/Jan/2026 20:48:55] "[36mGET /static/css/form.css HTTP/1.1[0m" 304 -
+2026-01-19 20:48:55,215 | INFO | 127.0.0.1 - - [19/Jan/2026 20:48:55] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2026-01-19 20:48:55,287 | INFO | 127.0.0.1 - - [19/Jan/2026 20:48:55] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2026-01-19 20:48:55,298 | INFO | 127.0.0.1 - - [19/Jan/2026 20:48:55] "GET /static/js/form.js HTTP/1.1" 200 -
+2026-01-19 20:51:37,770 | INFO | 127.0.0.1 - - [19/Jan/2026 20:51:37] "POST /api/usulan-perubahan/submit HTTP/1.1" 200 -
+2026-01-19 20:51:39,412 | INFO | 127.0.0.1 - - [19/Jan/2026 20:51:39] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 20:51:39,503 | INFO | 127.0.0.1 - - [19/Jan/2026 20:51:39] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 20:51:39,504 | INFO | 127.0.0.1 - - [19/Jan/2026 20:51:39] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-19 20:51:39,507 | INFO | 127.0.0.1 - - [19/Jan/2026 20:51:39] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-19 20:51:39,526 | INFO | 127.0.0.1 - - [19/Jan/2026 20:51:39] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-19 20:51:39,526 | INFO | 127.0.0.1 - - [19/Jan/2026 20:51:39] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-19 20:51:44,101 | INFO | 127.0.0.1 - - [19/Jan/2026 20:51:44] "GET /usulan-perubahan/generate/37 HTTP/1.1" 200 -
+2026-01-19 20:51:52,785 | INFO | 127.0.0.1 - - [19/Jan/2026 20:51:52] "GET /usulan-perubahan/generate/37 HTTP/1.1" 200 -
+2026-01-19 20:53:54,424 | INFO | 127.0.0.1 - - [19/Jan/2026 20:53:54] "GET /usulan-perubahan/baru HTTP/1.1" 200 -
+2026-01-19 20:53:54,542 | INFO | 127.0.0.1 - - [19/Jan/2026 20:53:54] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 20:53:54,547 | INFO | 127.0.0.1 - - [19/Jan/2026 20:53:54] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2026-01-19 20:53:54,547 | INFO | 127.0.0.1 - - [19/Jan/2026 20:53:54] "[36mGET /static/css/form.css HTTP/1.1[0m" 304 -
+2026-01-19 20:53:54,564 | INFO | 127.0.0.1 - - [19/Jan/2026 20:53:54] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2026-01-19 20:53:54,647 | INFO | 127.0.0.1 - - [19/Jan/2026 20:53:54] "GET /static/js/form.js HTTP/1.1" 200 -
+2026-01-19 20:54:00,189 | INFO | 127.0.0.1 - - [19/Jan/2026 20:54:00] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 20:54:00,229 | INFO | 127.0.0.1 - - [19/Jan/2026 20:54:00] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 20:54:00,229 | INFO | 127.0.0.1 - - [19/Jan/2026 20:54:00] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-19 20:54:00,235 | INFO | 127.0.0.1 - - [19/Jan/2026 20:54:00] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-19 20:54:00,240 | INFO | 127.0.0.1 - - [19/Jan/2026 20:54:00] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-19 20:54:00,243 | INFO | 127.0.0.1 - - [19/Jan/2026 20:54:00] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-19 21:07:31,489 | INFO | 127.0.0.1 - - [19/Jan/2026 21:07:31] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 21:07:31,530 | INFO | 127.0.0.1 - - [19/Jan/2026 21:07:31] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 21:07:31,532 | INFO | 127.0.0.1 - - [19/Jan/2026 21:07:31] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-19 21:07:31,539 | INFO | 127.0.0.1 - - [19/Jan/2026 21:07:31] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-19 21:07:31,558 | INFO | 127.0.0.1 - - [19/Jan/2026 21:07:31] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-19 21:07:31,566 | INFO | 127.0.0.1 - - [19/Jan/2026 21:07:31] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-19 21:07:32,976 | INFO | 127.0.0.1 - - [19/Jan/2026 21:07:32] "GET /usulan-perubahan/baru HTTP/1.1" 200 -
+2026-01-19 21:07:33,047 | INFO | 127.0.0.1 - - [19/Jan/2026 21:07:33] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 21:07:33,048 | INFO | 127.0.0.1 - - [19/Jan/2026 21:07:33] "[36mGET /static/css/form.css HTTP/1.1[0m" 304 -
+2026-01-19 21:07:33,054 | INFO | 127.0.0.1 - - [19/Jan/2026 21:07:33] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2026-01-19 21:07:33,058 | INFO | 127.0.0.1 - - [19/Jan/2026 21:07:33] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2026-01-19 21:07:33,124 | INFO | 127.0.0.1 - - [19/Jan/2026 21:07:33] "GET /static/js/form.js HTTP/1.1" 200 -
+2026-01-19 21:09:22,174 | INFO | 127.0.0.1 - - [19/Jan/2026 21:09:22] "GET /usulan-perubahan/baru HTTP/1.1" 200 -
+2026-01-19 21:09:22,221 | INFO | 127.0.0.1 - - [19/Jan/2026 21:09:22] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 21:09:22,221 | INFO | 127.0.0.1 - - [19/Jan/2026 21:09:22] "[36mGET /static/css/form.css HTTP/1.1[0m" 304 -
+2026-01-19 21:09:22,229 | INFO | 127.0.0.1 - - [19/Jan/2026 21:09:22] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2026-01-19 21:09:22,233 | INFO | 127.0.0.1 - - [19/Jan/2026 21:09:22] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2026-01-19 21:09:22,310 | INFO | 127.0.0.1 - - [19/Jan/2026 21:09:22] "GET /static/js/form.js HTTP/1.1" 200 -
+2026-01-19 21:10:33,349 | INFO | 127.0.0.1 - - [19/Jan/2026 21:10:33] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 21:10:33,447 | INFO | 127.0.0.1 - - [19/Jan/2026 21:10:33] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 21:10:33,451 | INFO | 127.0.0.1 - - [19/Jan/2026 21:10:33] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-19 21:10:33,458 | INFO | 127.0.0.1 - - [19/Jan/2026 21:10:33] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-19 21:10:33,463 | INFO | 127.0.0.1 - - [19/Jan/2026 21:10:33] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-19 21:10:33,463 | INFO | 127.0.0.1 - - [19/Jan/2026 21:10:33] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-19 21:16:57,921 | INFO | 127.0.0.1 - - [19/Jan/2026 21:16:57] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-19 21:16:57,968 | INFO | 127.0.0.1 - - [19/Jan/2026 21:16:57] "GET /static/css/form_02.css HTTP/1.1" 200 -
+2026-01-19 21:16:58,055 | INFO | 127.0.0.1 - - [19/Jan/2026 21:16:58] "[36mGET /static/js/form_02.js HTTP/1.1[0m" 304 -
+2026-01-19 21:17:02,671 | INFO | 127.0.0.1 - - [19/Jan/2026 21:17:02] "GET /dashboard HTTP/1.1" 200 -
+2026-01-19 21:17:02,716 | INFO | 127.0.0.1 - - [19/Jan/2026 21:17:02] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-19 21:17:02,716 | INFO | 127.0.0.1 - - [19/Jan/2026 21:17:02] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-19 21:17:02,724 | INFO | 127.0.0.1 - - [19/Jan/2026 21:17:02] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-19 21:17:02,730 | INFO | 127.0.0.1 - - [19/Jan/2026 21:17:02] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-19 21:17:02,730 | INFO | 127.0.0.1 - - [19/Jan/2026 21:17:02] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-19 21:19:33,719 | INFO | 127.0.0.1 - - [19/Jan/2026 21:19:33] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-19 21:19:33,779 | INFO | 127.0.0.1 - - [19/Jan/2026 21:19:33] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-19 21:19:33,783 | INFO | 127.0.0.1 - - [19/Jan/2026 21:19:33] "[36mGET /static/js/form_02.js HTTP/1.1[0m" 304 -
+2026-01-19 21:19:39,055 | INFO | 127.0.0.1 - - [19/Jan/2026 21:19:39] "GET /laporan-insiden HTTP/1.1" 200 -
+2026-01-19 21:19:39,091 | INFO | 127.0.0.1 - - [19/Jan/2026 21:19:39] "[36mGET /static/css/form_03.css HTTP/1.1[0m" 304 -
+2026-01-19 21:19:39,127 | INFO | 127.0.0.1 - - [19/Jan/2026 21:19:39] "[36mGET /static/js/signature.js HTTP/1.1[0m" 304 -
+2026-01-19 21:19:39,139 | INFO | 127.0.0.1 - - [19/Jan/2026 21:19:39] "[36mGET /static/js/form_03.js HTTP/1.1[0m" 304 -
+2026-01-20 07:51:15,945 | INFO | 127.0.0.1 - - [20/Jan/2026 07:51:15] "GET /usulan-perubahan/baru HTTP/1.1" 200 -
+2026-01-20 07:51:16,002 | INFO | 127.0.0.1 - - [20/Jan/2026 07:51:16] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 07:51:16,012 | INFO | 127.0.0.1 - - [20/Jan/2026 07:51:16] "[36mGET /static/css/form.css HTTP/1.1[0m" 304 -
+2026-01-20 07:51:16,017 | INFO | 127.0.0.1 - - [20/Jan/2026 07:51:16] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2026-01-20 07:51:16,029 | INFO | 127.0.0.1 - - [20/Jan/2026 07:51:16] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2026-01-20 07:51:16,095 | INFO | 127.0.0.1 - - [20/Jan/2026 07:51:16] "GET /static/js/form.js HTTP/1.1" 200 -
+2026-01-20 07:52:08,184 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:08] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 07:52:08,245 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:08] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 07:52:08,257 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:08] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 07:52:08,257 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:08] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 07:52:08,259 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:08] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 07:52:08,268 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:08] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 07:52:35,257 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:35] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 07:52:35,293 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:35] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 07:52:35,297 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:35] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 07:52:35,304 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:35] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 07:52:35,311 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:35] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 07:52:35,311 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:35] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 07:52:36,679 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:36] "GET /usulan-perubahan/baru HTTP/1.1" 200 -
+2026-01-20 07:52:36,718 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:36] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 07:52:36,724 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:36] "[36mGET /static/css/form.css HTTP/1.1[0m" 304 -
+2026-01-20 07:52:36,728 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:36] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2026-01-20 07:52:36,730 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:36] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2026-01-20 07:52:36,840 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:36] "GET /static/js/form.js HTTP/1.1" 200 -
+2026-01-20 07:52:45,206 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:45] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 07:52:45,236 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:45] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 07:52:45,236 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:45] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 07:52:45,236 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:45] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 07:52:45,247 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:45] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 07:52:45,252 | INFO | 127.0.0.1 - - [20/Jan/2026 07:52:45] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 08:39:27,484 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.9.7.114:5000
+2026-01-20 08:39:27,484 | INFO | [33mPress CTRL+C to quit[0m
+2026-01-20 08:39:27,490 | INFO |  * Restarting with stat
+2026-01-20 08:39:28,628 | WARNING |  * Debugger is active!
+2026-01-20 08:39:28,639 | INFO |  * Debugger PIN: 220-703-075
+2026-01-20 08:39:31,755 | INFO | 127.0.0.1 - - [20/Jan/2026 08:39:31] "[32mGET / HTTP/1.1[0m" 302 -
+2026-01-20 08:39:31,944 | INFO | 127.0.0.1 - - [20/Jan/2026 08:39:31] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 08:39:31,991 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-20 08:39:32,196 | INFO |  * Restarting with stat
+2026-01-20 08:39:33,366 | WARNING |  * Debugger is active!
+2026-01-20 08:39:33,366 | INFO |  * Debugger PIN: 220-703-075
+2026-01-20 08:39:33,735 | INFO | 127.0.0.1 - - [20/Jan/2026 08:39:33] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 08:39:33,829 | INFO | 127.0.0.1 - - [20/Jan/2026 08:39:33] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 08:39:33,829 | INFO | 127.0.0.1 - - [20/Jan/2026 08:39:33] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 08:39:33,845 | INFO | 127.0.0.1 - - [20/Jan/2026 08:39:33] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 08:39:33,860 | INFO | 127.0.0.1 - - [20/Jan/2026 08:39:33] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 08:39:36,079 | INFO | 127.0.0.1 - - [20/Jan/2026 08:39:36] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 08:39:36,126 | INFO | 127.0.0.1 - - [20/Jan/2026 08:39:36] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 08:39:36,173 | INFO | 127.0.0.1 - - [20/Jan/2026 08:39:36] "[36mGET /static/js/form_02.js HTTP/1.1[0m" 304 -
+2026-01-20 08:40:07,194 | INFO | 127.0.0.1 - - [20/Jan/2026 08:40:07] "[33mPOST /surat-pernyataan/generate HTTP/1.1[0m" 404 -
+2026-01-20 08:40:32,461 | INFO | 127.0.0.1 - - [20/Jan/2026 08:40:32] "[35m[1mGET /dashboard HTTP/1.1[0m" 500 -
+2026-01-20 08:40:32,524 | INFO | 127.0.0.1 - - [20/Jan/2026 08:40:32] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2026-01-20 08:40:32,545 | INFO | 127.0.0.1 - - [20/Jan/2026 08:40:32] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2026-01-20 08:40:32,560 | INFO | 127.0.0.1 - - [20/Jan/2026 08:40:32] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2026-01-20 08:47:38,445 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-20 08:47:38,700 | INFO |  * Restarting with stat
+2026-01-20 08:47:41,587 | WARNING |  * Debugger is active!
+2026-01-20 08:47:41,606 | INFO |  * Debugger PIN: 220-703-075
+2026-01-20 08:49:11,163 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.9.7.114:5000
+2026-01-20 08:49:11,164 | INFO | [33mPress CTRL+C to quit[0m
+2026-01-20 08:49:11,167 | INFO |  * Restarting with stat
+2026-01-20 08:49:13,199 | WARNING |  * Debugger is active!
+2026-01-20 08:49:13,217 | INFO |  * Debugger PIN: 220-703-075
+2026-01-20 08:49:16,796 | INFO | 127.0.0.1 - - [20/Jan/2026 08:49:16] "[32mGET / HTTP/1.1[0m" 302 -
+2026-01-20 08:49:17,186 | INFO | 127.0.0.1 - - [20/Jan/2026 08:49:17] "[35m[1mGET /dashboard HTTP/1.1[0m" 500 -
+2026-01-20 08:49:17,815 | INFO | 127.0.0.1 - - [20/Jan/2026 08:49:17] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2026-01-20 08:49:17,850 | INFO | 127.0.0.1 - - [20/Jan/2026 08:49:17] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2026-01-20 08:49:18,054 | INFO | 127.0.0.1 - - [20/Jan/2026 08:49:18] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2026-01-20 08:51:42,628 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.9.7.114:5000
+2026-01-20 08:51:42,628 | INFO | [33mPress CTRL+C to quit[0m
+2026-01-20 08:51:42,630 | INFO |  * Restarting with stat
+2026-01-20 08:51:43,744 | WARNING |  * Debugger is active!
+2026-01-20 08:51:43,749 | INFO |  * Debugger PIN: 220-703-075
+2026-01-20 08:51:47,160 | INFO | 127.0.0.1 - - [20/Jan/2026 08:51:47] "[32mGET / HTTP/1.1[0m" 302 -
+2026-01-20 08:51:47,450 | INFO | 127.0.0.1 - - [20/Jan/2026 08:51:47] "[35m[1mGET /dashboard HTTP/1.1[0m" 500 -
+2026-01-20 08:51:47,658 | INFO | 127.0.0.1 - - [20/Jan/2026 08:51:47] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2026-01-20 08:51:47,679 | INFO | 127.0.0.1 - - [20/Jan/2026 08:51:47] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2026-01-20 08:51:47,700 | INFO | 127.0.0.1 - - [20/Jan/2026 08:51:47] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2026-01-20 08:53:37,554 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.9.7.114:5000
+2026-01-20 08:53:37,554 | INFO | [33mPress CTRL+C to quit[0m
+2026-01-20 08:53:37,561 | INFO |  * Restarting with stat
+2026-01-20 08:53:38,715 | WARNING |  * Debugger is active!
+2026-01-20 08:53:38,715 | INFO |  * Debugger PIN: 220-703-075
+2026-01-20 08:53:41,562 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:41] "[32mGET / HTTP/1.1[0m" 302 -
+2026-01-20 08:53:41,644 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:41] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 08:53:41,926 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:41] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 08:53:41,943 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:41] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 08:53:41,989 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:41] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 08:53:42,036 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:42] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 08:53:42,036 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:42] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 08:53:42,648 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:42] "[32mGET / HTTP/1.1[0m" 302 -
+2026-01-20 08:53:42,695 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:42] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 08:53:42,724 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:42] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 08:53:42,728 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:42] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 08:53:42,728 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:42] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 08:53:42,728 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:42] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 08:53:42,728 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:42] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 08:53:43,094 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-20 08:53:43,235 | INFO |  * Restarting with stat
+2026-01-20 08:53:44,365 | WARNING |  * Debugger is active!
+2026-01-20 08:53:44,366 | INFO |  * Debugger PIN: 220-703-075
+2026-01-20 08:53:48,339 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:48] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 08:53:48,533 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:48] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 08:53:48,564 | INFO | 127.0.0.1 - - [20/Jan/2026 08:53:48] "GET /static/js/form_02.js HTTP/1.1" 200 -
+2026-01-20 08:54:01,802 | INFO | 127.0.0.1 - - [20/Jan/2026 08:54:01] "POST /surat-pernyataan/generate HTTP/1.1" 200 -
+2026-01-20 08:54:03,482 | INFO | 127.0.0.1 - - [20/Jan/2026 08:54:03] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 08:54:03,519 | INFO | 127.0.0.1 - - [20/Jan/2026 08:54:03] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 08:54:03,526 | INFO | 127.0.0.1 - - [20/Jan/2026 08:54:03] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 08:54:03,528 | INFO | 127.0.0.1 - - [20/Jan/2026 08:54:03] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 08:54:03,528 | INFO | 127.0.0.1 - - [20/Jan/2026 08:54:03] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 08:54:03,528 | INFO | 127.0.0.1 - - [20/Jan/2026 08:54:03] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 08:54:09,309 | INFO | 127.0.0.1 - - [20/Jan/2026 08:54:09] "[32mGET /surat-pernyataan/download/13 HTTP/1.1[0m" 302 -
+2026-01-20 08:54:09,382 | INFO | 127.0.0.1 - - [20/Jan/2026 08:54:09] "GET /surat-pernyataan/generate-pdf/13 HTTP/1.1" 200 -
+2026-01-20 08:54:17,607 | INFO | 127.0.0.1 - - [20/Jan/2026 08:54:17] "[32mGET /surat-pernyataan/download/13 HTTP/1.1[0m" 302 -
+2026-01-20 08:54:17,727 | INFO | 127.0.0.1 - - [20/Jan/2026 08:54:17] "GET /surat-pernyataan/generate-pdf/13 HTTP/1.1" 200 -
+2026-01-20 08:54:43,385 | INFO | 127.0.0.1 - - [20/Jan/2026 08:54:43] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 08:54:43,417 | INFO | 127.0.0.1 - - [20/Jan/2026 08:54:43] "[36mGET /static/js/form_02.js HTTP/1.1[0m" 304 -
+2026-01-20 08:54:43,417 | INFO | 127.0.0.1 - - [20/Jan/2026 08:54:43] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 09:06:12,874 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:12] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:06:12,905 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:12] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:06:12,905 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:12] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:06:12,921 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:12] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:06:12,921 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:12] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:06:12,921 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:12] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:06:14,241 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:14] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:06:14,267 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:14] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:06:14,273 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:14] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:06:14,273 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:14] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:06:14,273 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:14] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:06:14,273 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:14] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:06:15,530 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:15] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 09:06:15,562 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:15] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 09:06:15,609 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:15] "GET /static/js/form_02.js HTTP/1.1" 200 -
+2026-01-20 09:06:18,975 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:18] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 09:06:18,995 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:18] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 09:06:18,995 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:18] "[36mGET /static/js/form_02.js HTTP/1.1[0m" 304 -
+2026-01-20 09:06:32,611 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:32] "POST /surat-pernyataan/generate HTTP/1.1" 200 -
+2026-01-20 09:06:34,169 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:34] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:06:34,212 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:34] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:06:34,219 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:34] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:06:34,219 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:34] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:06:34,219 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:34] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:06:34,229 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:34] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:06:37,651 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:37] "[32mGET /surat-pernyataan/download/14 HTTP/1.1[0m" 302 -
+2026-01-20 09:06:37,720 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:37] "GET /surat-pernyataan/generate-pdf/14 HTTP/1.1" 200 -
+2026-01-20 09:06:52,686 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:52] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 09:06:52,718 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:52] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 09:06:52,718 | INFO | 127.0.0.1 - - [20/Jan/2026 09:06:52] "[36mGET /static/js/form_02.js HTTP/1.1[0m" 304 -
+2026-01-20 09:12:48,147 | INFO | 127.0.0.1 - - [20/Jan/2026 09:12:48] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 09:12:48,178 | INFO | 127.0.0.1 - - [20/Jan/2026 09:12:48] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 09:12:48,178 | INFO | 127.0.0.1 - - [20/Jan/2026 09:12:48] "[36mGET /static/js/form_02.js HTTP/1.1[0m" 304 -
+2026-01-20 09:12:55,281 | INFO | 127.0.0.1 - - [20/Jan/2026 09:12:55] "POST /surat-pernyataan/generate HTTP/1.1" 200 -
+2026-01-20 09:12:56,976 | INFO | 127.0.0.1 - - [20/Jan/2026 09:12:56] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:12:57,023 | INFO | 127.0.0.1 - - [20/Jan/2026 09:12:57] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:12:57,023 | INFO | 127.0.0.1 - - [20/Jan/2026 09:12:57] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:12:57,039 | INFO | 127.0.0.1 - - [20/Jan/2026 09:12:57] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:12:57,039 | INFO | 127.0.0.1 - - [20/Jan/2026 09:12:57] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:12:57,039 | INFO | 127.0.0.1 - - [20/Jan/2026 09:12:57] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:13:01,183 | INFO | 127.0.0.1 - - [20/Jan/2026 09:13:01] "[32mGET /surat-pernyataan/download/15 HTTP/1.1[0m" 302 -
+2026-01-20 09:13:01,247 | INFO | 127.0.0.1 - - [20/Jan/2026 09:13:01] "GET /surat-pernyataan/generate-pdf/15 HTTP/1.1" 200 -
+2026-01-20 09:15:49,709 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-20 09:15:49,979 | INFO |  * Restarting with stat
+2026-01-20 09:15:51,372 | WARNING |  * Debugger is active!
+2026-01-20 09:15:51,380 | INFO |  * Debugger PIN: 220-703-075
+2026-01-20 09:16:06,304 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-20 09:16:06,459 | INFO |  * Restarting with stat
+2026-01-20 09:16:07,715 | WARNING |  * Debugger is active!
+2026-01-20 09:16:07,725 | INFO |  * Debugger PIN: 220-703-075
+2026-01-20 09:17:29,602 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:29] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:17:29,869 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:29] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:17:29,916 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:29] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:17:29,947 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:29] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:17:29,947 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:29] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:17:29,995 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:29] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:17:32,714 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:32] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 09:17:32,745 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:32] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 09:17:32,745 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:32] "[36mGET /static/js/form_02.js HTTP/1.1[0m" 304 -
+2026-01-20 09:17:41,561 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:41] "POST /surat-pernyataan/generate HTTP/1.1" 200 -
+2026-01-20 09:17:43,093 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:43] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:17:43,125 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:43] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:17:43,133 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:43] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:17:43,133 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:43] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:17:43,141 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:43] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:17:43,141 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:43] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:17:46,009 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:46] "[32mGET /surat-pernyataan/download/16 HTTP/1.1[0m" 302 -
+2026-01-20 09:17:46,095 | INFO | 127.0.0.1 - - [20/Jan/2026 09:17:46] "GET /surat-pernyataan/generate-pdf/16 HTTP/1.1" 200 -
+2026-01-20 09:18:02,035 | INFO | 127.0.0.1 - - [20/Jan/2026 09:18:02] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 09:18:02,071 | INFO | 127.0.0.1 - - [20/Jan/2026 09:18:02] "[36mGET /static/js/form_02.js HTTP/1.1[0m" 304 -
+2026-01-20 09:18:02,071 | INFO | 127.0.0.1 - - [20/Jan/2026 09:18:02] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 09:18:37,066 | INFO | 127.0.0.1 - - [20/Jan/2026 09:18:37] "POST /surat-pernyataan/generate HTTP/1.1" 200 -
+2026-01-20 09:18:38,645 | INFO | 127.0.0.1 - - [20/Jan/2026 09:18:38] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:18:38,676 | INFO | 127.0.0.1 - - [20/Jan/2026 09:18:38] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:18:38,676 | INFO | 127.0.0.1 - - [20/Jan/2026 09:18:38] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:18:38,692 | INFO | 127.0.0.1 - - [20/Jan/2026 09:18:38] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:18:38,692 | INFO | 127.0.0.1 - - [20/Jan/2026 09:18:38] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:18:38,698 | INFO | 127.0.0.1 - - [20/Jan/2026 09:18:38] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:18:42,209 | INFO | 127.0.0.1 - - [20/Jan/2026 09:18:42] "[33mGET /usulan-perubahan/view/37 HTTP/1.1[0m" 404 -
+2026-01-20 09:18:42,260 | INFO | 127.0.0.1 - - [20/Jan/2026 09:18:42] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:18:46,879 | INFO | 127.0.0.1 - - [20/Jan/2026 09:18:46] "[32mGET /surat-pernyataan/download/17 HTTP/1.1[0m" 302 -
+2026-01-20 09:18:46,938 | INFO | 127.0.0.1 - - [20/Jan/2026 09:18:46] "GET /surat-pernyataan/generate-pdf/17 HTTP/1.1" 200 -
+2026-01-20 09:20:11,641 | INFO | 127.0.0.1 - - [20/Jan/2026 09:20:11] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 09:20:11,688 | INFO | 127.0.0.1 - - [20/Jan/2026 09:20:11] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 09:20:11,688 | INFO | 127.0.0.1 - - [20/Jan/2026 09:20:11] "[36mGET /static/js/form_02.js HTTP/1.1[0m" 304 -
+2026-01-20 09:20:13,482 | INFO | 127.0.0.1 - - [20/Jan/2026 09:20:13] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 09:20:13,498 | INFO | 127.0.0.1 - - [20/Jan/2026 09:20:13] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 09:20:13,498 | INFO | 127.0.0.1 - - [20/Jan/2026 09:20:13] "[36mGET /static/js/form_02.js HTTP/1.1[0m" 304 -
+2026-01-20 09:20:26,763 | INFO | 127.0.0.1 - - [20/Jan/2026 09:20:26] "POST /surat-pernyataan/generate HTTP/1.1" 200 -
+2026-01-20 09:20:28,310 | INFO | 127.0.0.1 - - [20/Jan/2026 09:20:28] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:20:28,353 | INFO | 127.0.0.1 - - [20/Jan/2026 09:20:28] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:20:28,353 | INFO | 127.0.0.1 - - [20/Jan/2026 09:20:28] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:20:28,358 | INFO | 127.0.0.1 - - [20/Jan/2026 09:20:28] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:20:28,358 | INFO | 127.0.0.1 - - [20/Jan/2026 09:20:28] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:20:28,358 | INFO | 127.0.0.1 - - [20/Jan/2026 09:20:28] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:20:33,473 | INFO | 127.0.0.1 - - [20/Jan/2026 09:20:33] "[32mGET /surat-pernyataan/download/18 HTTP/1.1[0m" 302 -
+2026-01-20 09:20:33,522 | INFO | 127.0.0.1 - - [20/Jan/2026 09:20:33] "GET /surat-pernyataan/generate-pdf/18 HTTP/1.1" 200 -
+2026-01-20 09:26:30,345 | INFO | 127.0.0.1 - - [20/Jan/2026 09:26:30] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:26:30,375 | INFO | 127.0.0.1 - - [20/Jan/2026 09:26:30] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:26:30,375 | INFO | 127.0.0.1 - - [20/Jan/2026 09:26:30] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:26:30,391 | INFO | 127.0.0.1 - - [20/Jan/2026 09:26:30] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:26:30,391 | INFO | 127.0.0.1 - - [20/Jan/2026 09:26:30] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:26:30,391 | INFO | 127.0.0.1 - - [20/Jan/2026 09:26:30] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:26:31,633 | INFO | 127.0.0.1 - - [20/Jan/2026 09:26:31] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 09:26:31,681 | INFO | 127.0.0.1 - - [20/Jan/2026 09:26:31] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 09:26:31,712 | INFO | 127.0.0.1 - - [20/Jan/2026 09:26:31] "GET /static/js/form_02.js HTTP/1.1" 200 -
+2026-01-20 09:27:03,979 | INFO | 127.0.0.1 - - [20/Jan/2026 09:27:03] "POST /surat-pernyataan/generate-template HTTP/1.1" 200 -
+2026-01-20 09:27:06,999 | INFO | 127.0.0.1 - - [20/Jan/2026 09:27:06] "GET /surat-pernyataan?new=true HTTP/1.1" 200 -
+2026-01-20 09:27:07,040 | INFO | 127.0.0.1 - - [20/Jan/2026 09:27:07] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 09:27:07,040 | INFO | 127.0.0.1 - - [20/Jan/2026 09:27:07] "[36mGET /static/js/form_02.js HTTP/1.1[0m" 304 -
+2026-01-20 09:27:09,665 | INFO | 127.0.0.1 - - [20/Jan/2026 09:27:09] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:27:09,696 | INFO | 127.0.0.1 - - [20/Jan/2026 09:27:09] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:27:09,696 | INFO | 127.0.0.1 - - [20/Jan/2026 09:27:09] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:27:09,696 | INFO | 127.0.0.1 - - [20/Jan/2026 09:27:09] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:27:09,696 | INFO | 127.0.0.1 - - [20/Jan/2026 09:27:09] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:27:09,712 | INFO | 127.0.0.1 - - [20/Jan/2026 09:27:09] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:27:13,236 | INFO | 127.0.0.1 - - [20/Jan/2026 09:27:13] "[32mGET /surat-pernyataan/download/19 HTTP/1.1[0m" 302 -
+2026-01-20 09:27:13,286 | INFO | 127.0.0.1 - - [20/Jan/2026 09:27:13] "GET /surat-pernyataan/generate-pdf/19 HTTP/1.1" 200 -
+2026-01-20 09:27:45,543 | INFO | 127.0.0.1 - - [20/Jan/2026 09:27:45] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 09:27:45,574 | INFO | 127.0.0.1 - - [20/Jan/2026 09:27:45] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 09:27:45,574 | INFO | 127.0.0.1 - - [20/Jan/2026 09:27:45] "[36mGET /static/js/form_02.js HTTP/1.1[0m" 304 -
+2026-01-20 09:34:00,030 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:00] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:34:00,059 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:00] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:34:00,061 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:00] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:34:00,061 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:00] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:34:00,070 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:00] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:34:00,070 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:00] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:34:01,486 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:01] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 09:34:01,522 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:01] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 09:34:01,554 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:01] "GET /static/js/form_02.js HTTP/1.1" 200 -
+2026-01-20 09:34:36,820 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:36] "POST /surat-pernyataan/generate-template HTTP/1.1" 200 -
+2026-01-20 09:34:38,861 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:38] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:34:38,900 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:38] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:34:38,900 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:38] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:34:38,900 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:38] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:34:38,909 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:38] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:34:38,910 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:38] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:34:44,153 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:44] "[32mGET /surat-pernyataan/download/20 HTTP/1.1[0m" 302 -
+2026-01-20 09:34:44,220 | INFO | 127.0.0.1 - - [20/Jan/2026 09:34:44] "GET /surat-pernyataan/generate-pdf/20 HTTP/1.1" 200 -
+2026-01-20 09:35:49,610 | INFO | 127.0.0.1 - - [20/Jan/2026 09:35:49] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 09:35:49,650 | INFO | 127.0.0.1 - - [20/Jan/2026 09:35:49] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 09:35:49,650 | INFO | 127.0.0.1 - - [20/Jan/2026 09:35:49] "[36mGET /static/js/form_02.js HTTP/1.1[0m" 304 -
+2026-01-20 09:36:24,882 | INFO | 127.0.0.1 - - [20/Jan/2026 09:36:24] "POST /surat-pernyataan/generate-template HTTP/1.1" 200 -
+2026-01-20 09:36:26,920 | INFO | 127.0.0.1 - - [20/Jan/2026 09:36:26] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:36:26,950 | INFO | 127.0.0.1 - - [20/Jan/2026 09:36:26] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:36:26,950 | INFO | 127.0.0.1 - - [20/Jan/2026 09:36:26] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:36:26,950 | INFO | 127.0.0.1 - - [20/Jan/2026 09:36:26] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:36:26,961 | INFO | 127.0.0.1 - - [20/Jan/2026 09:36:26] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:36:26,961 | INFO | 127.0.0.1 - - [20/Jan/2026 09:36:26] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:36:32,471 | INFO | 127.0.0.1 - - [20/Jan/2026 09:36:32] "[32mGET /surat-pernyataan/download/21 HTTP/1.1[0m" 302 -
+2026-01-20 09:36:32,540 | INFO | 127.0.0.1 - - [20/Jan/2026 09:36:32] "GET /surat-pernyataan/generate-pdf/21 HTTP/1.1" 200 -
+2026-01-20 09:42:15,491 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-20 09:42:15,622 | INFO |  * Restarting with stat
+2026-01-20 09:42:16,812 | WARNING |  * Debugger is active!
+2026-01-20 09:42:16,820 | INFO |  * Debugger PIN: 220-703-075
+2026-01-20 09:42:55,230 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-20 09:42:55,393 | INFO |  * Restarting with stat
+2026-01-20 09:42:56,643 | WARNING |  * Debugger is active!
+2026-01-20 09:42:56,654 | INFO |  * Debugger PIN: 220-703-075
+2026-01-20 09:43:13,311 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:13] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:43:13,621 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:13] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:43:13,631 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:13] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:43:13,662 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:13] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:43:13,712 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:13] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:43:13,712 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:13] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:43:18,367 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:18] "[32mGET /surat-pernyataan/download/21 HTTP/1.1[0m" 302 -
+2026-01-20 09:43:20,242 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:20] "[32mGET /surat-pernyataan/download/21 HTTP/1.1[0m" 302 -
+2026-01-20 09:43:20,346 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:20] "GET /surat-pernyataan/generate-pdf/21 HTTP/1.1" 200 -
+2026-01-20 09:43:20,591 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:20] "GET /surat-pernyataan/generate-pdf/21 HTTP/1.1" 200 -
+2026-01-20 09:43:24,039 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:24] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 09:43:24,063 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:24] "[36mGET /static/js/form_02.js HTTP/1.1[0m" 304 -
+2026-01-20 09:43:24,067 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:24] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 09:43:55,645 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:55] "POST /surat-pernyataan/generate-template HTTP/1.1" 200 -
+2026-01-20 09:43:57,752 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:57] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:43:57,782 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:57] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:43:57,792 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:57] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:43:57,792 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:57] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:43:57,797 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:57] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:43:57,802 | INFO | 127.0.0.1 - - [20/Jan/2026 09:43:57] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:44:01,199 | INFO | 127.0.0.1 - - [20/Jan/2026 09:44:01] "[32mGET /surat-pernyataan/download/22 HTTP/1.1[0m" 302 -
+2026-01-20 09:44:01,267 | INFO | 127.0.0.1 - - [20/Jan/2026 09:44:01] "GET /surat-pernyataan/generate-pdf/22 HTTP/1.1" 200 -
+2026-01-20 09:44:47,222 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-20 09:44:47,447 | INFO |  * Restarting with stat
+2026-01-20 09:44:48,756 | WARNING |  * Debugger is active!
+2026-01-20 09:44:48,767 | INFO |  * Debugger PIN: 220-703-075
+2026-01-20 09:52:33,699 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-20 09:52:33,923 | INFO |  * Restarting with stat
+2026-01-20 09:52:36,474 | WARNING |  * Debugger is active!
+2026-01-20 09:52:36,497 | INFO |  * Debugger PIN: 220-703-075
+2026-01-20 09:53:10,062 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-20 09:53:10,292 | INFO |  * Restarting with stat
+2026-01-20 09:53:12,768 | WARNING |  * Debugger is active!
+2026-01-20 09:53:12,782 | INFO |  * Debugger PIN: 220-703-075
+2026-01-20 09:53:37,692 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-20 09:53:38,006 | INFO |  * Restarting with stat
+2026-01-20 09:53:41,857 | WARNING |  * Debugger is active!
+2026-01-20 09:53:41,877 | INFO |  * Debugger PIN: 220-703-075
+2026-01-20 09:56:50,721 | INFO | 127.0.0.1 - - [20/Jan/2026 09:56:50] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:56:51,034 | INFO | 127.0.0.1 - - [20/Jan/2026 09:56:51] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:56:51,065 | INFO | 127.0.0.1 - - [20/Jan/2026 09:56:51] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:56:51,127 | INFO | 127.0.0.1 - - [20/Jan/2026 09:56:51] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:56:51,173 | INFO | 127.0.0.1 - - [20/Jan/2026 09:56:51] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:56:51,177 | INFO | 127.0.0.1 - - [20/Jan/2026 09:56:51] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:56:52,681 | INFO | 127.0.0.1 - - [20/Jan/2026 09:56:52] "[32mGET /surat-pernyataan/download-pdf/22 HTTP/1.1[0m" 302 -
+2026-01-20 09:56:52,692 | INFO | 127.0.0.1 - - [20/Jan/2026 09:56:52] "GET /surat-pernyataan/dashboard HTTP/1.1" 200 -
+2026-01-20 09:56:52,732 | INFO | 127.0.0.1 - - [20/Jan/2026 09:56:52] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:56:52,740 | INFO | 127.0.0.1 - - [20/Jan/2026 09:56:52] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:56:52,740 | INFO | 127.0.0.1 - - [20/Jan/2026 09:56:52] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:56:52,740 | INFO | 127.0.0.1 - - [20/Jan/2026 09:56:52] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:56:52,748 | INFO | 127.0.0.1 - - [20/Jan/2026 09:56:52] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:57:02,012 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:02] "[32mGET /surat-pernyataan/download-pdf/22 HTTP/1.1[0m" 302 -
+2026-01-20 09:57:02,026 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:02] "GET /surat-pernyataan/dashboard HTTP/1.1" 200 -
+2026-01-20 09:57:02,052 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:02] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:02,056 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:02] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:02,059 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:02] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:02,063 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:02] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:57:02,063 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:02] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:57:05,164 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:05] "GET /surat-pernyataan/dashboard HTTP/1.1" 200 -
+2026-01-20 09:57:05,180 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:05] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:05,182 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:05] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:05,188 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:05] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:05,188 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:05] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:57:05,192 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:05] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:57:06,062 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:06] "GET /surat-pernyataan/dashboard HTTP/1.1" 200 -
+2026-01-20 09:57:06,092 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:06] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:06,093 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:06] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:06,093 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:06] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:06,102 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:06] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:57:06,102 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:06] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:57:06,897 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:06] "GET /surat-pernyataan/dashboard HTTP/1.1" 200 -
+2026-01-20 09:57:06,922 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:06] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:06,922 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:06] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:06,932 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:06] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:06,932 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:06] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:57:06,937 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:06] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:57:07,127 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:07] "GET /surat-pernyataan/dashboard HTTP/1.1" 200 -
+2026-01-20 09:57:07,152 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:07] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:07,152 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:07] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:07,152 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:07] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:07,162 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:07] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:57:07,162 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:07] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:57:07,342 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:07] "GET /surat-pernyataan/dashboard HTTP/1.1" 200 -
+2026-01-20 09:57:07,392 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:07] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:07,392 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:07] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:07,398 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:07] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:07,398 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:07] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:57:07,402 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:07] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:57:12,295 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:12] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:57:12,332 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:12] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:12,336 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:12] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:12,336 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:12] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:12,336 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:12] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:57:12,344 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:12] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:57:15,629 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:15] "[32mGET /surat-pernyataan/download-pdf/22 HTTP/1.1[0m" 302 -
+2026-01-20 09:57:15,646 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:15] "GET /surat-pernyataan/dashboard HTTP/1.1" 200 -
+2026-01-20 09:57:15,672 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:15] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:15,672 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:15] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:15,682 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:15] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:15,682 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:15] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:57:15,682 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:15] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:57:20,392 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:20] "[32mGET /surat-pernyataan/download-pdf/22 HTTP/1.1[0m" 302 -
+2026-01-20 09:57:20,399 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:20] "GET /surat-pernyataan/dashboard HTTP/1.1" 200 -
+2026-01-20 09:57:20,423 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:20] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:20,428 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:20] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:20,432 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:20] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:20,432 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:20] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:57:20,432 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:20] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:57:33,702 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:33] "[32mGET /surat-pernyataan/download-pdf/22 HTTP/1.1[0m" 302 -
+2026-01-20 09:57:33,716 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:33] "GET /surat-pernyataan/dashboard HTTP/1.1" 200 -
+2026-01-20 09:57:33,745 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:33] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:33,745 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:33] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:33,752 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:33] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:57:33,752 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:33] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:57:33,752 | INFO | 127.0.0.1 - - [20/Jan/2026 09:57:33] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:58:46,860 | INFO | 127.0.0.1 - - [20/Jan/2026 09:58:46] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:58:46,887 | INFO | 127.0.0.1 - - [20/Jan/2026 09:58:46] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:58:46,889 | INFO | 127.0.0.1 - - [20/Jan/2026 09:58:46] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:58:46,892 | INFO | 127.0.0.1 - - [20/Jan/2026 09:58:46] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:58:46,897 | INFO | 127.0.0.1 - - [20/Jan/2026 09:58:46] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:58:46,897 | INFO | 127.0.0.1 - - [20/Jan/2026 09:58:46] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:58:48,374 | INFO | 127.0.0.1 - - [20/Jan/2026 09:58:48] "[32mGET /surat-pernyataan/download/22 HTTP/1.1[0m" 302 -
+2026-01-20 09:58:48,392 | INFO | 127.0.0.1 - - [20/Jan/2026 09:58:48] "[32mGET /surat-pernyataan/generate-pdf/22 HTTP/1.1[0m" 302 -
+2026-01-20 09:58:48,422 | INFO | 127.0.0.1 - - [20/Jan/2026 09:58:48] "[35m[1mGET /surat-pernyataan/dashboard HTTP/1.1[0m" 500 -
+2026-01-20 09:58:48,460 | INFO | 127.0.0.1 - - [20/Jan/2026 09:58:48] "[36mGET /surat-pernyataan/dashboard?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:58:48,461 | INFO | 127.0.0.1 - - [20/Jan/2026 09:58:48] "[36mGET /surat-pernyataan/dashboard?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2026-01-20 09:58:48,473 | INFO | 127.0.0.1 - - [20/Jan/2026 09:58:48] "[36mGET /surat-pernyataan/dashboard?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2026-01-20 09:59:03,532 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:03] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:59:03,562 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:03] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:59:03,566 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:03] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:59:03,570 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:03] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:59:03,570 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:03] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:59:03,574 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:03] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:59:04,711 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:04] "[32mGET /surat-pernyataan/download/22 HTTP/1.1[0m" 302 -
+2026-01-20 09:59:04,719 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:04] "[32mGET /surat-pernyataan/generate-pdf/22 HTTP/1.1[0m" 302 -
+2026-01-20 09:59:04,729 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:04] "GET /surat-pernyataan/dashboard HTTP/1.1" 200 -
+2026-01-20 09:59:04,761 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:04] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:59:04,762 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:04] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:59:04,765 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:04] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:59:04,769 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:04] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:59:04,770 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:04] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:59:47,656 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:47] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 09:59:47,676 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:47] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:59:47,681 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:47] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 09:59:47,683 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:47] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 09:59:47,683 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:47] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 09:59:47,683 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:47] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 09:59:49,046 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:49] "[32mGET /surat-pernyataan/download/22 HTTP/1.1[0m" 302 -
+2026-01-20 09:59:49,060 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:49] "[32mGET /surat-pernyataan/generate-pdf/22 HTTP/1.1[0m" 302 -
+2026-01-20 09:59:49,083 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:49] "[35m[1mGET /surat-pernyataan/dashboard HTTP/1.1[0m" 500 -
+2026-01-20 09:59:49,112 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:49] "[36mGET /surat-pernyataan/dashboard?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2026-01-20 09:59:49,112 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:49] "[36mGET /surat-pernyataan/dashboard?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2026-01-20 09:59:49,126 | INFO | 127.0.0.1 - - [20/Jan/2026 09:59:49] "[36mGET /surat-pernyataan/dashboard?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2026-01-20 10:00:15,853 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-20 10:00:16,153 | INFO |  * Restarting with stat
+2026-01-20 10:00:17,599 | WARNING |  * Debugger is active!
+2026-01-20 10:00:17,602 | INFO |  * Debugger PIN: 220-703-075
+2026-01-20 10:00:17,750 | INFO | 127.0.0.1 - - [20/Jan/2026 10:00:17] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 10:00:18,063 | INFO | 127.0.0.1 - - [20/Jan/2026 10:00:18] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 10:00:18,092 | INFO | 127.0.0.1 - - [20/Jan/2026 10:00:18] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 10:00:18,112 | INFO | 127.0.0.1 - - [20/Jan/2026 10:00:18] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 10:00:18,112 | INFO | 127.0.0.1 - - [20/Jan/2026 10:00:18] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 10:00:18,162 | INFO | 127.0.0.1 - - [20/Jan/2026 10:00:18] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 10:00:19,172 | INFO | 127.0.0.1 - - [20/Jan/2026 10:00:19] "[32mGET /surat-pernyataan/download/22 HTTP/1.1[0m" 302 -
+2026-01-20 10:00:21,062 | INFO | 127.0.0.1 - - [20/Jan/2026 10:00:21] "[32mGET /surat-pernyataan/download/22 HTTP/1.1[0m" 302 -
+2026-01-20 10:00:21,179 | INFO | 127.0.0.1 - - [20/Jan/2026 10:00:21] "GET /surat-pernyataan/generate-pdf/22 HTTP/1.1" 200 -
+2026-01-20 10:00:24,284 | INFO | 127.0.0.1 - - [20/Jan/2026 10:00:24] "GET /surat-pernyataan/generate-pdf/22 HTTP/1.1" 200 -
+2026-01-20 10:01:15,308 | INFO | 127.0.0.1 - - [20/Jan/2026 10:01:15] "GET /surat-pernyataan HTTP/1.1" 200 -
+2026-01-20 10:01:15,332 | INFO | 127.0.0.1 - - [20/Jan/2026 10:01:15] "[36mGET /static/css/form_02.css HTTP/1.1[0m" 304 -
+2026-01-20 10:01:15,362 | INFO | 127.0.0.1 - - [20/Jan/2026 10:01:15] "GET /static/js/form_02.js HTTP/1.1" 200 -
+2026-01-20 10:01:25,102 | INFO | 127.0.0.1 - - [20/Jan/2026 10:01:25] "GET /dashboard HTTP/1.1" 200 -
+2026-01-20 10:01:25,142 | INFO | 127.0.0.1 - - [20/Jan/2026 10:01:25] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-20 10:01:25,142 | INFO | 127.0.0.1 - - [20/Jan/2026 10:01:25] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-20 10:01:25,142 | INFO | 127.0.0.1 - - [20/Jan/2026 10:01:25] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-20 10:01:25,142 | INFO | 127.0.0.1 - - [20/Jan/2026 10:01:25] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-20 10:01:25,146 | INFO | 127.0.0.1 - - [20/Jan/2026 10:01:25] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-20 10:01:38,692 | INFO |  * Detected change in 'c:\\Users\\lenovo\\OneDrive\\Documents\\PRAKTEK INDUSTRI\\app.py', reloading
+2026-01-20 10:01:38,843 | INFO |  * Restarting with stat
+2026-01-20 10:01:40,095 | WARNING |  * Debugger is active!
+2026-01-20 10:01:40,102 | INFO |  * Debugger PIN: 220-703-075

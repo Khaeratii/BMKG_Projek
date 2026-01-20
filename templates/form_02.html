@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
@@ -52,9 +52,13 @@
 
       <!-- MAIN FORM -->
       <main class="form-main">
-        <!-- PERBAIKAN: Tambahkan action dan method pada form -->
-        <form id="suratForm" action="/surat-pernyataan/generate" method="POST">
-          <!-- PERBAIKAN: Tambahkan CSRF token -->
+        <!-- PERUBAHAN: Ganti action ke route template -->
+        <form
+          id="suratForm"
+          action="/surat-pernyataan/generate-template"
+          method="POST"
+        >
+          <!-- CSRF Token -->
           <input
             type="hidden"
             name="csrf_token"
@@ -87,6 +91,7 @@
                   <input
                     type="text"
                     name="nama"
+                    id="nama"
                     class="form-input"
                     placeholder="Masukkan nama lengkap"
                     required
@@ -107,6 +112,7 @@
                   <input
                     type="text"
                     name="nip"
+                    id="nip"
                     class="form-input"
                     placeholder="Masukkan NIP atau NIK"
                     required
@@ -128,6 +134,7 @@
                   <input
                     type="text"
                     name="instansi"
+                    id="instansi"
                     class="form-input"
                     placeholder="Contoh: BMKG Wilayah VI Makassar"
                     required
@@ -135,6 +142,24 @@
                   <div class="form-hint">
                     <i class="fas fa-info-circle"></i> Nama instansi tempat
                     bekerja
+                  </div>
+                </div>
+
+                <!-- Jabatan -->
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fas fa-user-tie label-icon"></i>
+                    Jabatan
+                  </label>
+                  <input
+                    type="text"
+                    name="jabatan"
+                    id="jabatan"
+                    class="form-input"
+                    placeholder="Contoh: Staf IT"
+                  />
+                  <div class="form-hint">
+                    <i class="fas fa-info-circle"></i> Jabatan/posisi pekerjaan
                   </div>
                 </div>
 
@@ -147,6 +172,7 @@
                   <input
                     type="text"
                     name="kota"
+                    id="kota"
                     class="form-input"
                     placeholder="Makassar"
                     value="Makassar"
@@ -165,6 +191,7 @@
                   </label>
                   <textarea
                     name="kegiatan"
+                    id="kegiatan"
                     class="form-textarea"
                     placeholder="Deskripsikan kegiatan atau pekerjaan yang dilakukan..."
                     rows="4"
@@ -185,6 +212,7 @@
                   <input
                     type="text"
                     name="periode"
+                    id="periode"
                     class="form-input"
                     placeholder="Contoh: 1 Januari 2024 - 31 Desember 2024"
                     required
@@ -324,6 +352,10 @@
                     <span id="reviewInstansi">-</span>
                   </div>
                   <div class="summary-item">
+                    <label>Jabatan</label>
+                    <span id="reviewJabatan">-</span>
+                  </div>
+                  <div class="summary-item">
                     <label>Status</label>
                     <span class="highlight">Siap Diproses</span>
                   </div>
@@ -412,13 +444,13 @@
                         <i class="fas fa-save"></i> Simpan Draft
                       </button>
 
-                      <!-- PERBAIKAN: Ganti type menjadi submit -->
+                      <!-- Tombol Submit menggunakan template -->
                       <button type="submit" class="btn-submit" id="submitBtn">
-                        <i class="fas fa-file-pdf"></i> Submit File
+                        <i class="fas fa-file-word"></i> Buat dari Template
                       </button>
                     </div>
 
-                    <!-- PERBAIKAN: Tambahkan loading state -->
+                    <!-- Loading state -->
                     <div
                       class="submit-loading"
                       id="submitLoading"
@@ -428,7 +460,7 @@
                       <span>Menyimpan data dan membuat PDF...</span>
                     </div>
 
-                    <!-- PERBAIKAN: Tambahkan error display -->
+                    <!-- Error display -->
                     <div
                       class="submit-error"
                       id="submitError"
@@ -447,7 +479,6 @@
     </div>
 
     <!-- Notification Toast -->
-    <!-- PERBAIKAN: Hapus style display:none -->
     <div class="notification" id="notification">
       <i class="fas fa-check-circle"></i>
       <span id="notificationMessage">Pesan notifikasi</span>
@@ -459,26 +490,60 @@
     <!-- JavaScript -->
     <script src="{{ url_for('static', filename='js/form_02.js') }}"></script>
 
-    <!-- PERBAIKAN: Tambahkan custom JavaScript untuk handle form submission -->
+    <!-- PERUBAHAN: Update JavaScript untuk handle template route -->
     <script>
-      // Inisialisasi form submission handler
       document.addEventListener("DOMContentLoaded", function () {
         const form = document.getElementById("suratForm");
         const submitBtn = document.getElementById("submitBtn");
         const loadingDiv = document.getElementById("submitLoading");
         const errorDiv = document.getElementById("submitError");
 
+        // Fungsi untuk membersihkan draft saat form dimuat
+        function clearOldDraftOnLoad() {
+          try {
+            const currentTime = new Date().getTime();
+            const draft = localStorage.getItem("suratDraft");
+
+            if (draft) {
+              const draftData = JSON.parse(draft);
+
+              // Jika draft lebih dari 1 jam yang lalu, hapus
+              if (draftData.savedAt) {
+                const savedTime = new Date(draftData.savedAt).getTime();
+                const hoursDiff = (currentTime - savedTime) / (1000 * 60 * 60);
+
+                if (hoursDiff > 1) {
+                  localStorage.removeItem("suratDraft");
+                  console.log("🗑️ Old draft cleared (older than 1 hour)");
+                }
+              }
+
+              // Reset form ke kosong
+              if (window.location.search.includes("new=true")) {
+                localStorage.removeItem("suratDraft");
+                form.reset();
+                console.log("🔄 Form reset for new submission");
+              }
+            }
+          } catch (e) {
+            console.log("No draft to clear");
+          }
+        }
+
+        // Panggil fungsi clear draft
+        clearOldDraftOnLoad();
+
         if (form) {
           form.addEventListener("submit", async function (e) {
             e.preventDefault();
 
-            console.log("📤 Form submission started...");
+            console.log("📤 Form submission to template route...");
 
-            // Validasi form terlebih dahulu
+            // Validasi form
             if (!validateForm()) {
               showNotification(
                 "Harap lengkapi semua data dengan benar",
-                "error"
+                "error",
               );
               return false;
             }
@@ -488,7 +553,7 @@
             if (!agreeCheckbox || !agreeCheckbox.checked) {
               showNotification(
                 "Harap centang persetujuan terlebih dahulu",
-                "error"
+                "error",
               );
               return false;
             }
@@ -505,65 +570,69 @@
             }
 
             try {
-              // Kumpulkan data form
               const formData = new FormData(form);
 
-              // Debug: lihat data yang dikirim
-              console.log("📋 Form data to be sent:");
+              console.log("📋 Data to be sent to template route:");
               for (let [key, value] of formData.entries()) {
                 console.log(
                   `  ${key}:`,
-                  key === "ttd_base64" ? value.substring(0, 50) + "..." : value
+                  key === "ttd_base64" ? value.substring(0, 50) + "..." : value,
                 );
               }
 
-              // Kirim ke server
-              const response = await fetch("/surat-pernyataan/generate", {
-                method: "POST",
-                body: formData,
-                headers: {
-                  "X-Requested-With": "XMLHttpRequest",
+              // Kirim ke route template (bukan route lama)
+              const response = await fetch(
+                "/surat-pernyataan/generate-template",
+                {
+                  method: "POST",
+                  body: formData,
+                  headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                  },
                 },
-              });
+              );
 
-              // Parse response
-              const result = await response.json();
-              console.log("📥 Server response:", result);
+              // Handle response
+              if (response.ok) {
+                // PDF langsung di-download
+                console.log("✅ PDF generated successfully");
 
-              if (result.status === "success") {
-                // Success
-                showNotification(
-                  result.message || "✅ Data berhasil disimpan!",
-                  "success"
+                // Ambil nama file dari header
+                const contentDisposition = response.headers.get(
+                  "Content-Disposition",
                 );
+                let filename = "surat_pernyataan.pdf";
 
-                if (submitBtn) {
-                  submitBtn.innerHTML =
-                    '<i class="fas fa-check"></i> Berhasil!';
-                  submitBtn.classList.add("success");
+                if (contentDisposition) {
+                  const match = contentDisposition.match(/filename="(.+)"/);
+                  if (match) {
+                    filename = match[1];
+                  }
                 }
 
-                // Clear draft dari localStorage
+                showNotification(
+                  `✅ Dokumen ${filename} berhasil dibuat dan diunduh`,
+                  "success",
+                );
+
+                // Clear draft setelah sukses
                 localStorage.removeItem("suratDraft");
 
-                // Redirect setelah delay
+                // Reset form setelah beberapa detik
                 setTimeout(() => {
-                  if (result.redirect) {
-                    window.location.href = result.redirect;
-                  } else {
-                    window.location.href = "/surat-pernyataan/dashboard";
-                  }
-                }, 2000);
+                  form.reset();
+                  window.location.href = "/surat-pernyataan?new=true";
+                }, 3000);
               } else {
-                // Error dari server
+                // Coba parse error dari response
+                const errorData = await response.json();
                 throw new Error(
-                  result.message || result.error || "Gagal menyimpan data"
+                  errorData.message || `Server error: ${response.status}`,
                 );
               }
             } catch (error) {
-              console.error("❌ Form submission error:", error);
+              console.error("❌ Template route error:", error);
 
-              // Show error
               if (errorDiv) {
                 errorDiv.style.display = "block";
                 document.getElementById("errorMessage").textContent =
@@ -575,11 +644,11 @@
               // Hide loading
               if (loadingDiv) loadingDiv.style.display = "none";
 
-              // Reset button state jika error
-              if (submitBtn && !submitBtn.classList.contains("success")) {
+              // Reset button state
+              if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML =
-                  '<i class="fas fa-file-pdf"></i> Cetak & Simpan ke Database';
+                  '<i class="fas fa-file-word"></i> Buat dari Template';
               }
             }
 
@@ -598,7 +667,6 @@
               isValid = false;
               field.classList.add("error");
 
-              // Tambahkan pesan error
               const parent = field.parentElement;
               let errorDiv = parent.querySelector(".error-message");
               if (!errorDiv) {
@@ -621,7 +689,7 @@
           if (!signatureData || !signatureData.startsWith("data:image")) {
             showNotification(
               "Harap buat dan simpan tanda tangan terlebih dahulu",
-              "warning"
+              "warning",
             );
             isValid = false;
           }
@@ -629,7 +697,7 @@
           return isValid;
         }
 
-        // Fungsi untuk show notification
+        // Fungsi show notification
         function showNotification(message, type = "info") {
           const notification = document.getElementById("notification");
           const messageElement = document.getElementById("notificationMessage");
@@ -657,10 +725,54 @@
             notification.style.display = "none";
           }, 5000);
         }
+
+        // Tambahkan window.validateForm untuk diakses dari form_02.js
+        window.validateForm = validateForm;
       });
+
+      // Fungsi untuk reset form secara menyeluruh
+      function resetFormCompletely() {
+        if (
+          confirm(
+            "Apakah Anda yakin ingin mengosongkan semua data? Semua data termasuk draft akan dihapus.",
+          )
+        ) {
+          // Reset form
+          document.getElementById("suratForm").reset();
+
+          // Clear signature
+          if (window.clearSignature) {
+            window.clearSignature();
+          }
+
+          // Clear draft dari localStorage
+          localStorage.removeItem("suratDraft");
+
+          // Reset to step 1
+          if (window.goToStep) {
+            window.goToStep(1);
+          }
+
+          // Show notification
+          const notification = document.getElementById("notification");
+          if (notification) {
+            document.getElementById("notificationMessage").textContent =
+              "Form telah direset";
+            notification.style.display = "flex";
+            setTimeout(() => {
+              notification.style.display = "none";
+            }, 3000);
+          }
+
+          // Tambahkan parameter new ke URL
+          window.history.pushState({}, "", "/surat-pernyataan?new=true");
+        }
+      }
+
+      // Replace resetForm function in form_02.js
+      window.resetForm = resetFormCompletely;
     </script>
 
-    <!-- PERBAIKAN: Tambahkan CSS untuk button states -->
     <style>
       .btn-submit:disabled {
         opacity: 0.6;
@@ -696,23 +808,18 @@
         margin-right: 8px;
       }
 
-      /* Style untuk debug button dari form_02.js */
-      .btn-secondary.fixed-bottom-left {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        z-index: 9999;
-        padding: 8px 12px;
-        font-size: 12px;
+      /* Style untuk mengatasi draft otomatis */
+      .draft-warning {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 15px;
+        color: #856404;
       }
 
-      .btn-warning.fixed-bottom-left {
-        position: fixed;
-        bottom: 60px;
-        left: 20px;
-        z-index: 9999;
-        padding: 8px 12px;
-        font-size: 12px;
+      .draft-warning i {
+        margin-right: 8px;
       }
     </style>
   </body>
