@@ -1021,6 +1021,861 @@ def dashboard_usulan():
                          system_name="usulan-perubahan",
                          show_only_usulan=True)
 
+# ==================== ROUTE UNTUK GENERATE USULAN PERUBAHAN ====================
+
+@app.route('/usulan-perubahan/generate/<int:proposal_id>')
+def generate_usulan_perubahan(proposal_id):
+    """Generate Word/PDF document untuk Usulan Perubahan"""
+    try:
+        print(f"[DEBUG] Generating document for proposal {proposal_id}")
+        
+        # Get ALL proposal data with related tables
+        proposal = Proposal.query.get(proposal_id)
+        
+        if not proposal:
+            flash('Proposal tidak ditemukan', 'danger')
+            return redirect(url_for('dashboard_usulan'))
+        
+        # Pastikan kita mengambil data yang berelasi
+        evaluation = Evaluation.query.filter_by(proposal_id=proposal_id).first()
+        approval = Approval.query.filter_by(proposal_id=proposal_id).first()
+        implementation = Implementation.query.filter_by(proposal_id=proposal_id).first()
+        
+        print(f"[DEBUG] Data ditemukan:")
+        print(f"  - Proposal: {proposal.nomor_dokumen}")
+        print(f"  - Evaluation: {'Ya' if evaluation else 'Tidak'}")
+        print(f"  - Approval: {'Ya' if approval else 'Tidak'}")
+        print(f"  - Implementation: {'Ya' if implementation else 'Tidak'}")
+        
+        if not os.path.exists(TEMPLATE_USULAN_PERUBAHAN):
+            flash(f'Template Word tidak ditemukan', 'danger')
+            return redirect(url_for('view_proposal', proposal_id=proposal_id))
+        
+        doc = DocxTemplate(TEMPLATE_USULAN_PERUBAHAN)
+        
+        # Get signature images
+        signature_pemohon = None
+        if proposal.signature_filename:
+            # Cari di beberapa lokasi yang mungkin
+            possible_paths = [
+                os.path.join(DATA_FOLDER, 'signatures', proposal.signature_filename),
+                os.path.join('data', 'signatures', proposal.signature_filename),
+                os.path.join('uploads', 'signatures', proposal.signature_filename),
+                proposal.signature_filename  # Jika sudah full path
+            ]
+            
+            for sig_path in possible_paths:
+                if os.path.exists(sig_path):
+                    try:
+                        signature_pemohon = InlineImage(doc, sig_path, width=Mm(80))
+                        print(f"[DEBUG] Signature pemohon loaded from: {sig_path}")
+                        break
+                    except Exception as e:
+                        print(f"[WARN] Failed to load signature from {sig_path}: {e}")
+                        continue
+        
+        signature_approval = None
+        if approval and approval.tanda_tangan_persetujuan:
+            approval_path = os.path.join(DATA_FOLDER, 'signatures', approval.tanda_tangan_persetujuan)
+            if os.path.exists(approval_path):
+                try:
+                    signature_approval = InlineImage(doc, approval_path, width=Mm(80))
+                    print(f"[DEBUG] Signature approval loaded")
+                except Exception as e:
+                    print(f"[WARN] Failed to load approval signature: {e}")
+        
+        signature_implementation = None
+        if implementation and implementation.tanda_tangan_pic:
+            impl_path = os.path.join(DATA_FOLDER, 'signatures', implementation.tanda_tangan_pic)
+            if os.path.exists(impl_path):
+                try:
+                    signature_implementation = InlineImage(doc, impl_path, width=Mm(80))
+                    print(f"[DEBUG] Signature implementation loaded")
+                except Exception as e:
+                    print(f"[WARN] Failed to load implementation signature: {e}")
+        
+        # Prepare template data dengan data lengkap
+        tipe_perubahan_list = []
+        if evaluation and evaluation.tipe_perubahan:
+            try:
+                tipe_perubahan_list = json.loads(evaluation.tipe_perubahan) if isinstance(evaluation.tipe_perubahan, str) else evaluation.tipe_perubahan
+                print(f"[DEBUG] Tipe perubahan list: {tipe_perubahan_list}")
+            except:
+                tipe_perubahan_list = []
+        
+        # Format tanggal untuk template
+        def format_date_for_template(date_obj):
+            if not date_obj:
+                return ""
+            try:
+                months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                         'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+                return f"{date_obj.day} {months[date_obj.month-1]} {date_obj.year}"
+            except:
+                return str(date_obj)
+        
+        # Prepare data untuk template - PASTIKAN SEMUA DATA DIMASUKKAN
+        data_form = {
+            # Header Dokumen
+            'no_dokumen': proposal.nomor_dokumen or 'SOP/XX/IMS/XX/XXXX/XX',
+            'revisi': proposal.revisi or '00',
+            'tgl_efektif': format_date_for_template(proposal.tgl_efektif) if proposal.tgl_efektif else '',
+            
+            # A. USULAN PERUBAHAN
+            'no_usulan': f"{proposal.id:03d}",
+            'tanggal': format_date_for_template(proposal.tanggal) if proposal.tanggal else '',
+            'diminta_oleh': proposal.diminta_oleh or '',
+            'jabatan': proposal.jabatan or '',
+            'deskripsi_perubahan': proposal.deskripsi_perubahan or '',
+            'tgl_dibutuhkan': format_date_for_template(proposal.hasil_dibutuhkan_tgl) if proposal.hasil_dibutuhkan_tgl else '',
+            'alasan_perubahan': proposal.alasan_perubahan or '',
+            
+            # Tanda Tangan
+            'tanda_tangan_pemohon': signature_pemohon if signature_pemohon else "TTD PEMOHON",
+            'tanda_tangan_persetujuan': signature_approval if signature_approval else "TTD PEMBERI PERSETUJUAN",
+            'tanda_tangan_pic': signature_implementation if signature_implementation else "TTD PELAKSANA",
+            
+            # B. EVALUASI DAMPAK PERUBAHAN
+            'is_hardware': '✓' if 'Perangkat Keras' in tipe_perubahan_list else '',
+            'is_konfigurasi': '✓' if 'Konfigurasi' in tipe_perubahan_list else '',
+            'is_software': '✓' if 'Software/Aplikasi' in tipe_perubahan_list else '',
+            'is_database': '✓' if 'Database' in tipe_perubahan_list else '',
+            'is_utilities': '✓' if 'Utilities' in tipe_perubahan_list else '',
+            
+            'is_normal': '✓' if evaluation and evaluation.prioritas == 'Normal' else '',
+            'is_emergency': '✓' if evaluation and evaluation.prioritas == 'Emergency' else '',
+            
+            'dampak_produksi': evaluation.dampak_lingkungan if evaluation else '',
+            'upaya_diperlukan': evaluation.upaya_dibutuhkan if evaluation else '',
+            'kebutuhan_sdm': evaluation.sumber_daya if evaluation else '',
+            'rencana_pengujian': evaluation.rencana_pengujian if evaluation else '',
+            'catatan_evaluator': evaluation.catatan_evaluasi if evaluation else '',
+            'tanggal_evaluasi': format_date_for_template(evaluation.evaluated_at) if evaluation and evaluation.evaluated_at else '',
+            
+            # C. PERSETUJUAN PERUBAHAN
+            'status_diterima': '✓' if approval and approval.keputusan == 'setuju' else '',
+            'status_ditolak': '✓' if approval and approval.keputusan == 'tolak' else '',
+            
+            'tgl_pelaksanaan': format_date_for_template(approval.tanggal_pelaksanaan) if approval and approval.tanggal_pelaksanaan else '',
+            'pic_pelaksana': approval.pic_pelaksana if approval else '',
+            'catatan_persetujuan': approval.catatan_persetujuan if approval else '',
+            'tanggal_persetujuan': format_date_for_template(approval.approved_at) if approval and approval.approved_at else '',
+            
+            # D. IMPLEMENTASI PERUBAHAN
+            'hasil_tahapan_perubahan': implementation.hasil_tahapan_perubahan if implementation else '',
+            'hasil_pengujian_implementasi': implementation.hasil_pengujian if implementation else '',
+            'tgl_rilis': format_date_for_template(implementation.tanggal_rilis) if implementation and implementation.tanggal_rilis else '',
+            'catatan_implementasi': implementation.catatan_implementasi if implementation else '',
+            'tanggal_implementasi': format_date_for_template(implementation.implemented_at) if implementation and implementation.implemented_at else '',
+            
+            # Metadata tambahan
+            'bulan_tahun': datetime.now().strftime('%B %Y'),
+            'tahun': datetime.now().strftime('%Y'),
+            'nomor_urut': f"{proposal.id:03d}",
+        }
+        
+        print(f"[DEBUG] Template data prepared with {len(data_form)} fields")
+        
+        # Debug beberapa field penting
+        debug_fields = ['no_dokumen', 'diminta_oleh', 'jabatan', 'deskripsi_perubahan', 
+                       'alasan_perubahan', 'dampak_produksi', 'hasil_tahapan_perubahan']
+        for field in debug_fields:
+            value = data_form.get(field, 'NOT FOUND')
+            print(f"  - {field}: {value[:50] if value else 'EMPTY'}")
+        
+        try:
+            doc.render(data_form)
+            print(f"[DEBUG] Template rendered successfully")
+        except Exception as render_error:
+            print(f"[ERROR] Error rendering template: {render_error}")
+            flash(f'Error rendering template: {str(render_error)}', 'danger')
+            return redirect(url_for('view_proposal', proposal_id=proposal_id))
+        
+        # Save document
+        safe_doc_number = proposal.nomor_dokumen.replace('/', '_').replace(' ', '_')
+        filename_docx = f"Usulan_Perubahan_{safe_doc_number}.docx"
+        output_docx_path = os.path.join(OUTPUT_DIR, filename_docx)
+        
+        try:
+            doc.save(output_docx_path)
+            print(f"[DEBUG] Document saved to: {output_docx_path}")
+        except Exception as save_error:
+            print(f"[ERROR] Error saving document: {save_error}")
+            flash(f'Error saving document: {str(save_error)}', 'danger')
+            return redirect(url_for('view_proposal', proposal_id=proposal_id))
+        
+        # Try to convert to PDF
+        pdf_path = None
+        if HAS_DOCX2PDF:
+            try:
+                pdf_path = output_docx_path.replace(".docx", ".pdf")
+                convert(output_docx_path, pdf_path)
+                
+                if os.path.exists(pdf_path):
+                    filename = f"Usulan_Perubahan_{safe_doc_number}.pdf"
+                    print(f"[SUCCESS] PDF generated: {pdf_path}")
+                    return send_file(
+                        pdf_path,
+                        as_attachment=True,
+                        download_name=filename,
+                        mimetype='application/pdf'
+                    )
+            except Exception as e:
+                print(f"[WARN] PDF conversion failed: {e}")
+        
+        # Serve DOCX if PDF conversion failed
+        flash('Konversi ke PDF gagal. File DOCX telah didownload.', 'info')
+        return send_file(
+            output_docx_path,
+            as_attachment=True,
+            download_name=filename_docx,
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+            
+    except Exception as e:
+        print(f"[ERROR] Error generating document: {e}")
+        print(f"[ERROR] Traceback: {traceback.format_exc()}")
+        flash(f'Terjadi kesalahan: {str(e)}', 'danger')
+        return redirect(url_for('view_proposal', proposal_id=proposal_id))
+
+@app.route('/usulan-perubahan/view/<int:proposal_id>')
+def view_proposal(proposal_id):
+    """View proposal details"""
+    proposal = Proposal.query.get(proposal_id)
+    
+    if not proposal:
+        flash('Proposal tidak ditemukan', 'danger')
+        return redirect(url_for('dashboard_usulan'))
+    
+    evaluation = Evaluation.query.filter_by(proposal_id=proposal_id).first()
+    approval = Approval.query.filter_by(proposal_id=proposal_id).first()
+    implementation = Implementation.query.filter_by(proposal_id=proposal_id).first()
+    
+    proposal_dict = proposal.to_dict()
+    
+    evaluation_dict = {}
+    if evaluation:
+        evaluation_dict = evaluation.to_dict()
+        if isinstance(evaluation_dict.get('tipe_perubahan'), list):
+            evaluation_dict['tipe_perubahan_str'] = ', '.join(evaluation_dict['tipe_perubahan'])
+        else:
+            evaluation_dict['tipe_perubahan_str'] = str(evaluation_dict.get('tipe_perubahan', ''))
+    
+    approval_dict = approval.to_dict() if approval else {}
+    implementation_dict = implementation.to_dict() if implementation else {}
+    
+    return render_template('view_proposal.html',
+                         proposal=proposal_dict,
+                         evaluation=evaluation_dict,
+                         approval=approval_dict,
+                         implementation=implementation_dict,
+                         system_name="usulan-perubahan")
+
+@app.route('/usulan-perubahan/edit/<int:proposal_id>', methods=['GET', 'POST'])
+def edit_proposal(proposal_id):
+    """Edit draft proposal"""
+    try:
+        proposal = Proposal.query.get(proposal_id)
+        
+        if not proposal or proposal.status != 'draft':
+            flash('Hanya draft yang bisa diedit', 'danger')
+            return redirect(url_for('dashboard_usulan'))
+        
+        if request.method == 'POST':
+            form_data = request.form.to_dict()
+            tipe_perubahan = request.form.getlist('tipe_perubahan')
+            if tipe_perubahan:
+                form_data['tipe_perubahan'] = ','.join(tipe_perubahan)
+            
+            signature_filename = proposal.signature_filename
+            if form_data.get('signature_data') and form_data['signature_data'].startswith('data:image'):
+                if signature_filename:
+                    old_path = os.path.join(DATA_FOLDER, 'signatures', signature_filename)
+                    if os.path.exists(old_path):
+                        os.remove(old_path)
+                
+                identifier = f"pemohon_{datetime.now().timestamp()}"
+                signature_filename = save_signature_image(
+                    form_data['signature_data'], 
+                    identifier,
+                    "usulan"
+                )
+            
+            proposal.tanggal = form_data.get('tanggal', '')
+            proposal.revisi = form_data.get('revisi', '00')
+            proposal.tgl_efektif = form_data.get('tgl_efektif', '')
+            proposal.deskripsi_perubahan = form_data.get('deskripsi_perubahan', '')
+            proposal.hasil_dibutuhkan_tgl = form_data.get('hasil_dibutuhkan_tgl', '')
+            proposal.alasan_perubahan = form_data.get('alasan_perubahan', '')
+            proposal.signature_filename = signature_filename or proposal.signature_filename
+            proposal.updated_at = datetime.now()
+            
+            action = request.form.get('action', 'draft')
+            if action == 'submit':
+                proposal.status = 'evaluasi'
+                flash_message = 'Draft berhasil dikirim sebagai usulan!'
+            else:
+                proposal.status = 'draft'
+                flash_message = 'Draft berhasil diperbarui!'
+            
+            db.session.commit()
+            flash(flash_message, 'success')
+            return redirect(url_for('dashboard_usulan'))
+        
+        # GET request - load data
+        evaluation = Evaluation.query.filter_by(proposal_id=proposal_id).first()
+        approval = Approval.query.filter_by(proposal_id=proposal_id).first()
+        implementation = Implementation.query.filter_by(proposal_id=proposal_id).first()
+        
+        form_data = {
+            'no_dokumen': proposal.nomor_dokumen,
+            'revisi': proposal.revisi,
+            'tgl_efektif': proposal.tgl_efektif.strftime('%Y-%m-%d') if proposal.tgl_efektif else '',
+            'tanggal': proposal.tanggal.strftime('%Y-%m-%d') if proposal.tanggal else '',
+            'diminta_oleh': proposal.diminta_oleh,
+            'jabatan': proposal.jabatan,
+            'deskripsi_perubahan': proposal.deskripsi_perubahan,
+            'hasil_dibutuhkan_tgl': proposal.hasil_dibutuhkan_tgl.strftime('%Y-%m-%d') if proposal.hasil_dibutuhkan_tgl else '',
+            'alasan_perubahan': proposal.alasan_perubahan,
+        }
+        
+        if evaluation:
+            tipe_perubahan = json.loads(evaluation.tipe_perubahan) if evaluation.tipe_perubahan else []
+            form_data.update({
+                'tipe_perubahan': ','.join(tipe_perubahan) if tipe_perubahan else '',
+                'prioritas': evaluation.prioritas,
+                'dampak_lingkungan': evaluation.dampak_lingkungan,
+                'upaya_diperlukan': evaluation.upaya_dibutuhkan,
+                'kebutuhan_sumber_daya': evaluation.sumber_daya,
+                'rencana_pengujian': evaluation.rencana_pengujian,
+                'catatan_evaluator': evaluation.catatan_evaluasi,
+                'tanggal_evaluasi': evaluation.evaluated_at.strftime('%Y-%m-%d') if evaluation.evaluated_at else '',
+            })
+        
+        if approval:
+            form_data.update({
+                'status_persetujuan': approval.status,
+                'tanggal_pelaksanaan': approval.tanggal_pelaksanaan.strftime('%Y-%m-%d') if approval.tanggal_pelaksanaan else '',
+                'pic_pelaksana': approval.pic_pelaksana,
+                'catatan_persetujuan': approval.catatan_persetujuan,
+                'catatan_penolakan': approval.catatan_persetujuan,
+                'tanggal_persetujuan': approval.approved_at.strftime('%Y-%m-%d') if approval.approved_at else '',
+            })
+        
+        if implementation:
+            form_data.update({
+                'hasil_tahapan': implementation.hasil_tahapan_perubahan,
+                'hasil_pengujian': implementation.hasil_pengujian,
+                'tanggal_rilis': implementation.tanggal_rilis.strftime('%Y-%m-%d') if implementation.tanggal_rilis else '',
+                'catatan_implementasi': implementation.catatan_implementasi,
+                'tanggal_implementasi': implementation.implemented_at.strftime('%Y-%m-%d') if implementation.implemented_at else '',
+            })
+        
+        signature_data = None
+        if proposal.signature_filename:
+            signature_path = os.path.join(DATA_FOLDER, 'signatures', proposal.signature_filename)
+            if os.path.exists(signature_path):
+                with open(signature_path, 'rb') as f:
+                    signature_bytes = f.read()
+                    signature_data = f"data:image/png;base64,{base64.b64encode(signature_bytes).decode('utf-8')}"
+        
+        today = datetime.now()
+        proposals_all = Proposal.query.count()
+        
+        return render_template('form_complete.html',
+                             edit_mode=True,
+                             proposal=proposal.to_dict(),
+                             form_data=form_data,
+                             signature_data=signature_data,
+                             draft_name=proposal.draft_name,
+                             draft_notes=proposal.draft_notes,
+                             today_date=today.strftime('%Y-%m-%d'),
+                             tomorrow_date=(today + timedelta(days=1)).strftime('%Y-%m-%d'),
+                             next_week_date=(today + timedelta(days=7)).strftime('%Y-%m-%d'),
+                             current_year=today.year,
+                             proposal_count=proposals_all,
+                             system_name="usulan-perubahan")
+                             
+    except Exception as e:
+        print(f"Error editing proposal: {e}")
+        flash(f'Terjadi kesalahan: {str(e)}', 'danger')
+        return redirect(url_for('dashboard_usulan'))
+
+# ==================== API ROUTES UNTUK USULAN PERUBAHAN ====================
+
+@app.route('/api/usulan-perubahan/submit', methods=['POST'])
+def submit_proposal_api():
+    try:
+        print(f"[DEBUG] submit_proposal_api called")
+        
+        # Cek content type
+        if request.content_type != 'application/json':
+            print(f"[WARN] Invalid content type: {request.content_type}")
+            return jsonify({'success': False, 'message': 'Content type must be application/json'}), 400
+        
+        data = request.get_json()
+        if not data:
+            print(f"[WARN] No JSON data received")
+            return jsonify({'success': False, 'message': 'Tidak ada data'}), 400
+        
+        print(f"[DEBUG] Data received. Keys: {list(data.keys())}")
+        
+        form_data = data.get('form_data', {})
+        action = data.get('action', 'submit')
+        draft_id = data.get('draft_id')
+        draft_name = data.get('draft_name', '')
+        draft_notes = data.get('draft_notes', '')
+        
+        print(f"[DEBUG] Action: {action}, Draft ID: {draft_id}")
+        
+        # Validasi form_data
+        if not isinstance(form_data, dict):
+            print(f"[ERROR] form_data is not a dict: {type(form_data)}")
+            return jsonify({
+                'success': False,
+                'message': 'Format data tidak valid'
+            }), 400
+        
+        # VALIDASI DATA WAJIB
+        required_fields = ['no_dokumen', 'diminta_oleh', 'jabatan', 'deskripsi_perubahan']
+        missing_fields = [field for field in required_fields if not form_data.get(field)]
+        
+        if missing_fields and action != 'draft':
+            print(f"[WARN] Missing required fields: {missing_fields}")
+            return jsonify({
+                'success': False,
+                'message': f'Data wajib tidak lengkap: {", ".join(missing_fields)}'
+            }), 400
+        
+        if action == 'draft':
+            # Simpan sebagai draft
+            print(f"[DEBUG] Saving as draft...")
+            result = save_draft_enhanced(form_data, draft_id, draft_name, draft_notes)
+            
+            # Jika draft berhasil disimpan, redirect ke dashboard
+            if isinstance(result, dict) and result.get('success'):
+                return jsonify({
+                    'success': True,
+                    'message': 'Draft berhasil disimpan!',
+                    'redirect': url_for('main_dashboard')
+                })
+            return result
+            
+        else:
+            # Submit langsung
+            print(f"[DEBUG] Submitting proposal...")
+            success = save_proposal_complete(form_data)
+            
+            if success:
+                return jsonify({
+                    'success': True,
+                    'message': 'Usulan perubahan berhasil disimpan!',
+                    'redirect': url_for('main_dashboard')
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'message': 'Gagal menyimpan usulan perubahan'
+                }), 500
+                
+    except Exception as e:
+        print(f"[ERROR] Error in submit_proposal_api: {e}")
+        print(f"[ERROR] Traceback: {traceback.format_exc()}")
+        return jsonify({
+            'success': False,
+            'message': f'Terjadi kesalahan server: {str(e)}'
+        }), 500
+
+def save_draft_enhanced(form_data, draft_id=None, draft_name='', draft_notes=''):
+    """Save draft dengan nama lama tapi implementasi baru"""
+    try:
+        print(f"[DEBUG] save_draft_enhanced called")
+        print(f"[DEBUG] Draft ID: {draft_id}, Draft Name: {draft_name}")
+        
+        # PARSE DRAFT ID
+        actual_id = None
+        if draft_id and isinstance(draft_id, str):
+            if draft_id.startswith('draft_'):
+                try:
+                    actual_id = int(draft_id.replace('draft_', ''))
+                    print(f"[DEBUG] Parsed draft ID: {actual_id}")
+                except ValueError:
+                    print(f"[DEBUG] Invalid draft ID format: {draft_id}")
+                    actual_id = None
+            elif draft_id.startswith('DRAFT_'):
+                try:
+                    actual_id = int(draft_id.replace('DRAFT_', ''))
+                    print(f"[DEBUG] Parsed DRAFT ID: {actual_id}")
+                except ValueError:
+                    print(f"[DEBUG] Invalid DRAFT ID format: {draft_id}")
+                    actual_id = None
+        elif draft_id:
+            try:
+                actual_id = int(draft_id)
+            except:
+                actual_id = None
+        
+        # CARI PROPOSAL
+        proposal = None
+        is_new = True
+        
+        if actual_id:
+            proposal = Proposal.query.get(actual_id)
+            if proposal and proposal.status == 'draft':
+                is_new = False
+                print(f"[DEBUG] Found existing draft: {proposal.id}")
+            else:
+                proposal = None
+                print(f"[DEBUG] Draft not found or not a draft, creating new")
+        
+        # HANDLE SIGNATURE PEMOHON
+        signature_pemohon = None
+        if form_data.get('signature_data'):
+            print(f"[DEBUG] Processing signature data")
+            identifier = f"pemohon_{datetime.now().timestamp()}"
+            signature_pemohon = save_signature_image(
+                form_data.get('signature_data'), 
+                identifier,
+                "usulan"
+            )
+            print(f"[DEBUG] Signature saved: {signature_pemohon}")
+        
+        # GENERATE DOC NUMBER
+        proposal_count = Proposal.query.count()
+        if not form_data.get('no_dokumen'):
+            form_data['no_dokumen'] = generate_doc_number(proposal_count)
+            print(f"[DEBUG] Generated doc number: {form_data['no_dokumen']}")
+        
+        now = datetime.now()
+        
+        # UPDATE ATAU CREATE PROPOSAL
+        if proposal:
+            # UPDATE EXISTING DRAFT
+            proposal.tanggal = parse_date_safe(form_data.get('tanggal')) or now.date()
+            proposal.nomor_dokumen = form_data.get('no_dokumen', proposal.nomor_dokumen or '')
+            proposal.revisi = form_data.get('revisi', proposal.revisi or '00')
+            proposal.tgl_efektif = parse_date_safe(form_data.get('tgl_efektif'))
+            proposal.diminta_oleh = form_data.get('diminta_oleh', proposal.diminta_oleh or '')
+            proposal.jabatan = form_data.get('jabatan', proposal.jabatan or '')
+            proposal.deskripsi_perubahan = form_data.get('deskripsi_perubahan', proposal.deskripsi_perubahan or '')
+            proposal.hasil_dibutuhkan_tgl = parse_date_safe(form_data.get('hasil_dibutuhkan_tgl'))
+            proposal.alasan_perubahan = form_data.get('alasan_perubahan', proposal.alasan_perubahan or '')
+            proposal.signature_filename = signature_pemohon or proposal.signature_filename
+            proposal.draft_name = draft_name or proposal.draft_name
+            proposal.draft_notes = draft_notes or proposal.draft_notes
+            proposal.updated_at = now
+            print(f"[DEBUG] Updated draft ID: {proposal.id}")
+        else:
+            # CREATE NEW DRAFT
+            proposal = Proposal(
+                tanggal=parse_date_safe(form_data.get('tanggal')) or now.date(),
+                nomor_dokumen=form_data.get('no_dokumen', ''),
+                revisi=form_data.get('revisi', '00'),
+                tgl_efektif=parse_date_safe(form_data.get('tgl_efektif')),
+                diminta_oleh=form_data.get('diminta_oleh', ''),
+                jabatan=form_data.get('jabatan', ''),
+                deskripsi_perubahan=form_data.get('deskripsi_perubahan', ''),
+                hasil_dibutuhkan_tgl=parse_date_safe(form_data.get('hasil_dibutuhkan_tgl')),
+                alasan_perubahan=form_data.get('alasan_perubahan', ''),
+                status='draft',
+                signature_filename=signature_pemohon or '',
+                draft_name=draft_name,
+                draft_notes=draft_notes,
+                created_at=now,
+                updated_at=now
+            )
+            db.session.add(proposal)
+            print(f"[DEBUG] Created new draft")
+        
+        db.session.flush()
+        print(f"[DEBUG] Draft saved. Proposal ID: {proposal.id}")
+        
+        # SIMPAN DATA TERKAIT
+        save_draft_related_data(proposal.id, form_data, {})
+        
+        db.session.commit()
+        print(f"[DEBUG] All data committed successfully")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Draft berhasil disimpan' if is_new else 'Draft berhasil diperbarui',
+            'draft_id': f"draft_{proposal.id}",
+            'is_new': is_new,
+            'timestamp': now.strftime('%Y-%m-%d %H:%M:%S'),
+            'proposal_number': proposal.nomor_dokumen
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] Error in save_draft_enhanced: {e}")
+        print(f"[ERROR] Traceback: {traceback.format_exc()}")
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Gagal menyimpan draft: {str(e)}'
+        }), 500
+
+def parse_date_safe(date_str):
+    """Parse tanggal dengan berbagai format secara aman"""
+    if not date_str:
+        return None
+    try:
+        # Coba berbagai format tanggal
+        for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y'):
+            try:
+                return datetime.strptime(str(date_str), fmt).date()
+            except ValueError:
+                continue
+        return None
+    except Exception as e:
+        print(f"[WARN] Failed to parse date '{date_str}': {e}")
+        return None
+    
+def save_draft_related_data(proposal_id, form_data, signatures=None):
+    """Save related data for draft"""
+    try:
+        if signatures is None:
+            signatures = {}
+        
+        print(f"[DEBUG] save_draft_related_data for proposal {proposal_id}")
+        
+        # HANDLE EVALUATION DATA
+        if form_data.get('tipe_perubahan') or form_data.get('prioritas'):
+            evaluation = Evaluation.query.filter_by(proposal_id=proposal_id).first()
+            
+            if evaluation:
+                # UPDATE EXISTING
+                evaluation.tipe_perubahan = json.dumps(
+                    form_data.get('tipe_perubahan', '').split(',') 
+                    if form_data.get('tipe_perubahan') else []
+                )
+                evaluation.prioritas = form_data.get('prioritas', '')
+                evaluation.dampak_lingkungan = form_data.get('dampak_lingkungan', '')
+                evaluation.upaya_dibutuhkan = form_data.get('upaya_diperlukan', '')
+                evaluation.sumber_daya = form_data.get('kebutuhan_sumber_daya', '')
+                evaluation.rencana_pengujian = form_data.get('rencana_pengujian', '')
+                evaluation.catatan_evaluasi = form_data.get('catatan_evaluator', '')
+                evaluation.keputusan = 'draft'
+                evaluation.evaluated_at = parse_date_safe(form_data.get('tanggal_evaluasi'))
+                evaluation.updated_at = datetime.now()
+                print(f"[DEBUG] Updated evaluation")
+            else:
+                # CREATE NEW
+                evaluation = Evaluation(
+                    proposal_id=proposal_id,
+                    tipe_perubahan=json.dumps(
+                        form_data.get('tipe_perubahan', '').split(',') 
+                        if form_data.get('tipe_perubahan') else []
+                    ),
+                    prioritas=form_data.get('prioritas', ''),
+                    dampak_lingkungan=form_data.get('dampak_lingkungan', ''),
+                    upaya_dibutuhkan=form_data.get('upaya_diperlukan', ''),
+                    sumber_daya=form_data.get('kebutuhan_sumber_daya', ''),
+                    rencana_pengujian=form_data.get('rencana_pengujian', ''),
+                    catatan_evaluasi=form_data.get('catatan_evaluator', ''),
+                    keputusan='draft',
+                    evaluated_at=parse_date_safe(form_data.get('tanggal_evaluasi'))
+                )
+                db.session.add(evaluation)
+                print(f"[DEBUG] Created new evaluation")
+        
+        # HANDLE APPROVAL SIGNATURE
+        approval_signature = None
+        if form_data.get('signature_approval'):
+            identifier = f"approval_{datetime.now().timestamp()}_{proposal_id}"
+            approval_signature = save_signature_image(
+                form_data.get('signature_approval'),
+                identifier,
+                "usulan"
+            )
+            print(f"[DEBUG] Approval signature saved: {approval_signature}")
+        
+        # HANDLE APPROVAL DATA
+        if form_data.get('status_persetujuan'):
+            approval = Approval.query.filter_by(proposal_id=proposal_id).first()
+            
+            if approval:
+                # UPDATE EXISTING
+                approval.status = form_data.get('status_persetujuan')
+                approval.catatan_persetujuan = form_data.get('catatan_persetujuan') or form_data.get('catatan_penolakan', '')
+                approval.keputusan = 'draft'
+                approval.tanggal_pelaksanaan = parse_date_safe(form_data.get('tanggal_pelaksanaan'))
+                approval.pic_pelaksana = form_data.get('pic_pelaksana', '')
+                approval.approved_at = parse_date_safe(form_data.get('tanggal_persetujuan'))
+                approval.tanda_tangan_persetujuan = approval_signature or approval.tanda_tangan_persetujuan
+                approval.updated_at = datetime.now()
+                print(f"[DEBUG] Updated approval")
+            else:
+                # CREATE NEW
+                approval = Approval(
+                    proposal_id=proposal_id,
+                    status=form_data.get('status_persetujuan'),
+                    catatan_persetujuan=form_data.get('catatan_persetujuan') or form_data.get('catatan_penolakan', ''),
+                    keputusan='draft',
+                    tanggal_pelaksanaan=parse_date_safe(form_data.get('tanggal_pelaksanaan')),
+                    pic_pelaksana=form_data.get('pic_pelaksana', ''),
+                    approved_at=parse_date_safe(form_data.get('tanggal_persetujuan')),
+                    tanda_tangan_persetujuan=approval_signature or ''
+                )
+                db.session.add(approval)
+                print(f"[DEBUG] Created new approval")
+        
+        # HANDLE IMPLEMENTATION SIGNATURE
+        implementation_signature = None
+        if form_data.get('signature_implementation'):
+            identifier = f"implementation_{datetime.now().timestamp()}_{proposal_id}"
+            implementation_signature = save_signature_image(
+                form_data.get('signature_implementation'),
+                identifier,
+                "usulan"
+            )
+            print(f"[DEBUG] Implementation signature saved: {implementation_signature}")
+        
+        # HANDLE IMPLEMENTATION DATA
+        if form_data.get('hasil_tahapan'):
+            implementation = Implementation.query.filter_by(proposal_id=proposal_id).first()
+            
+            if implementation:
+                # UPDATE EXISTING
+                implementation.hasil_tahapan_perubahan = form_data.get('hasil_tahapan', '')
+                implementation.hasil_pengujian = form_data.get('hasil_pengujian', '')
+                implementation.tanggal_rilis = parse_date_safe(form_data.get('tanggal_rilis'))
+                implementation.catatan_implementasi = form_data.get('catatan_implementasi', '')
+                implementation.implemented_at = parse_date_safe(form_data.get('tanggal_implementasi'))
+                implementation.tanda_tangan_pic = implementation_signature or implementation.tanda_tangan_pic
+                implementation.updated_at = datetime.now()
+                print(f"[DEBUG] Updated implementation")
+            else:
+                # CREATE NEW
+                implementation = Implementation(
+                    proposal_id=proposal_id,
+                    hasil_tahapan_perubahan=form_data.get('hasil_tahapan', ''),
+                    hasil_pengujian=form_data.get('hasil_pengujian', ''),
+                    tanggal_rilis=parse_date_safe(form_data.get('tanggal_rilis')),
+                    catatan_implementasi=form_data.get('catatan_implementasi', ''),
+                    implemented_at=parse_date_safe(form_data.get('tanggal_implementasi')),
+                    tanda_tangan_pic=implementation_signature or ''
+                )
+                db.session.add(implementation)
+                print(f"[DEBUG] Created new implementation")
+        
+        print(f"[DEBUG] All related data saved for proposal {proposal_id}")
+            
+    except Exception as e:
+        print(f"[ERROR] Error in save_draft_related_data: {e}")
+        print(f"[ERROR] Traceback: {traceback.format_exc()}")
+        raise e
+
+@app.route('/api/usulan-perubahan/load-draft/<draft_id>', methods=['GET'])
+def load_draft_api(draft_id):
+    """Load draft data"""
+    try:
+        if draft_id.startswith('draft_'):
+            actual_id = int(draft_id.replace('draft_', ''))
+        elif draft_id.startswith('DRAFT_'):
+            actual_id = int(draft_id.replace('DRAFT_', ''))
+        else:
+            actual_id = int(draft_id)
+        
+        proposal = Proposal.query.get(actual_id)
+        
+        if not proposal or proposal.status != 'draft':
+            return jsonify({'success': False, 'message': 'Draft tidak ditemukan'}), 404
+        
+        evaluation = Evaluation.query.filter_by(proposal_id=actual_id).first()
+        
+        signature_data = None
+        if proposal.signature_filename:
+            signature_path = os.path.join(DATA_FOLDER, 'signatures', proposal.signature_filename)
+            if os.path.exists(signature_path):
+                with open(signature_path, 'rb') as f:
+                    signature_bytes = f.read()
+                    signature_data = f"data:image/png;base64,{base64.b64encode(signature_bytes).decode('utf-8')}"
+        
+        form_data = {
+            'no_dokumen': proposal.nomor_dokumen,
+            'revisi': proposal.revisi,
+            'tgl_efektif': proposal.tgl_efektif.strftime('%Y-%m-%d') if proposal.tgl_efektif else '',
+            'tanggal': proposal.tanggal.strftime('%Y-%m-%d') if proposal.tanggal else '',
+            'diminta_oleh': proposal.diminta_oleh,
+            'jabatan': proposal.jabatan,
+            'deskripsi_perubahan': proposal.deskripsi_perubahan,
+            'hasil_dibutuhkan_tgl': proposal.hasil_dibutuhkan_tgl.strftime('%Y-%m-%d') if proposal.hasil_dibutuhkan_tgl else '',
+            'alasan_perubahan': proposal.alasan_perubahan,
+            'signature_data': signature_data,
+        }
+        
+        if evaluation:
+            tipe_perubahan = json.loads(evaluation.tipe_perubahan) if evaluation.tipe_perubahan else []
+            form_data.update({
+                'tipe_perubahan': ','.join(tipe_perubahan) if tipe_perubahan else '',
+                'prioritas': evaluation.prioritas,
+                'dampak_lingkungan': evaluation.dampak_lingkungan,
+                'upaya_diperlukan': evaluation.upaya_dibutuhkan,
+                'kebutuhan_sumber_daya': evaluation.sumber_daya,
+                'rencana_pengujian': evaluation.rencana_pengujian,
+                'catatan_evaluator': evaluation.catatan_evaluasi,
+                'tanggal_evaluasi': evaluation.evaluated_at.strftime('%Y-%m-%d') if evaluation.evaluated_at else '',
+            })
+        
+        return jsonify({
+            'success': True,
+            'draft': {
+                'id': f"draft_{proposal.id}",
+                'draft_id': f"draft_{proposal.id}",
+                'form_data': form_data,
+                'draft_name': proposal.draft_name,
+                'draft_notes': proposal.draft_notes,
+                'created_at': proposal.created_at.strftime('%Y-%m-%d %H:%M:%S') if proposal.created_at else '',
+                'updated_at': proposal.updated_at.strftime('%Y-%m-%d %H:%M:%S') if proposal.updated_at else '',
+                'proposal_number': proposal.nomor_dokumen
+            }
+        })
+        
+    except Exception as e:
+        print(f"Error loading draft: {e}")
+        return jsonify({
+            'success': False,
+            'message': f'Gagal memuat draft: {str(e)}'
+        }), 500
+
+@app.route('/api/usulan-perubahan/delete-draft/<draft_id>', methods=['DELETE'])
+def delete_draft_api(draft_id):
+    """Delete draft"""
+    try:
+        if draft_id.startswith('draft_'):
+            actual_id = int(draft_id.replace('draft_', ''))
+        elif draft_id.startswith('DRAFT_'):
+            actual_id = int(draft_id.replace('DRAFT_', ''))
+        else:
+            actual_id = int(draft_id)
+        
+        proposal = Proposal.query.get(actual_id)
+        
+        if not proposal or proposal.status != 'draft':
+            return jsonify({'success': False, 'message': 'Draft tidak ditemukan'}), 404
+        
+        if proposal.signature_filename and not proposal.signature_filename.startswith('data:image'):
+            signature_path = os.path.join(DATA_FOLDER, 'signatures', proposal.signature_filename)
+            if os.path.exists(signature_path):
+                os.remove(signature_path)
+        
+        Evaluation.query.filter_by(proposal_id=actual_id).delete()
+        Approval.query.filter_by(proposal_id=actual_id).delete()
+        Implementation.query.filter_by(proposal_id=actual_id).delete()
+        
+        db.session.delete(proposal)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Draft berhasil dihapus'})
+        
+    except Exception as e:
+        print(f"Error deleting draft: {e}")
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Gagal menghapus draft: {str(e)}'
+        }), 500
+
 @app.route('/surat-pernyataan/dashboard')
 def surat_pernyataan_dashboard():
     """Dashboard khusus untuk Surat Pernyataan"""
