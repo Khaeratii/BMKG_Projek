@@ -1,5 +1,15 @@
 // ===============================
 // FORM MULTI-STEP JS (DIPERBAIKI)
+
+function genNoPermohonan() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  const h = String(now.getHours()).padStart(2, "0");
+  const min = String(now.getMinutes()).padStart(2, "0");
+  return `${y}-${m}-${d} ${h}.${min}`;
+}
 // ===============================
 document.addEventListener("DOMContentLoaded", () => {
   console.log("🚀 Form Laporan Insiden Multi-Step Loaded");
@@ -93,21 +103,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.log(`🔄 Navigating to step ${stepNumber}`);
 
-    // Update UI
     showStep(stepNumber);
-
-    // Update state
     state.currentStep = stepNumber;
-
-    // Update progress bar
     updateProgressSteps(stepNumber);
-
-    // Scroll to top
     window.scrollTo({ top: 0, behavior: "smooth" });
 
-    // Generate review jika step 3
+    // 🔥 FIX UTAMA TTD
+    if (stepNumber === 2) {
+      setTimeout(() => {
+        resizeAllSignatureCanvas();
+      }, 100);
+    }
+
     if (stepNumber === 3) {
-      console.log("🔄 Step 3 detected, calling generateReview()");
       setTimeout(generateReview, 500);
     }
   }
@@ -747,18 +755,22 @@ document.addEventListener("DOMContentLoaded", () => {
   // 7. GENERATE NOMOR PERMOHONAN
   // ===============================
   function generateNomorPermohonan() {
-    const noPermohonanField = document.getElementById("no_permohonan");
-    if (noPermohonanField && !noPermohonanField.value) {
-      const now = new Date();
-      const timestamp =
-        now.getFullYear() +
-        String(now.getMonth() + 1).padStart(2, "0") +
-        String(now.getDate()).padStart(2, "0") +
-        String(now.getHours()).padStart(2, "0") +
-        String(now.getMinutes()).padStart(2, "0") +
-        String(now.getSeconds()).padStart(2, "0");
-      noPermohonanField.value = `INS-${timestamp}`;
+    const field = document.getElementById("no_permohonan");
+    if (!field) return;
+
+    // Jangan override kalau sudah ada value
+    if (field.value && field.value.trim() !== "") return;
+
+    // Gunakan sessionStorage agar tidak berubah-ubah
+    const stored = sessionStorage.getItem("no_permohonan");
+    if (stored) {
+      field.value = stored;
+      return;
     }
+
+    const generated = genNoPermohonan();
+    field.value = generated;
+    sessionStorage.setItem("no_permohonan", generated);
   }
 
   // ===============================
@@ -943,6 +955,24 @@ document.addEventListener("DOMContentLoaded", () => {
   window.validateStep2 = validateStep2;
   window.showFieldError = showFieldError;
   window.clearFieldError = clearFieldError;
+
+  // ===============================
+  // FIX TTD: RESIZE CANVAS SAAT STEP AKTIF
+  // ===============================
+  function resizeAllSignatureCanvas() {
+    for (let i = 1; i <= 5; i++) {
+      const canvas = document.getElementById(`signatureCanvas${i}`);
+      if (!canvas) continue;
+
+      const rect = canvas.getBoundingClientRect();
+
+      // Hindari resize berulang
+      if (rect.width === 0 || rect.height === 0) continue;
+
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+  }
 
   // ===============================
   // 11. START EVERYTHING

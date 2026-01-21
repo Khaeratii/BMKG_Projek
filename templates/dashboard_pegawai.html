@@ -1,10 +1,6 @@
-{% extends "base.html" %} {% block title %} {% if system_name == "main" %}
-Dashboard Utama | Sistem Terintegrasi BMKG {% elif system_name ==
-"usulan-perubahan" %} Dashboard Usulan Perubahan | BMKG {% elif system_name ==
-"surat-pernyataan" %} Dashboard Surat Pernyataan | BMKG {% elif system_name ==
-"laporan-insiden" %} Dashboard Laporan Insiden | BMKG {% else %} Dashboard
-Pegawai | BMKG Wilayah IV {% endif %} {% endblock %} {% block body_class
-%}dashboard-page{% endblock %} {% block extra_css %}
+{% extends "base.html" %} {% block title %} Dashboard Utama | BMKG Wilayah IV {%
+endblock %} {% block body_class %}dashboard-page{% endblock %} {% block
+extra_css %}
 <link
   rel="stylesheet"
   href="{{ url_for('static', filename='css/dashboard_pegawai.css') }}"
@@ -27,7 +23,7 @@ Pegawai | BMKG Wilayah IV {% endif %} {% endblock %} {% block body_class
         />
         <div class="navbar-title">
           BMKG Wilayah IV
-          <small>Sistem Terintegrasi BMKG</small>
+          <small>Dashboard Utama</small>
         </div>
       </a>
 
@@ -58,8 +54,6 @@ Pegawai | BMKG Wilayah IV {% endif %} {% endblock %} {% block body_class
           </li>
 
           <div class="sidebar-divider"></div>
-
-          <!-- Sistem Terintegrasi -->
 
           <!-- Aksi Cepat -->
           <li>
@@ -97,26 +91,15 @@ Pegawai | BMKG Wilayah IV {% endif %} {% endblock %} {% block body_class
       <!-- Welcome Section -->
       <div class="welcome-card">
         <h1 class="welcome-title">
-          {% if system_name == "main" %} Selamat Datang di Sistem Terintegrasi
-          BMKG! {% elif system_name == "usulan-perubahan" %} Sistem Usulan
-          Perubahan BMKG {% elif system_name == "surat-pernyataan" %} Sistem
-          Surat Pernyataan BMKG {% elif system_name == "laporan-insiden" %}
-          Sistem Laporan Insiden BMKG {% else %} Dashboard Pegawai BMKG {% endif
-          %}
+          Selamat Datang di Dashboard BMKG Wilayah IV
         </h1>
 
         <p class="welcome-subtitle">
-          {% if system_name == "main" %} Berikut adalah riwayat semua dokumen
-          dan draft yang telah dibuat {% elif system_name == "usulan-perubahan"
-          %} Kelola usulan perubahan sistem dan teknologi {% elif system_name ==
-          "surat-pernyataan" %} Kelola surat pernyataan resmi {% elif
-          system_name == "laporan-insiden" %} Kelola laporan insiden dan
-          kejadian penting {% endif %}
+          Berikut adalah riwayat semua dokumen dan draft yang telah dibuat
         </p>
 
         <!-- Quick Actions -->
         <div class="welcome-actions">
-          {% if system_name == "main" %}
           <a href="{{ url_for('proposal_baru') }}" class="btn-primary">
             <i class="fas fa-exchange-alt"></i> Buat Usulan Baru
           </a>
@@ -126,35 +109,11 @@ Pegawai | BMKG Wilayah IV {% endif %} {% endblock %} {% block body_class
           <a href="{{ url_for('laporan_insiden_form') }}" class="btn-primary">
             <i class="fas fa-exclamation-triangle"></i> Buat Laporan Insiden
           </a>
-          {% elif system_name == "usulan-perubahan" %}
-          <a href="{{ url_for('proposal_baru') }}" class="btn-primary">
-            <i class="fas fa-plus"></i> Buat Usulan Baru
-          </a>
-          <button class="btn-secondary" id="quickGuideBtn">
-            <i class="fas fa-question-circle"></i> Panduan Cepat
-          </button>
-          {% elif system_name == "surat-pernyataan" %}
-          <a href="{{ url_for('surat_pernyataan_home') }}" class="btn-primary">
-            <i class="fas fa-plus"></i> Buat Surat Baru
-          </a>
-          <button class="btn-secondary" id="exportAllBtn">
-            <i class="fas fa-download"></i> Export Semua
-          </button>
-          {% elif system_name == "laporan-insiden" %}
-          <a href="{{ url_for('laporan_insiden_form') }}" class="btn-primary">
-            <i class="fas fa-plus"></i> Buat Laporan Baru
-          </a>
-          <button class="btn-secondary" id="refreshInsidenBtn">
-            <i class="fas fa-sync-alt"></i> Refresh
-          </button>
-          {% endif %}
         </div>
       </div>
 
       <!-- Stats Grid -->
       <div class="stats-grid">
-        {% if system_name == "main" %}
-        <!-- Stats untuk dashboard utama -->
         <div class="stat-card">
           <div class="stat-icon">
             <i class="fas fa-exchange-alt"></i>
@@ -220,142 +179,9 @@ Pegawai | BMKG Wilayah IV {% endif %} {% endblock %} {% block body_class
             </div>
           </div>
         </div>
-
-        {% elif system_name == "usulan-perubahan" and stats %}
-        <!-- Stats untuk usulan perubahan -->
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-file-alt"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-value">{{ stats.total }}</h3>
-            <p class="stat-label">Total Usulan</p>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-edit"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-value">{{ stats.draft }}</h3>
-            <p class="stat-label">Draft</p>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-spinner"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-value">
-              {{ stats.evaluasi + stats.approval + stats.implementation }}
-            </h3>
-            <p class="stat-label">Diproses</p>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-check-circle"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-value">{{ stats.completed }}</h3>
-            <p class="stat-label">Selesai</p>
-          </div>
-        </div>
-
-        {% elif system_name == "surat-pernyataan" and stats %}
-        <!-- Stats untuk surat pernyataan -->
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-file-contract"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-value">{{ stats.total }}</h3>
-            <p class="stat-label">Total Surat</p>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-calendar-alt"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-value">{{ stats.recent or 0 }}</h3>
-            <p class="stat-label">30 Hari Terakhir</p>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-clock"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-value">{{ stats.today or 0 }}</h3>
-            <p class="stat-label">Hari Ini</p>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-plus-circle"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-value">+</h3>
-            <p class="stat-label">Buat Baru</p>
-            <a href="{{ url_for('surat_pernyataan_home') }}" class="stat-link"
-              >Klik di sini</a
-            >
-          </div>
-        </div>
-
-        {% elif system_name == "laporan-insiden" and stats %}
-        <!-- Stats untuk laporan insiden -->
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-exclamation-triangle"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-value">{{ stats.total }}</h3>
-            <p class="stat-label">Total Laporan</p>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-check-circle"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-value">{{ stats.selesai }}</h3>
-            <p class="stat-label">Selesai</p>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-clock"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-value">{{ stats.proses }}</h3>
-            <p class="stat-label">Dalam Proses</p>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-calendar-alt"></i>
-          </div>
-          <div class="stat-content">
-            <h3 class="stat-value">{{ stats.recent or 0 }}</h3>
-            <p class="stat-label">30 Hari Terakhir</p>
-          </div>
-        </div>
-        {% endif %}
       </div>
 
-      <!-- RIWAYAT DOKUMEN (untuk dashboard utama) -->
-      {% if system_name == "main" %}
+      <!-- RIWAYAT DOKUMEN -->
       <div class="table-container">
         <div class="table-header">
           <h3 class="table-title">
@@ -439,28 +265,23 @@ Pegawai | BMKG Wilayah IV {% endif %} {% endblock %} {% block body_class
                   </div>
                 </div>
                 <div class="document-actions">
-                  {% if doc.status == 'draft' %}
-                  <button
-                    class="btn-action btn-edit"
-                    onclick="editProposal('{{ doc.id }}')"
-                  >
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  {% else %}
-                  <button
-                    class="btn-action btn-view"
-                    onclick="viewProposal('{{ doc.id }}')"
-                  >
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  {% endif %} {% if doc.status == 'completed' %}
+                  {% if doc.status == 'completed' %}
                   <button
                     class="btn-action btn-pdf"
                     onclick="downloadDocument('{{ doc.id }}')"
+                    title="Download"
                   >
                     <i class="fas fa-download"></i>
                   </button>
                   {% endif %}
+
+                  <button
+                    class="btn-action btn-delete"
+                    onclick="deleteDocument('usulan', '{{ doc.id }}', this)"
+                    title="Hapus"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
                 </div>
               </div>
               {% endfor %}
@@ -513,17 +334,19 @@ Pegawai | BMKG Wilayah IV {% endif %} {% endblock %} {% block body_class
                 </div>
                 <div class="document-actions">
                   <a
-                    href="{{ url_for('view_surat_pernyataan', surat_id=doc.id) }}"
-                    class="btn-action btn-view"
-                  >
-                    <i class="fas fa-eye"></i>
-                  </a>
-                  <a
                     href="{{ url_for('download_surat_pernyataan', surat_id=doc.id) }}"
                     class="btn-action btn-pdf"
+                    title="Download"
                   >
                     <i class="fas fa-download"></i>
                   </a>
+                  <button
+                    class="btn-action btn-delete"
+                    onclick="deleteDocument('surat', '{{ doc.id }}', this)"
+                    title="Hapus"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
                 </div>
               </div>
               {% endfor %}
@@ -588,15 +411,16 @@ Pegawai | BMKG Wilayah IV {% endif %} {% endblock %} {% block body_class
                 <div class="document-actions">
                   <a
                     href="{{ url_for('laporan_insiden_print_by_id', laporan_id=doc.id) }}"
-                    class="btn-action btn-view"
-                    id="printReviewBtn"
+                    class="btn-action btn-pdf"
+                    title="Download"
                     target="_blank"
                   >
-                    <i class="fas fa-print"></i>
+                    <i class="fas fa-download"></i>
                   </a>
                   <button
                     class="btn-action btn-delete"
-                    onclick="deleteLaporanInsiden('{{ doc.id }}')"
+                    onclick="deleteDocument('insiden', '{{ doc.id }}', this)"
+                    title="Hapus"
                   >
                     <i class="fas fa-trash"></i>
                   </button>
@@ -619,517 +443,14 @@ Pegawai | BMKG Wilayah IV {% endif %} {% endblock %} {% block body_class
           </div>
         </div>
       </div>
-
-      {% elif system_name == "usulan-perubahan" %}
-      <!-- Table untuk Usulan Perubahan -->
-      <div class="table-container">
-        <div class="table-header">
-          <h3 class="table-title">
-            <i class="fas fa-list"></i>
-            Daftar Usulan Perubahan {% if stats %}
-            <small class="table-subtitle">
-              Total: {{ stats.total }} | Draft: {{ stats.draft }} | Selesai: {{
-              stats.completed }}
-            </small>
-            {% endif %}
-          </h3>
-          <div class="table-actions">
-            <button class="btn-action btn-view" id="refreshTable">
-              <i class="fas fa-sync-alt"></i> Refresh
-            </button>
-            <button class="btn-action btn-pdf" id="exportPdf">
-              <i class="fas fa-file-export"></i> Export
-            </button>
-            <a href="{{ url_for('proposal_baru') }}" class="btn-primary">
-              <i class="fas fa-plus"></i> Buat Baru
-            </a>
-          </div>
-        </div>
-
-        <div class="table-responsive">
-          {% if proposals and proposals|length > 0 %}
-          <table class="data-table" id="proposalsTable">
-            <thead>
-              <tr>
-                <th>No. Dokumen</th>
-                <th>Tanggal</th>
-                <th>Deskripsi Perubahan</th>
-                <th>Status</th>
-                <th>Tgl. Dibutuhkan</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for usulan_item in proposals %}
-              <tr data-proposal-id="{{ usulan_item.id }}">
-                <td>
-                  <strong
-                    >{{ usulan_item.nomor_dokumen or 'Belum ada nomor'
-                    }}</strong
-                  >
-                </td>
-                <td class="tanggal-indonesia">
-                  {{ usulan_item.tanggal|format_date if usulan_item.tanggal else
-                  '-' }}
-                </td>
-                <td>
-                  <div
-                    class="proposal-desc"
-                    data-tooltip="{{ usulan_item.deskripsi_perubahan }}"
-                  >
-                    {{ usulan_item.deskripsi_perubahan[:60] }} {% if
-                    usulan_item.deskripsi_perubahan|length > 60 %}...{% endif %}
-                  </div>
-                </td>
-                <td>
-                  {% if usulan_item.status == 'draft' %}
-                  <span class="status-badge badge-draft">Draft</span>
-                  {% elif usulan_item.status == 'evaluasi' %}
-                  <span class="status-badge badge-evaluasi">Evaluasi</span>
-                  {% elif usulan_item.status == 'approval' %}
-                  <span class="status-badge badge-approval"
-                    >Menunggu Approval</span
-                  >
-                  {% elif usulan_item.status == 'implementation' %}
-                  <span class="status-badge badge-implementation"
-                    >Implementasi</span
-                  >
-                  {% elif usulan_item.status == 'completed' %}
-                  <span class="status-badge badge-completed">Selesai</span>
-                  {% else %}
-                  <span class="status-badge">{{ usulan_item.status }}</span>
-                  {% endif %}
-                </td>
-                <td class="tanggal-indonesia">
-                  {{ usulan_item.hasil_dibutuhkan_tgl|format_date if
-                  usulan_item.hasil_dibutuhkan_tgl else '-' }}
-                </td>
-                <td>
-                  <div class="action-buttons">
-                    {% if usulan_item.status == 'draft' %}
-                    <!-- TOMBOL EDIT DRAFT -->
-                    <button
-                      class="btn-action btn-edit"
-                      onclick="return editProposal('{{ usulan_item.id }}');"
-                      data-proposal-id="{{ usulan_item.id }}"
-                      title="Edit usulan"
-                    >
-                      <i class="fas fa-edit"></i>
-                    </button>
-
-                    <!-- TOMBOL DELETE DRAFT -->
-                    <button
-                      class="btn-action btn-delete"
-                      onclick="return deleteProposal('{{ usulan_item.id }}');"
-                      data-proposal-id="{{ usulan_item.id }}"
-                      title="Hapus usulan"
-                    >
-                      <i class="fas fa-trash"></i>
-                    </button>
-
-                    {% else %}
-                    <!-- TOMBOL VIEW (untuk proposal non-draft) -->
-                    <button
-                      class="btn-action btn-view"
-                      onclick="return viewProposal('{{ usulan_item.id }}');"
-                      data-proposal-id="{{ usulan_item.id }}"
-                      title="Lihat detail"
-                    >
-                      <i class="fas fa-eye"></i>
-                    </button>
-
-                    {% if usulan_item.status == 'completed' %}
-                    <!-- TOMBOL DOWNLOAD (hanya untuk status completed) -->
-                    <button
-                      class="btn-action btn-pdf"
-                      onclick="return downloadDocument('{{ usulan_item.id }}');"
-                      data-proposal-id="{{ usulan_item.id }}"
-                      title="Unduh Dokumen"
-                    >
-                      <i class="fas fa-file-pdf"></i>
-                    </button>
-                    {% endif %} {% endif %}
-                  </div>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          {% else %}
-          <div class="empty-state">
-            <div class="empty-icon">
-              <i class="fas fa-file-alt"></i>
-            </div>
-            <h3 class="empty-title">Belum ada usulan perubahan</h3>
-            <p class="empty-description">
-              Mulai dengan membuat usulan perubahan baru untuk sistem BMKG.
-            </p>
-            <div class="empty-actions">
-              <a href="{{ url_for('proposal_baru') }}" class="btn-primary">
-                <i class="fas fa-exchange-alt"></i> Buat Usulan Perubahan
-              </a>
-            </div>
-          </div>
-          {% endif %}
-        </div>
-      </div>
-
-      {% elif system_name == "surat-pernyataan" %}
-      <!-- Table untuk Surat Pernyataan -->
-      <div class="table-container">
-        <div class="table-header">
-          <h3 class="table-title">
-            <i class="fas fa-list"></i>
-            Daftar Surat Pernyataan {% if stats %}
-            <small class="table-subtitle">
-              Total: {{ stats.total }} | 30 Hari: {{ stats.recent or 0 }} | Hari
-              Ini: {{ stats.today or 0 }}
-            </small>
-            {% endif %}
-          </h3>
-          <div class="table-actions">
-            <a
-              href="{{ url_for('surat_pernyataan_home') }}"
-              class="btn-primary"
-            >
-              <i class="fas fa-plus"></i> Buat Surat Baru
-            </a>
-            <button class="btn-action btn-pdf" onclick="exportSuratPDF()">
-              <i class="fas fa-file-export"></i> Export
-            </button>
-            <button class="btn-action btn-view" onclick="refreshSurat()">
-              <i class="fas fa-sync-alt"></i> Refresh
-            </button>
-          </div>
-        </div>
-
-        <div class="table-responsive">
-          {% if surat_list and surat_list|length > 0 %}
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Nama</th>
-                <th>NIP/NIK</th>
-                <th>Instansi</th>
-                <th>Kegiatan</th>
-                <th>Tanggal Dibuat</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for surat_item in surat_list %}
-              <tr>
-                <td>{{ loop.index }}</td>
-                <td><strong>{{ surat_item.nama }}</strong></td>
-                <td>{{ surat_item.nip }}</td>
-                <td>{{ surat_item.instansi|truncate(20) }}</td>
-                <td>
-                  <div class="text-truncate" style="max-width: 200px">
-                    {{ surat_item.kegiatan|truncate(50) }}
-                  </div>
-                </td>
-                <td>
-                  {{ surat_item.created_at|format_date if surat_item.created_at
-                  else '-' }}
-                </td>
-                <td>
-                  <div class="action-buttons">
-                    <a
-                      href="{{ url_for('view_surat_pernyataan', surat_id=doc.id) }}"
-                      class="btn-action btn-view"
-                      title="Preview"
-                    >
-                      <i class="fas fa-eye"></i>
-                    </a>
-                    <a
-                      href="{{ url_for('download_surat_pernyataan', surat_id=surat_item.id) }}"
-                      class="btn-action btn-pdf"
-                      title="Download PDF"
-                    >
-                      <i class="fas fa-download"></i>
-                    </a>
-                    <button
-                      class="btn-action btn-delete"
-                      onclick="deleteSuratPernyataan({{ surat_item.id }})"
-                      title="Hapus"
-                    >
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          {% else %}
-          <div class="empty-state">
-            <div class="empty-icon">
-              <i class="fas fa-file-contract"></i>
-            </div>
-            <h3 class="empty-title">Belum ada surat pernyataan</h3>
-            <p class="empty-description">
-              Mulai dengan membuat surat pernyataan baru.
-            </p>
-            <div class="empty-actions">
-              <a
-                href="{{ url_for('surat_pernyataan_home') }}"
-                class="btn-primary"
-              >
-                <i class="fas fa-file-contract"></i> Buat Surat Pernyataan
-              </a>
-            </div>
-          </div>
-          {% endif %}
-        </div>
-      </div>
-
-      {% elif system_name == "laporan-insiden" %}
-      <!-- Table untuk Laporan Insiden -->
-      <div class="table-container">
-        <div class="table-header">
-          <h3 class="table-title">
-            <i class="fas fa-list"></i>
-            Daftar Laporan Insiden {% if stats %}
-            <small class="table-subtitle">
-              Total: {{ stats.total }} | Selesai: {{ stats.selesai }} | Proses:
-              {{ stats.proses }}
-            </small>
-            {% endif %}
-          </h3>
-          <div class="table-actions">
-            <a href="{{ url_for('laporan_insiden_form') }}" class="btn-primary">
-              <i class="fas fa-plus"></i> Buat Laporan Baru
-            </a>
-            <button class="btn-action btn-view" onclick="refreshLaporan()">
-              <i class="fas fa-sync-alt"></i> Refresh
-            </button>
-            <button class="btn-action btn-pdf" onclick="exportLaporanPDF()">
-              <i class="fas fa-file-export"></i> Export
-            </button>
-          </div>
-        </div>
-
-        <div class="table-responsive">
-          {% if laporans and laporans|length > 0 %}
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>No Dokumen</th>
-                <th>Nama Pelapor</th>
-                <th>Tanggal Kejadian</th>
-                <th>Status</th>
-                <th>Tanggal Dibuat</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for insiden_item in laporans %}
-              <tr>
-                <td>{{ loop.index }}</td>
-                <td>{{ insiden_item.no_dok or 'Tidak ada' }}</td>
-                <td>{{ insiden_item.nama_pelapor }}</td>
-                <td>
-                  {{ insiden_item.tanggal_kejadian|format_date if
-                  insiden_item.tanggal_kejadian else '-' }}
-                </td>
-                <td>
-                  {% if insiden_item.insiden_selesai == 'Ya' %}
-                  <span class="status-badge badge-completed">Selesai</span>
-                  {% else %}
-                  <span class="status-badge badge-warning">Belum Selesai</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {{ insiden_item.created_at|format_date if
-                  insiden_item.created_at else '-' }}
-                </td>
-                <td>
-                  <div class="action-buttons">
-                    <a
-                      href="{{ url_for('laporan_insiden_print_by_id', laporan_id=insiden_item.id) }}"
-                      class="btn-action btn-view"
-                      title="Print"
-                      target="_blank"
-                    >
-                      <i class="fas fa-print"></i>
-                    </a>
-                    <button
-                      onclick="deleteLaporanInsiden({{ insiden_item.id }})"
-                      class="btn-action btn-delete"
-                      title="Hapus"
-                    >
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          {% else %}
-          <div class="empty-state">
-            <div class="empty-icon">
-              <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <h3 class="empty-title">Belum ada laporan insiden</h3>
-            <p class="empty-description">
-              Buat laporan insiden pertama Anda untuk melaporkan kejadian
-              penting.
-            </p>
-            <div class="empty-actions">
-              <a
-                href="{{ url_for('laporan_insiden_form') }}"
-                class="btn-primary"
-              >
-                <i class="fas fa-plus-circle"></i> Buat Laporan Insiden
-              </a>
-            </div>
-          </div>
-          {% endif %}
-        </div>
-      </div>
-      {% endif %}
     </div>
   </main>
-</div>
-
-<!-- Modal for Quick Guide -->
-<div class="modal-overlay" id="guideModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>
-        <i class="fas fa-graduation-cap"></i>
-        Panduan Cepat Sistem
-      </h3>
-      <button onclick="closeGuide()" class="modal-close">&times;</button>
-    </div>
-
-    <div class="guide-steps">
-      <div class="step">
-        <h4>
-          <span class="step-number">1</span>
-          Pilih Sistem
-        </h4>
-        <p>
-          Pilih sistem yang ingin Anda gunakan: Usulan Perubahan, Surat
-          Pernyataan, atau Laporan Insiden.
-        </p>
-      </div>
-
-      <div class="step">
-        <h4>
-          <span class="step-number">2</span>
-          Isi Formulir
-        </h4>
-        <p>
-          Isi formulir dengan data yang lengkap dan benar sesuai kebutuhan
-          dokumen.
-        </p>
-      </div>
-
-      <div class="step">
-        <h4>
-          <span class="step-number">3</span>
-          Review & Submit
-        </h4>
-        <p>
-          Periksa kembali data sebelum submit. Pastikan semua informasi sudah
-          benar.
-        </p>
-      </div>
-
-      <div class="step">
-        <h4>
-          <span class="step-number">4</span>
-          Unduh Dokumen
-        </h4>
-        <p>
-          Setelah dokumen selesai, Anda dapat mengunduhnya dalam format PDF
-          untuk arsip.
-        </p>
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button onclick="closeGuide()" class="btn-primary">
-        <i class="fas fa-check"></i> Mengerti
-      </button>
-    </div>
-  </div>
 </div>
 {% endblock %} {% block extra_js %}
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 
 <script>
   // ==================== FUNGSI UTAMA ====================
-  function editProposal(id) {
-    console.log("[EDIT] Tombol edit diklik, ID:", id);
-
-    try {
-      if (!id || id === "undefined" || id === "null") {
-        console.error("[ERROR] ID tidak valid:", id);
-        alert("ID usulan tidak valid");
-        return false;
-      }
-
-      const proposalId = String(id).trim();
-      console.log("[EDIT] Proposal ID setelah konversi:", proposalId);
-
-      const url = `/usulan-perubahan/edit/${encodeURIComponent(proposalId)}`;
-      console.log("[EDIT] Redirect ke:", url);
-
-      window.location.href = url;
-      return false;
-    } catch (error) {
-      console.error("[ERROR] Gagal redirect:", error);
-      alert("Terjadi kesalahan saat membuka halaman edit");
-      return false;
-    }
-  }
-
-  function viewProposal(id) {
-    console.log("[VIEW] Lihat proposal:", id);
-
-    try {
-      const proposalId = String(id).trim();
-      window.location.href = `/usulan-perubahan/view/${proposalId}`;
-      return false;
-    } catch (error) {
-      console.error("[ERROR] Gagal melihat proposal:", error);
-      alert("Terjadi kesalahan saat membuka detail proposal");
-      return false;
-    }
-  }
-
-  function deleteProposal(id) {
-    const proposalId = String(id).trim();
-
-    if (confirm("Apakah Anda yakin ingin menghapus usulan ini?")) {
-      fetch(`/api/usulan-perubahan/delete-draft/draft_${proposalId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            alert(data.message);
-            window.location.reload();
-          } else {
-            alert("Gagal menghapus usulan: " + data.message);
-          }
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          alert("Terjadi kesalahan saat menghapus usulan");
-        });
-    }
-    return false;
-  }
-
   function downloadDocument(id) {
     const proposalId = String(id).trim();
     window.location.href = `/usulan-perubahan/generate/${proposalId}`;
@@ -1137,79 +458,209 @@ Pegawai | BMKG Wilayah IV {% endif %} {% endblock %} {% block body_class
   }
 
   // ==================== FUNGSI SURAT PERNYATAAN ====================
-  function deleteSuratPernyataan(id) {
-    if (confirm("Apakah Anda yakin ingin menghapus surat pernyataan ini?")) {
-      fetch(`/api/surat-pernyataan/delete/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            showToast("Surat pernyataan berhasil dihapus", "success");
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
-          } else {
-            showToast("Error: " + (data.message || "Gagal menghapus"), "error");
-          }
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          showToast("Terjadi kesalahan saat menghapus surat", "error");
-        });
-    }
-  }
-
-  function exportSuratPDF() {
-    alert("Fitur export PDF untuk surat pernyataan akan segera tersedia");
-  }
-
-  function refreshSurat() {
-    window.location.reload();
-  }
 
   // ==================== FUNGSI LAPORAN INSIDEN ====================
-  function deleteLaporanInsiden(id) {
-    if (confirm("Apakah Anda yakin ingin menghapus laporan insiden ini?")) {
-      console.log("Deleting laporan insiden ID:", id);
+  /**
+   * Fungsi hapus universal untuk semua jenis dokumen
+   */
+  /**
+   * Fungsi hapus universal untuk semua jenis dokumen
+   */
+  async function deleteDocument(type, id, element) {
+    if (!type || !id) {
+      showToast("Data tidak valid", "error");
+      return;
+    }
 
-      fetch(`/api/laporan-insiden/delete/${id}`, {
-        method: "POST",
+    const confirmMessage =
+      {
+        usulan: "Apakah Anda yakin ingin menghapus usulan perubahan ini?",
+        surat: "Apakah Anda yakin ingin menghapus surat pernyataan ini?",
+        insiden: "Apakah Anda yakin ingin menghapus laporan insiden ini?",
+      }[type] || "Apakah Anda yakin ingin menghapus dokumen ini?";
+
+    if (
+      !confirm(
+        confirmMessage +
+          "\n\nDokumen yang sudah dihapus tidak dapat dikembalikan.",
+      )
+    ) {
+      return;
+    }
+
+    // Dapatkan tombol yang diklik
+    const button =
+      element ||
+      document.querySelector(`[onclick*="deleteDocument('${type}', '${id}')"]`);
+
+    if (!button) {
+      showToast("Gagal menemukan elemen dokumen", "error");
+      return;
+    }
+
+    // Tampilkan loading state
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    button.disabled = true;
+
+    try {
+      const endpoints = {
+        usulan: `/api/usulan-perubahan/delete/${id}`,
+        surat: `/api/surat-pernyataan/delete/${id}`,
+        insiden: `/api/laporan-insiden/delete/${id}`,
+      };
+
+      const methods = {
+        usulan: "DELETE",
+        surat: "DELETE",
+        insiden: "POST",
+      };
+
+      const response = await fetch(endpoints[type], {
+        method: methods[type],
         headers: {
           "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
         },
-      })
-        .then((response) => {
-          console.log("Response status:", response.status);
-          return response.json();
-        })
-        .then((data) => {
-          console.log("Response data:", data);
-          if (data.status === "ok") {
-            showToast("Laporan insiden berhasil dihapus", "success");
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
-          } else {
-            showToast("Error: " + (data.error || "Gagal menghapus"), "error");
-          }
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          showToast("Terjadi kesalahan saat menghapus laporan", "error");
-        });
+      });
+
+      const data = await response.json();
+
+      if (data.success || data.status === "ok") {
+        showToast("Dokumen berhasil dihapus", "success");
+
+        // Hapus card dari DOM
+        const card = button.closest(".document-card");
+        if (card) {
+          card.style.opacity = "0.5";
+          card.style.transform = "translateX(-100%)";
+          card.style.transition = "all 0.3s ease";
+
+          setTimeout(() => {
+            card.remove();
+            updateDocumentCount(type, -1);
+
+            // Cek jika section kosong
+            checkIfSectionEmpty(type);
+          }, 300);
+        } else {
+          // Reload jika tidak bisa hapus dari DOM
+          setTimeout(() => window.location.reload(), 1000);
+        }
+      } else {
+        throw new Error(data.message || data.error || "Gagal menghapus");
+      }
+    } catch (error) {
+      console.error(`Delete ${type} error:`, error);
+      showToast(`Gagal menghapus: ${error.message}`, "error");
+
+      // Reset button
+      button.innerHTML = originalHTML;
+      button.disabled = false;
     }
   }
 
-  function refreshLaporan() {
-    window.location.reload();
+  /**
+   * Update counter setelah hapus
+   */
+  function updateDocumentCount(type, change) {
+    const counters = {
+      usulan: document.querySelector("#usulanSection .section-count"),
+      surat: document.querySelector("#suratSection .section-count"),
+      insiden: document.querySelector("#insidenSection .section-count"),
+    };
+
+    if (counters[type]) {
+      const current = parseInt(counters[type].textContent) || 0;
+      const newCount = Math.max(0, current + change);
+      counters[type].textContent = newCount;
+
+      // Update stat cards juga
+      updateStatsCard(type, newCount);
+    }
   }
 
-  function exportLaporanPDF() {
-    alert("Fitur export PDF untuk laporan insiden akan segera tersedia");
+  /**
+   * Update stat card di dashboard
+   */
+  function updateStatsCard(type, newCount) {
+    const statCards = document.querySelectorAll(".stat-card");
+
+    statCards.forEach((card) => {
+      const label = card.querySelector(".stat-label");
+      if (label) {
+        if (type === "usulan" && label.textContent.includes("Usulan")) {
+          const valueElement = card.querySelector(".stat-value");
+          if (valueElement) {
+            valueElement.textContent = newCount;
+          }
+        }
+        if (type === "surat" && label.textContent.includes("Surat")) {
+          const valueElement = card.querySelector(".stat-value");
+          if (valueElement) {
+            valueElement.textContent = newCount;
+          }
+        }
+        if (type === "insiden" && label.textContent.includes("Laporan")) {
+          const valueElement = card.querySelector(".stat-value");
+          if (valueElement) {
+            valueElement.textContent = newCount;
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Cek jika section kosong setelah hapus
+   */
+  function checkIfSectionEmpty(type) {
+    const sectionMap = {
+      usulan: "#usulanSection .documents-grid",
+      surat: "#suratSection .documents-grid",
+      insiden: "#insidenSection .documents-grid",
+    };
+
+    const grid = document.querySelector(sectionMap[type]);
+    if (grid && grid.children.length === 0) {
+      const section = grid.closest(".documents-section");
+      if (section) {
+        const emptyHTML = `
+        <div class="empty-section">
+          <i class="fas fa-${getIconByType(type)}"></i>
+          <p>Belum ada ${getLabelByType(type)}</p>
+          <a href="${getCreateUrlByType(type)}" class="btn-primary btn-sm">
+            <i class="fas fa-plus"></i> Buat ${getLabelByType(type)} Baru
+          </a>
+        </div>
+      `;
+        grid.innerHTML = emptyHTML;
+      }
+    }
+  }
+
+  function getIconByType(type) {
+    return {
+      usulan: "file-alt",
+      surat: "file-contract",
+      insiden: "exclamation-triangle",
+    }[type];
+  }
+
+  function getLabelByType(type) {
+    return {
+      usulan: "Usulan Perubahan",
+      surat: "Surat Pernyataan",
+      insiden: "Laporan Insiden",
+    }[type];
+  }
+
+  function getCreateUrlByType(type) {
+    return {
+      usulan: '{{ url_for("proposal_baru") }}',
+      surat: '{{ url_for("surat_pernyataan_home") }}',
+      insiden: '{{ url_for("laporan_insiden_form") }}',
+    }[type];
   }
 
   // ==================== FUNGSI UNTUK DASHBOARD UTAMA ====================
@@ -1234,18 +685,6 @@ Pegawai | BMKG Wilayah IV {% endif %} {% endblock %} {% block body_class
         }
       }
     });
-  }
-
-  function showAllProposals() {
-    alert("Fitur lihat semua usulan akan segera tersedia");
-  }
-
-  function showAllSurat() {
-    alert("Fitur lihat semua surat akan segera tersedia");
-  }
-
-  function showAllLaporan() {
-    alert("Fitur lihat semua laporan akan segera tersedia");
   }
 
   // Fungsi toast notification
@@ -1285,71 +724,9 @@ Pegawai | BMKG Wilayah IV {% endif %} {% endblock %} {% block body_class
     }, 5000);
   }
 
-  // ==================== FUNGSI MODAL ====================
-  function closeGuide() {
-    const guideModal = document.getElementById("guideModal");
-    if (guideModal) {
-      guideModal.style.display = "none";
-    }
-  }
-
   // ==================== INITIALIZATION ====================
   document.addEventListener("DOMContentLoaded", function () {
     console.log("[DASHBOARD] Initializing...");
-
-    // Setup modal guide
-    const guideBtn = document.getElementById("quickGuideBtn");
-    const guideModal = document.getElementById("guideModal");
-
-    if (guideBtn && guideModal) {
-      guideBtn.addEventListener("click", function () {
-        guideModal.style.display = "block";
-      });
-
-      const closeBtn = guideModal.querySelector(".modal-close");
-      if (closeBtn) {
-        closeBtn.addEventListener("click", closeGuide);
-      }
-
-      guideModal.addEventListener("click", function (e) {
-        if (e.target === guideModal) {
-          closeGuide();
-        }
-      });
-    }
-
-    // Setup export all button for surat pernyataan
-    const exportAllBtn = document.getElementById("exportAllBtn");
-    if (exportAllBtn) {
-      exportAllBtn.addEventListener("click", function () {
-        exportSuratPDF();
-      });
-    }
-
-    // Setup refresh button for laporan insiden
-    const refreshInsidenBtn = document.getElementById("refreshInsidenBtn");
-    if (refreshInsidenBtn) {
-      refreshInsidenBtn.addEventListener("click", function () {
-        refreshLaporan();
-      });
-    }
-
-    // Setup refresh button
-    const refreshBtn = document.getElementById("refreshTable");
-    if (refreshBtn) {
-      refreshBtn.addEventListener("click", function () {
-        console.log("[REFRESH] Refreshing...");
-        window.location.reload();
-      });
-    }
-
-    // Setup export button
-    const exportBtn = document.getElementById("exportPdf");
-    if (exportBtn) {
-      exportBtn.addEventListener("click", function () {
-        alert("Fitur export PDF sedang dalam pengembangan");
-      });
-    }
 
     // Setup tab buttons untuk dashboard utama
     if (document.querySelector(".tab-btn")) {
@@ -1634,70 +1011,6 @@ Pegawai | BMKG Wilayah IV {% endif %} {% endblock %} {% block body_class
   .badge-success {
     background: #1cc88a;
     color: white;
-  }
-
-  /* Sidebar Submenu */
-  .sidebar-submenu {
-    list-style: none;
-    padding-left: 25px;
-    margin-top: 5px;
-    max-height: 200px;
-    overflow-y: auto;
-  }
-
-  .sidebar-subitem {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    font-size: 13px;
-    color: #6c757d;
-    text-decoration: none;
-    border-radius: 4px;
-    margin-bottom: 2px;
-    transition: background 0.2s;
-  }
-
-  .sidebar-subitem:hover {
-    background: #f8f9fa;
-    color: #4e73df;
-  }
-
-  .sidebar-subitem i {
-    margin-right: 8px;
-    font-size: 12px;
-  }
-
-  .sidebar-subitem small {
-    color: #adb5bd;
-    font-size: 11px;
-  }
-
-  .submenu-header {
-    padding: 10px 12px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #4e73df;
-    border-bottom: 1px solid #eee;
-    margin: 10px 0;
-  }
-
-  .view-all {
-    color: #4e73df;
-    font-weight: 500;
-  }
-
-  .table-subtitle {
-    font-size: 14px;
-    font-weight: normal;
-    color: #6c757d;
-    margin-left: 10px;
-  }
-
-  .text-truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 </style>
 {% endblock %}
