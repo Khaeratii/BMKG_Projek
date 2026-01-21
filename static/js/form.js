@@ -1,23 +1,24 @@
 /**
- * Form Complete - BMKG
- * JavaScript untuk form lengkap semua tahap (5 Steps)
- * Versi: 2.2 - Simplified (No Draft, No Print)
+ * Two Step Form - BMKG Wilayah IV
+ * JavaScript untuk form 2 tahap (Form & Review)
+ * Versi: 2.0 - Two Step Implementation
  */
 
 // ==================== GLOBAL VARIABLES ====================
 let currentStep = 1;
-const totalSteps = 5;
+const totalSteps = 2;
 const signatures = {
   pemohon: null,
   approval: null,
   implementation: null,
 };
-let lastValidationTime = 0; // Untuk mencegah peringatan terlalu sering
+let lastValidationTime = 0;
+let signaturePads = {};
 
 // ==================== INITIALIZATION ====================
 
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("Form Complete JavaScript loaded");
+  console.log("Two Step Form JavaScript loaded");
 
   // Initialize core components
   initializeForm();
@@ -62,10 +63,10 @@ function setDefaultDates() {
 
   // Set minimum dates for future dates
   const futureDateInputs = [
-    { id: "tglEfektif", minDate: tomorrow },
-    { id: "hasilDibutuhkan", minDate: nextWeek },
-    { id: "tanggalPelaksanaan", minDate: tomorrow },
-    { id: "tanggalRilis", minDate: tomorrow },
+    { id: "tgl_efektif", minDate: tomorrow },
+    { id: "hasil_dibutuhkan_tgl", minDate: nextWeek },
+    { id: "tanggal_pelaksanaan", minDate: tomorrow },
+    { id: "tanggal_rilis", minDate: tomorrow },
   ];
 
   futureDateInputs.forEach(({ id, minDate }) => {
@@ -79,17 +80,32 @@ function setDefaultDates() {
   });
 
   // Set today's date for proposal date
-  const tanggalInput = document.getElementById("tanggalInput");
+  const tanggalInput = document.getElementById("tanggal");
   if (tanggalInput && !tanggalInput.value) {
     tanggalInput.value = formatDate(today);
   }
+
+  // Set other dates to today
+  const todayDateInputs = [
+    "tanggal_evaluasi",
+    "tanggal_persetujuan",
+    "tanggal_implementasi",
+  ];
+
+  todayDateInputs.forEach((id) => {
+    const input = document.getElementById(id);
+    if (input && !input.value) {
+      input.value = formatDate(today);
+    }
+  });
 }
 
 function setupCharacterCounters() {
-  const textareas = document.querySelectorAll(".form-textarea[name]");
+  const textareas = document.querySelectorAll(".form-control[data-counter]");
 
   textareas.forEach((textarea) => {
-    const counter = document.getElementById(`${textarea.name}Counter`);
+    const counterId = textarea.dataset.counter;
+    const counter = document.getElementById(counterId);
     if (counter) {
       updateCounter(counter, textarea.value.length);
       textarea.addEventListener("input", () => {
@@ -97,6 +113,26 @@ function setupCharacterCounters() {
       });
     }
   });
+
+  // Setup for hardcoded textareas
+  const deskripsiTextarea = document.getElementById("deskripsi_perubahan");
+  const deskripsiCounter = document.getElementById("deskripsiCounter");
+  const alasanTextarea = document.getElementById("alasan_perubahan");
+  const alasanCounter = document.getElementById("alasanCounter");
+
+  if (deskripsiTextarea && deskripsiCounter) {
+    updateCounter(deskripsiCounter, deskripsiTextarea.value.length);
+    deskripsiTextarea.addEventListener("input", () => {
+      updateCounter(deskripsiCounter, deskripsiTextarea.value.length);
+    });
+  }
+
+  if (alasanTextarea && alasanCounter) {
+    updateCounter(alasanCounter, alasanTextarea.value.length);
+    alasanTextarea.addEventListener("input", () => {
+      updateCounter(alasanCounter, alasanTextarea.value.length);
+    });
+  }
 }
 
 function updateCounter(counter, count) {
@@ -134,48 +170,34 @@ function setupApprovalListeners() {
       }
 
       // Update required attributes
-      const tanggalInput = document.getElementById("tanggalPelaksanaan");
-      const picInput = document.querySelector('input[name="pic_pelaksana"]');
-      const catatanInput = document.querySelector(
-        'textarea[name="catatan_penolakan"]',
-      );
+      const tanggalInput = document.getElementById("tanggal_pelaksanaan");
+      const picInput = document.getElementById("pic_pelaksana");
+      const catatanInput = document.getElementById("catatan_penolakan");
 
       if (tanggalInput) tanggalInput.required = isApproved;
       if (picInput) picInput.required = isApproved;
       if (catatanInput) catatanInput.required = !isApproved;
     });
   });
+
+  // Trigger initial state
+  const defaultRadio = document.querySelector(
+    'input[name="status_persetujuan"]:checked',
+  );
+  if (defaultRadio) {
+    defaultRadio.dispatchEvent(new Event("change"));
+  }
 }
 
 function setupEditableFields() {
   console.log("Setting up editable fields...");
 
   // Field yang bisa diedit: No Dokumen, Diminta Oleh, Jabatan
-  const editableFields = ["noDokumenInput", "dimintaOlehInput", "jabatanInput"];
+  const editableFields = ["no_dokumen", "diminta_oleh", "jabatan"];
 
   editableFields.forEach((fieldId) => {
     const field = document.getElementById(fieldId);
     if (field) {
-      // Pastikan field tidak readonly
-      field.removeAttribute("readonly");
-
-      // Hapus placeholder untuk field kosong
-      field.addEventListener("focus", function () {
-        if (this.hasAttribute("data-placeholder")) {
-          if (this.value === this.getAttribute("data-placeholder")) {
-            this.value = "";
-          }
-        }
-      });
-
-      field.addEventListener("blur", function () {
-        if (this.hasAttribute("data-placeholder")) {
-          if (this.value === "") {
-            this.value = this.getAttribute("data-placeholder");
-          }
-        }
-      });
-
       // Tambahkan visual feedback
       field.addEventListener("input", function () {
         if (this.value.trim() === "") {
@@ -184,6 +206,11 @@ function setupEditableFields() {
           this.classList.remove("field-empty");
         }
       });
+
+      // Inisialisasi state
+      if (field.value.trim() === "") {
+        field.classList.add("field-empty");
+      }
     }
   });
 }
@@ -194,185 +221,203 @@ function initializeSignatures() {
   console.log("Initializing signature systems...");
 
   // Initialize all three signature systems
-  initializeSignature("signatureCanvas", "signatureData", "pemohon");
-  initializeSignature("signatureCanvas2", "signatureData2", "approval");
-  initializeSignature("signatureCanvas3", "signatureData3", "implementation");
+  initializeSignaturePad(1, "pemohon");
+  initializeSignaturePad(2, "approval");
+  initializeSignaturePad(3, "implementation");
 
   // Setup file upload for all three sections
   setupFileUploads();
   setupSignatureOptions();
 }
 
-function initializeSignature(canvasId, dataId, type) {
+function initializeSignaturePad(sectionNum, type) {
+  const canvasId = `signatureCanvas${sectionNum}`;
+  const dataId = `signatureData${sectionNum}`;
   const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
+  const dataInput = document.getElementById(dataId);
 
-  const ctx = canvas.getContext("2d");
-  let isDrawing = false;
-  let lastX = 0;
-  let lastY = 0;
-  const drawingHistory = [];
+  if (!canvas || !dataInput) {
+    console.error(`❌ Canvas or data input not found for ${type}`);
+    return;
+  }
+
+  // Initialize Signature Pad
+  const signaturePad = new SignaturePad(canvas, {
+    backgroundColor: "rgb(255, 255, 255)",
+    penColor: "rgb(0, 0, 0)",
+    minWidth: 1,
+    maxWidth: 3,
+    throttle: 16,
+    velocityFilterWeight: 0.7,
+  });
+
+  // Store reference
+  signaturePads[type] = signaturePad;
 
   // Set canvas size
   function resizeCanvas() {
     const container = canvas.parentElement;
-    const width = container.clientWidth;
-    const height = 200;
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
-    // Set display size
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    // Set canvas size
+    canvas.width = container.offsetWidth * ratio;
+    canvas.height = 200 * ratio;
+    canvas.getContext("2d").scale(ratio, ratio);
 
-    // Set actual size
-    const scale = window.devicePixelRatio || 1;
-    canvas.width = width * scale;
-    canvas.height = height * scale;
+    // Clear and redraw
+    signaturePad.clear();
 
-    // Scale context
-    ctx.scale(scale, scale);
+    // If we have saved data, redraw it
+    if (signatures[type]) {
+      signaturePad.fromDataURL(signatures[type]);
+    }
 
-    // Clear canvas
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(0, 0, width, height);
-
-    // Set drawing properties
-    ctx.lineWidth = 2;
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "#000000";
+    // Hide placeholder if signature exists
+    const placeholder = canvas.parentElement.querySelector(
+      ".signature-placeholder",
+    );
+    if (placeholder) {
+      placeholder.style.display = signaturePad.isEmpty() ? "block" : "none";
+    }
   }
 
   resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
 
-  // Drawing functions
-  function startDrawing(e) {
-    isDrawing = true;
-    const rect = canvas.getBoundingClientRect();
-
-    if (e.type.includes("touch")) {
-      lastX = e.touches[0].clientX - rect.left;
-      lastY = e.touches[0].clientY - rect.top;
-    } else {
-      lastX = e.clientX - rect.left;
-      lastY = e.clientY - rect.top;
-    }
-
-    // Hide placeholder
+  // Hide placeholder when drawing starts
+  canvas.addEventListener("touchstart", () => {
     const placeholder = canvas.parentElement.querySelector(
       ".signature-placeholder",
     );
     if (placeholder) placeholder.style.display = "none";
-
-    // Save state for undo
-    drawingHistory.push(canvas.toDataURL());
-    if (drawingHistory.length > 10) drawingHistory.shift();
-
-    e.preventDefault();
-  }
-
-  function draw(e) {
-    if (!isDrawing) return;
-
-    e.preventDefault();
-    const rect = canvas.getBoundingClientRect();
-    let x, y;
-
-    if (e.type.includes("touch")) {
-      x = e.touches[0].clientX - rect.left;
-      y = e.touches[0].clientY - rect.top;
-    } else {
-      x = e.clientX - rect.left;
-      y = e.clientY - rect.top;
-    }
-
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-
-    lastX = x;
-    lastY = y;
-  }
-
-  function stopDrawing() {
-    if (!isDrawing) return;
-    isDrawing = false;
-    updateSignatureData(type);
-  }
-
-  // Event listeners
-  canvas.addEventListener("mousedown", startDrawing);
-  canvas.addEventListener("mousemove", draw);
-  canvas.addEventListener("mouseup", stopDrawing);
-  canvas.addEventListener("mouseout", stopDrawing);
-
-  // Touch events
-  canvas.addEventListener("touchstart", startDrawing);
-  canvas.addEventListener("touchmove", draw);
-  canvas.addEventListener("touchend", stopDrawing);
-
-  // Window resize
-  window.addEventListener("resize", () => {
-    setTimeout(resizeCanvas, 100);
   });
 
-  // Store methods on canvas
-  canvas.clear = () => {
-    const width = canvas.parentElement.clientWidth;
-    const height = 200;
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(0, 0, width, height);
-
-    // Clear history
-    drawingHistory.length = 0;
-
-    // Show placeholder
+  canvas.addEventListener("mousedown", () => {
     const placeholder = canvas.parentElement.querySelector(
       ".signature-placeholder",
     );
-    if (placeholder) placeholder.style.display = "block";
+    if (placeholder) placeholder.style.display = "none";
+  });
 
-    updateSignatureData(type);
-  };
+  // Update signature data
+  signaturePad.addEventListener("endStroke", () => {
+    updateSignatureData(sectionNum, type);
+    updateSignatureVisualFeedback(canvasId, type, true);
+  });
 
-  canvas.undo = () => {
-    if (drawingHistory.length === 0) return;
+  // Set up clear and undo buttons
+  const clearBtn = document.getElementById(`clearSignatureBtn${sectionNum}`);
+  const undoBtn = document.getElementById(`undoSignatureBtn${sectionNum}`);
 
-    drawingHistory.pop();
-    const width = canvas.parentElement.clientWidth;
-    const height = 200;
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      signaturePad.clear();
+      updateSignatureData(sectionNum, type);
+      updateSignatureVisualFeedback(canvasId, type, false);
 
-    // Clear canvas
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(0, 0, width, height);
-
-    if (drawingHistory.length > 0) {
-      const img = new Image();
-      img.onload = () => {
-        ctx.drawImage(img, 0, 0, width, height);
-        updateSignatureData(type);
-      };
-      img.src = drawingHistory[drawingHistory.length - 1];
-    } else {
+      // Show placeholder
       const placeholder = canvas.parentElement.querySelector(
         ".signature-placeholder",
       );
       if (placeholder) placeholder.style.display = "block";
-      signatures[type] = null;
-      document.getElementById(dataId).value = "";
-    }
-  };
+    });
+  }
 
-  // Set up clear and undo buttons
-  const clearBtn = document.getElementById(
-    `clear${canvasId.replace("signatureCanvas", "SignatureBtn")}`,
-  );
-  const undoBtn = document.getElementById(
-    `undo${canvasId.replace("signatureCanvas", "SignatureBtn")}`,
-  );
+  if (undoBtn) {
+    undoBtn.addEventListener("click", () => {
+      const data = signaturePad.toData();
+      if (data && data.length > 0) {
+        data.pop(); // Remove the last dot or line
+        signaturePad.fromData(data);
+        updateSignatureData(sectionNum, type);
+        updateSignatureVisualFeedback(canvasId, type, !signaturePad.isEmpty());
 
-  if (clearBtn) clearBtn.addEventListener("click", canvas.clear);
-  if (undoBtn) undoBtn.addEventListener("click", canvas.undo);
+        if (signaturePad.isEmpty()) {
+          const placeholder = canvas.parentElement.querySelector(
+            ".signature-placeholder",
+          );
+          if (placeholder) placeholder.style.display = "block";
+        }
+      }
+    });
+  }
+
+  // Load existing signature if any
+  if (signatures[type]) {
+    signaturePad.fromDataURL(signatures[type]);
+    updateSignatureVisualFeedback(canvasId, type, true);
+  }
+}
+
+function updateSignatureData(sectionNum, type) {
+  const canvasId = `signatureCanvas${sectionNum}`;
+  const dataId = `signatureData${sectionNum}`;
+  const canvas = document.getElementById(canvasId);
+  const dataInput = document.getElementById(dataId);
+  const signaturePad = signaturePads[type];
+
+  if (!signaturePad || !dataInput) return;
+
+  if (!signaturePad.isEmpty()) {
+    const dataUrl = signaturePad.toDataURL("image/png");
+    signatures[type] = dataUrl;
+    dataInput.value = dataUrl;
+  } else {
+    signatures[type] = null;
+    dataInput.value = "";
+  }
+}
+
+function updateSignatureVisualFeedback(canvasId, type, isValid) {
+  const canvas = document.getElementById(canvasId);
+  const section = canvas.closest(".signature-section");
+
+  if (!canvas || !section) return;
+
+  // Update canvas classes
+  canvas.classList.remove("drawing", "saved");
+
+  if (isValid && !signaturePads[type].isEmpty()) {
+    canvas.classList.add("saved");
+    section.classList.remove("invalid");
+    section.classList.add("valid");
+
+    // Show saved indicator
+    showSavedIndicator(sectionNumFromType(type));
+  } else if (!isValid) {
+    section.classList.remove("valid");
+    section.classList.add("invalid");
+  } else {
+    section.classList.remove("valid", "invalid");
+  }
+}
+
+function sectionNumFromType(type) {
+  const map = { pemohon: 1, approval: 2, implementation: 3 };
+  return map[type] || 1;
+}
+
+function showSavedIndicator(sectionNum) {
+  const section = document
+    .querySelector(`#signatureCanvas${sectionNum}`)
+    .closest(".signature-section");
+  const existingIndicator = section.querySelector(".signature-saved");
+
+  if (existingIndicator) {
+    existingIndicator.remove();
+  }
+
+  const indicator = document.createElement("div");
+  indicator.className = "signature-saved";
+  indicator.innerHTML = '<i class="fas fa-check-circle me-1"></i>Tersimpan';
+
+  section.style.position = "relative";
+  section.appendChild(indicator);
+
+  // Remove indicator after animation
+  setTimeout(() => {
+    indicator.remove();
+  }, 2000);
 }
 
 function setupFileUploads() {
@@ -384,27 +429,28 @@ function setupFileUploads() {
   ];
 
   uploadConfigs.forEach(({ section, type }) => {
-    const suffix = section === 1 ? "" : section;
     setupFileUpload(
-      `uploadArea${suffix}`,
-      `signatureFile${suffix}`,
-      `previewContainer${suffix}`,
-      `signaturePreview${suffix}`,
-      `removePreviewBtn${suffix}`,
-      `signatureData${section === 1 ? "" : section}`,
+      section,
       type,
+      `uploadArea${section}`,
+      `signatureFile${section}`,
+      `previewContainer${section}`,
+      `signaturePreview${section}`,
+      `removePreviewBtn${section}`,
+      `signatureData${section}`,
     );
   });
 }
 
 function setupFileUpload(
+  sectionNum,
+  type,
   uploadAreaId,
   fileInputId,
   previewContainerId,
   previewImgId,
   removeBtnId,
   dataInputId,
-  signatureType,
 ) {
   const uploadArea = document.getElementById(uploadAreaId);
   const fileInput = document.getElementById(fileInputId);
@@ -412,6 +458,7 @@ function setupFileUpload(
   const previewImg = document.getElementById(previewImgId);
   const removeBtn = document.getElementById(removeBtnId);
   const dataInput = document.getElementById(dataInputId);
+  const canvasId = `signatureCanvas${sectionNum}`;
 
   if (!uploadArea || !fileInput) return;
 
@@ -424,61 +471,33 @@ function setupFileUpload(
     uploadArea.classList.add("dragover");
   });
 
-  uploadArea.addEventListener("dragleave", () =>
-    uploadArea.classList.remove("dragover"),
-  );
+  uploadArea.addEventListener("dragleave", () => {
+    uploadArea.classList.remove("dragover");
+  });
 
   uploadArea.addEventListener("drop", (e) => {
     e.preventDefault();
     uploadArea.classList.remove("dragover");
     if (e.dataTransfer.files.length) {
       fileInput.files = e.dataTransfer.files;
-      handleFileSelect(
-        fileInput,
-        previewImg,
-        previewContainer,
-        uploadArea,
-        dataInput,
-        signatureType,
-      );
+      handleFileSelect(fileInput, type, canvasId);
     }
   });
 
   // File selection
-  fileInput.addEventListener("change", (e) =>
-    handleFileSelect(
-      e.target,
-      previewImg,
-      previewContainer,
-      uploadArea,
-      dataInput,
-      signatureType,
-    ),
-  );
+  fileInput.addEventListener("change", (e) => {
+    handleFileSelect(e.target, type, canvasId);
+  });
 
   // Remove preview
   if (removeBtn) {
-    removeBtn.addEventListener("click", () =>
-      removeUploadedSignature(
-        fileInput,
-        previewContainer,
-        uploadArea,
-        previewImg,
-        dataInput,
-        signatureType,
-      ),
-    );
+    removeBtn.addEventListener("click", () => {
+      removeUploadedSignature(type, canvasId);
+    });
   }
 }
 
-function handleFileSelect(
-  fileInput,
-  previewImg,
-  previewContainer,
-  uploadArea,
-  dataInput,
-  signatureType,
-) {
+function handleFileSelect(fileInput, type, canvasId) {
   const file = fileInput.files[0];
   if (!file) return;
 
@@ -496,49 +515,56 @@ function handleFileSelect(
 
   const reader = new FileReader();
   reader.onload = function (event) {
+    const sectionNum = canvasId.replace("signatureCanvas", "");
+    const previewImg = document.getElementById(`signaturePreview${sectionNum}`);
+    const previewContainer = document.getElementById(
+      `previewContainer${sectionNum}`,
+    );
+    const uploadArea = document.getElementById(`uploadArea${sectionNum}`);
+    const dataInput = document.getElementById(`signatureData${sectionNum}`);
+
     if (previewImg) previewImg.src = event.target.result;
     if (previewContainer) previewContainer.classList.add("active");
     if (uploadArea) uploadArea.style.display = "none";
 
-    signatures[signatureType] = event.target.result;
+    // Clear corresponding canvas
+    const signaturePad = signaturePads[type];
+    if (signaturePad) {
+      signaturePad.clear();
+    }
+
+    signatures[type] = event.target.result;
     if (dataInput) dataInput.value = event.target.result;
-    showToast(`Tanda tangan ${signatureType} berhasil diupload`, "success");
+
+    // Update visual feedback
+    updateSignatureVisualFeedback(canvasId, type, true);
+    showToast(`Tanda tangan ${type} berhasil diupload`, "success");
   };
 
   reader.readAsDataURL(file);
 }
 
-function removeUploadedSignature(
-  fileInput,
-  previewContainer,
-  uploadArea,
-  previewImg,
-  dataInput,
-  signatureType,
-) {
+function removeUploadedSignature(type, canvasId) {
+  const sectionNum = canvasId.replace("signatureCanvas", "");
+  const fileInput = document.getElementById(`signatureFile${sectionNum}`);
+  const previewContainer = document.getElementById(
+    `previewContainer${sectionNum}`,
+  );
+  const uploadArea = document.getElementById(`uploadArea${sectionNum}`);
+  const previewImg = document.getElementById(`signaturePreview${sectionNum}`);
+  const dataInput = document.getElementById(`signatureData${sectionNum}`);
+
   if (fileInput) fileInput.value = "";
   if (previewContainer) previewContainer.classList.remove("active");
   if (uploadArea) uploadArea.style.display = "block";
   if (previewImg) previewImg.src = "";
 
-  signatures[signatureType] = null;
+  signatures[type] = null;
   if (dataInput) dataInput.value = "";
-  showToast(`Tanda tangan ${signatureType} dihapus`, "warning");
-}
 
-function updateSignatureData(type) {
-  const sectionNum = type === "pemohon" ? 1 : type === "approval" ? 2 : 3;
-  const canvas = document.getElementById(
-    `signatureCanvas${sectionNum === 1 ? "" : sectionNum}`,
-  );
-  const dataInput = document.getElementById(
-    `signatureData${sectionNum === 1 ? "" : sectionNum}`,
-  );
-
-  if (canvas && dataInput) {
-    signatures[type] = canvas.toDataURL("image/png");
-    dataInput.value = signatures[type];
-  }
+  // Update visual feedback
+  updateSignatureVisualFeedback(canvasId, type, false);
+  showToast(`Tanda tangan ${type} dihapus`, "warning");
 }
 
 function setupSignatureOptions() {
@@ -550,56 +576,71 @@ function setupSignatureOptions() {
 
   sections.forEach(({ section, type }) => {
     const canvasBtn = document.querySelector(
-      `[data-option="canvas${section === 1 ? "" : section}"]`,
+      `[data-option="canvas${section}"]`,
     );
     const uploadBtn = document.querySelector(
-      `[data-option="upload${section === 1 ? "" : section}"]`,
+      `[data-option="upload${section}"]`,
     );
 
-    if (canvasBtn)
-      canvasBtn.addEventListener("click", () =>
-        switchSignatureOption(section, "canvas", type),
-      );
-    if (uploadBtn)
-      uploadBtn.addEventListener("click", () =>
-        switchSignatureOption(section, "upload", type),
-      );
+    if (canvasBtn) {
+      canvasBtn.addEventListener("click", () => {
+        switchSignatureOption(section, "canvas", type);
+      });
+    }
+
+    if (uploadBtn) {
+      uploadBtn.addEventListener("click", () => {
+        switchSignatureOption(section, "upload", type);
+      });
+    }
   });
 }
 
 function switchSignatureOption(sectionNum, optionType, signatureType) {
-  const suffix = sectionNum === 1 ? "" : sectionNum;
-  const containerId = `Signature${suffix}`;
-
   // Update active button
   document
     .querySelectorAll(
-      `[data-option^="canvas${suffix}"], [data-option^="upload${suffix}"]`,
+      `[data-option^="canvas${sectionNum}"], [data-option^="upload${sectionNum}"]`,
     )
     .forEach((btn) => btn.classList.remove("active"));
+
   document
-    .querySelector(`[data-option="${optionType}${suffix}"]`)
+    .querySelector(`[data-option="${optionType}${sectionNum}"]`)
     .classList.add("active");
 
   // Show selected container, hide others
   document
     .querySelectorAll(`.signature-option-container`)
     .forEach((container) => {
-      if (container.id.includes(suffix ? suffix.toString() : "")) {
+      if (container.id.includes(sectionNum.toString())) {
         container.classList.remove("active");
       }
     });
 
   document
-    .getElementById(`${optionType}${containerId}`)
+    .getElementById(`${optionType}Signature${sectionNum}`)
     .classList.add("active");
 
   // Clear other option
   if (optionType === "canvas") {
     clearUploadedSignatureByType(signatureType);
   } else {
-    const canvas = document.getElementById(`signatureCanvas${suffix}`);
-    if (canvas && canvas.clear) canvas.clear();
+    const signaturePad = signaturePads[signatureType];
+    if (signaturePad) {
+      signaturePad.clear();
+      updateSignatureData(sectionNum, signatureType);
+      updateSignatureVisualFeedback(
+        `signatureCanvas${sectionNum}`,
+        signatureType,
+        false,
+      );
+
+      // Show placeholder
+      const placeholder = document
+        .querySelector(`#signatureCanvas${sectionNum}`)
+        .parentElement.querySelector(".signature-placeholder");
+      if (placeholder) placeholder.style.display = "block";
+    }
   }
 }
 
@@ -607,12 +648,13 @@ function clearUploadedSignatureByType(type) {
   const sectionNum = { pemohon: 1, approval: 2, implementation: 3 }[type];
   if (!sectionNum) return;
 
-  const suffix = sectionNum === 1 ? "" : sectionNum;
-  const fileInput = document.getElementById(`signatureFile${suffix}`);
-  const previewContainer = document.getElementById(`previewContainer${suffix}`);
-  const uploadArea = document.getElementById(`uploadArea${suffix}`);
-  const previewImg = document.getElementById(`signaturePreview${suffix}`);
-  const dataInput = document.getElementById(`signatureData${suffix}`);
+  const fileInput = document.getElementById(`signatureFile${sectionNum}`);
+  const previewContainer = document.getElementById(
+    `previewContainer${sectionNum}`,
+  );
+  const uploadArea = document.getElementById(`uploadArea${sectionNum}`);
+  const previewImg = document.getElementById(`signaturePreview${sectionNum}`);
+  const dataInput = document.getElementById(`signatureData${sectionNum}`);
 
   if (fileInput) fileInput.value = "";
   if (previewContainer) previewContainer.classList.remove("active");
@@ -648,7 +690,9 @@ function setupFormSubmission() {
     submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
 
     // Add new event listener
-    newSubmitBtn.addEventListener("click", handleFormSubmission);
+    document
+      .getElementById("finalSubmitBtn")
+      .addEventListener("click", handleFormSubmission);
 
     console.log("✅ Form submission setup complete");
   } else {
@@ -666,9 +710,16 @@ async function handleFormSubmission() {
     return;
   }
 
-  // Validasi minimal - hanya step 1 wajib
+  // Validate all required fields
   if (!validateStep(1)) {
-    showToast("Harap lengkapi data usulan dasar terlebih dahulu!", "error");
+    showToast("Harap lengkapi semua data wajib pada form!", "error");
+    goToStep(1);
+    return;
+  }
+
+  // Validate signatures
+  if (!validateSignatures()) {
+    showToast("Harap lengkapi semua tanda tangan yang wajib!", "error");
     goToStep(1);
     return;
   }
@@ -708,11 +759,17 @@ async function handleFormSubmission() {
   const submissionData = {
     action: "submit",
     form_data: formData,
+    step_count: 2,
+    form_type: "two_step",
   };
 
   console.log("📤 Preparing to send data to server...");
   console.log("  - Action:", submissionData.action);
+  console.log("  - Step count:", submissionData.step_count);
   console.log("  - Field count:", Object.keys(formData).length);
+  console.log("  - Has pemohon signature:", !!signatures.pemohon);
+  console.log("  - Has approval signature:", !!signatures.approval);
+  console.log("  - Has implementation signature:", !!signatures.implementation);
 
   // Show loading
   const originalText = submitBtn.innerHTML;
@@ -777,19 +834,16 @@ async function handleFormSubmission() {
 function goToStep(stepNumber) {
   if (stepNumber < 1 || stepNumber > totalSteps) return;
 
-  // Validasi sebelum pindah ke step 5
-  if (stepNumber === 5) {
-    if (!validateCurrentStep()) {
+  // Validasi sebelum pindah ke step 2
+  if (stepNumber === 2) {
+    if (!validateStep(1)) {
+      return;
+    }
+    if (!validateSignatures()) {
+      showToast("Harap lengkapi semua tanda tangan yang wajib!", "error");
       return;
     }
     generateReviewContent();
-  }
-
-  // Validasi sebelum moving forward untuk step lain
-  if (stepNumber > currentStep && stepNumber < 5) {
-    if (!validateCurrentStep()) {
-      return;
-    }
   }
 
   showStep(stepNumber);
@@ -812,8 +866,7 @@ function showStep(stepNumber) {
   currentStep = stepNumber;
 
   // Scroll to top
-  const formMain = document.querySelector(".form-main");
-  if (formMain) formMain.scrollTop = 0;
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function updateProgressSteps(activeStep) {
@@ -830,9 +883,6 @@ function updateProgressSteps(activeStep) {
 }
 
 function nextStep() {
-  if (!validateCurrentStep()) {
-    return;
-  }
   if (currentStep < totalSteps) goToStep(currentStep + 1);
 }
 
@@ -846,14 +896,16 @@ function setupEventListeners() {
   console.log("Setting up event listeners...");
 
   // Navigation buttons
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-action]");
-    if (!btn) return;
+  const nextToReviewBtn = document.getElementById("nextToReview");
+  const backToFormBtn = document.getElementById("backToForm");
 
-    const action = btn.dataset.action;
-    if (action === "next") nextStep();
-    else if (action === "prev") prevStep();
-  });
+  if (nextToReviewBtn) {
+    nextToReviewBtn.addEventListener("click", nextStep);
+  }
+
+  if (backToFormBtn) {
+    backToFormBtn.addEventListener("click", prevStep);
+  }
 
   // Progress steps click
   document.querySelectorAll(".step").forEach((step) => {
@@ -864,62 +916,91 @@ function setupEventListeners() {
   });
 }
 
-function collectAllSignatureData() {
-  const signatureInputs = [
-    { id: "signatureData", type: "pemohon" },
-    { id: "signatureData2", type: "approval" },
-    { id: "signatureData3", type: "implementation" },
-  ];
-
-  signatureInputs.forEach(({ id, type }) => {
-    const input = document.getElementById(id);
-    if (input && input.value) signatures[type] = input.value;
-  });
-}
-
 // ==================== FORM VALIDATION ====================
-
-function validateCurrentStep() {
-  return validateStep(currentStep);
-}
 
 function validateStep(stepNumber) {
   const validators = {
-    1: validateStep1,
-    2: validateStep2,
-    3: validateStep3,
-    4: validateStep4,
+    1: validateFormData,
+    2: () => true, // Step 2 doesn't need form validation
   };
   return validators[stepNumber] ? validators[stepNumber]() : true;
 }
 
-// Helper untuk mencegah peringatan terlalu sering
-function canShowWarning() {
-  const now = Date.now();
-  if (now - lastValidationTime > 2000) {
-    // Hanya tampilkan peringatan setiap 2 detik
-    lastValidationTime = now;
-    return true;
-  }
-  return false;
-}
-
-function validateStep1() {
+function validateFormData() {
   let isValid = true;
-
-  // HANYA field yang benar-benar kritis
-  const criticalFields = [
-    { name: "no_dokumen", label: "No. Dokumen" },
-    { name: "diminta_oleh", label: "Diminta Oleh" },
-    { name: "jabatan", label: "Jabatan" },
-    { name: "deskripsi_perubahan", label: "Deskripsi Perubahan" },
-  ];
-
   let firstErrorField = null;
 
+  // Collect all critical fields
+  const criticalFields = [
+    // USULAN PERUBAHAN
+    {
+      name: "no_dokumen",
+      label: "No. Dokumen",
+      element: document.getElementById("no_dokumen"),
+    },
+    {
+      name: "diminta_oleh",
+      label: "Diminta Oleh",
+      element: document.getElementById("diminta_oleh"),
+    },
+    {
+      name: "jabatan",
+      label: "Jabatan",
+      element: document.getElementById("jabatan"),
+    },
+    {
+      name: "deskripsi_perubahan",
+      label: "Deskripsi Perubahan",
+      element: document.getElementById("deskripsi_perubahan"),
+    },
+    {
+      name: "alasan_perubahan",
+      label: "Alasan Perubahan",
+      element: document.getElementById("alasan_perubahan"),
+    },
+
+    // EVALUASI DAMPAK
+    {
+      name: "dampak_lingkungan",
+      label: "Dampak terhadap lingkungan produksi",
+      element: document.getElementById("dampak_lingkungan"),
+    },
+    {
+      name: "upaya_diperlukan",
+      label: "Upaya/Tindakan yang diperlukan",
+      element: document.getElementById("upaya_diperlukan"),
+    },
+    {
+      name: "kebutuhan_sumber_daya",
+      label: "Kebutuhan Sumber Daya",
+      element: document.getElementById("kebutuhan_sumber_daya"),
+    },
+    {
+      name: "rencana_pengujian",
+      label: "Penjelasan Rencana Pengujian",
+      element: document.getElementById("rencana_pengujian"),
+    },
+
+    // IMPLEMENTASI
+    {
+      name: "hasil_tahapan",
+      label: "Hasil Tahapan Perubahan",
+      element: document.getElementById("hasil_tahapan"),
+    },
+    {
+      name: "hasil_pengujian",
+      label: "Hasil pengujian Implementasi",
+      element: document.getElementById("hasil_pengujian"),
+    },
+    {
+      name: "tanggal_rilis",
+      label: "Tanggal rilis ke lingkungan operasional",
+      element: document.getElementById("tanggal_rilis"),
+    },
+  ];
+
   // Validate critical fields
-  criticalFields.forEach(({ name, label }) => {
-    const element = document.querySelector(`[name="${name}"]`);
+  criticalFields.forEach(({ name, label, element }) => {
     if (element) {
       if (!element.value || element.value.trim() === "") {
         markError(element, `${label} wajib diisi`);
@@ -931,226 +1012,96 @@ function validateStep1() {
     }
   });
 
-  // Validate dates only if they exist
-  const tanggal = document.querySelector('[name="tanggal"]');
-  const tglEfektif = document.querySelector('[name="tgl_efektif"]');
-  const hasilDibutuhkan = document.querySelector(
-    '[name="hasil_dibutuhkan_tgl"]',
-  );
-
-  if (tanggal && tglEfektif && tglEfektif.value) {
-    const tgl = new Date(tanggal.value);
-    const efektif = new Date(tglEfektif.value);
-
-    if (efektif <= tgl) {
-      markError(tglEfektif, "Tanggal efektif harus setelah tanggal usulan");
-      isValid = false;
-    }
-  }
-
-  if (tanggal && hasilDibutuhkan && hasilDibutuhkan.value) {
-    const tgl = new Date(tanggal.value);
-    const hasil = new Date(hasilDibutuhkan.value);
-
-    if (hasil <= tgl) {
-      markError(
-        hasilDibutuhkan,
-        "Tanggal hasil dibutuhkan harus setelah tanggal usulan",
-      );
-      isValid = false;
-    }
-  }
-
-  // Only show toast if validation failed and we can show warning
-  if (!isValid && canShowWarning()) {
-    showToast("Harap lengkapi data pada tahap ini terlebih dahulu", "warning");
-
-    // Scroll to first error field
-    if (firstErrorField) {
-      firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
-      setTimeout(() => {
-        firstErrorField.focus();
-      }, 300);
-    }
-  }
-
-  console.log(`✅ Step 1 validation: ${isValid ? "PASS" : "FAIL"}`);
-  return isValid;
-}
-
-function validateStep2() {
-  let isValid = true;
-  let firstErrorField = null;
-
-  // Check at least one change type
-  const changeTypes = document.querySelectorAll(
+  // Validate checkbox group (tipe perubahan)
+  const tipeCheckboxes = document.querySelectorAll(
     'input[name="tipe_perubahan"]:checked',
   );
-  if (changeTypes.length === 0) {
-    const checkboxes = document.querySelectorAll(
-      'input[name="tipe_perubahan"]',
-    );
-    if (checkboxes.length > 0) {
-      markError(
-        checkboxes[0].closest(".checkbox-group"),
-        "Pilih minimal satu tipe perubahan",
-      );
+  if (tipeCheckboxes.length === 0) {
+    const checkboxGroup = document.querySelector(".checkbox-group");
+    if (checkboxGroup) {
+      markError(checkboxGroup, "Pilih minimal satu tipe perubahan");
       isValid = false;
-      firstErrorField = checkboxes[0];
+      if (!firstErrorField) firstErrorField = checkboxGroup;
     }
+  } else {
+    clearError(document.querySelector(".checkbox-group"));
   }
 
-  // Validate required fields
-  const requiredFields = [
-    { name: "prioritas", label: "Prioritas Perubahan", type: "radio" },
-    { name: "dampak_lingkungan", label: "Dampak terhadap lingkungan produksi" },
-    { name: "upaya_diperlukan", label: "Upaya/Tindakan yang diperlukan" },
-    { name: "kebutuhan_sumber_daya", label: "Kebutuhan Sumber Daya" },
-    { name: "rencana_pengujian", label: "Penjelasan Rencana Pengujian" },
-  ];
-
-  requiredFields.forEach(({ name, label, type }) => {
-    if (type === "radio") {
-      const radioSelected = document.querySelector(
-        `input[name="${name}"]:checked`,
-      );
-      if (!radioSelected) {
-        const radios = document.querySelectorAll(`input[name="${name}"]`);
-        if (radios.length > 0) {
-          markError(
-            radios[0].closest(".radio-group"),
-            `${label} wajib dipilih`,
-          );
-          isValid = false;
-          if (!firstErrorField) firstErrorField = radios[0];
-        }
-      }
-    } else {
-      const element = document.querySelector(`[name="${name}"]`);
-      if (element && (!element.value || element.value.trim() === "")) {
-        markError(element, `${label} wajib diisi`);
-        isValid = false;
-        if (!firstErrorField) firstErrorField = element;
-      } else if (element) {
-        clearError(element);
-      }
+  // Validate radio group (prioritas)
+  const prioritasRadio = document.querySelector(
+    'input[name="prioritas"]:checked',
+  );
+  if (!prioritasRadio) {
+    const radioGroup = document.querySelector(".radio-group");
+    if (radioGroup) {
+      markError(radioGroup, "Pilih prioritas perubahan");
+      isValid = false;
+      if (!firstErrorField) firstErrorField = radioGroup;
     }
-  });
-
-  // Only show toast if validation failed and we can show warning
-  if (!isValid && canShowWarning()) {
-    showToast("Harap lengkapi data pada tahap ini terlebih dahulu", "warning");
-
-    // Scroll to first error field
-    if (firstErrorField) {
-      firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
-      setTimeout(() => {
-        if (firstErrorField.type !== "radio") {
-          firstErrorField.focus();
-        }
-      }, 300);
-    }
+  } else {
+    clearError(document.querySelector(".radio-group"));
   }
 
-  return isValid;
-}
-
-function validateStep3() {
-  let isValid = true;
-  let firstErrorField = null;
-
+  // Validate approval status and related fields
   const approvalStatus = document.querySelector(
     'input[name="status_persetujuan"]:checked',
   );
-
   if (!approvalStatus) {
-    const radios = document.querySelectorAll(
-      'input[name="status_persetujuan"]',
-    );
-    if (radios.length > 0) {
-      markError(
-        radios[0].closest(".radio-group"),
-        "Pilih status persetujuan (Disetujui/Ditolak)",
-      );
+    const statusGroup = document
+      .querySelector('input[name="status_persetujuan"]')
+      .closest(".radio-group");
+    if (statusGroup) {
+      markError(statusGroup, "Pilih status persetujuan");
       isValid = false;
-      firstErrorField = radios[0];
+      if (!firstErrorField) firstErrorField = statusGroup;
     }
   } else {
     if (approvalStatus.value === "disetujui") {
-      const requiredFields = [
-        { name: "tanggal_pelaksanaan", label: "Tanggal pelaksanaan perubahan" },
-        { name: "pic_pelaksana", label: "PIC Pelaksana perubahan" },
-      ];
+      const tanggalPelaksanaan = document.getElementById("tanggal_pelaksanaan");
+      const picPelaksana = document.getElementById("pic_pelaksana");
 
-      requiredFields.forEach(({ name, label }) => {
-        const element = document.querySelector(`[name="${name}"]`);
-        if (element && (!element.value || element.value.trim() === "")) {
-          markError(element, `${label} wajib diisi`);
-          isValid = false;
-          if (!firstErrorField) firstErrorField = element;
-        } else if (element) {
-          clearError(element);
-        }
-      });
+      if (
+        tanggalPelaksanaan &&
+        (!tanggalPelaksanaan.value || tanggalPelaksanaan.value.trim() === "")
+      ) {
+        markError(tanggalPelaksanaan, "Tanggal pelaksanaan wajib diisi");
+        isValid = false;
+        if (!firstErrorField) firstErrorField = tanggalPelaksanaan;
+      } else {
+        clearError(tanggalPelaksanaan);
+      }
 
-      // Validate date
-      const tanggalPelaksanaan = document.querySelector(
-        '[name="tanggal_pelaksanaan"]',
-      );
-      if (tanggalPelaksanaan && tanggalPelaksanaan.value) {
-        const date = new Date(tanggalPelaksanaan.value);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (date < today) {
-          markError(
-            tanggalPelaksanaan,
-            "Tanggal pelaksanaan tidak boleh di masa lalu",
-          );
-          isValid = false;
-          if (!firstErrorField) firstErrorField = tanggalPelaksanaan;
-        }
+      if (
+        picPelaksana &&
+        (!picPelaksana.value || picPelaksana.value.trim() === "")
+      ) {
+        markError(picPelaksana, "PIC Pelaksana wajib diisi");
+        isValid = false;
+        if (!firstErrorField) firstErrorField = picPelaksana;
+      } else {
+        clearError(picPelaksana);
       }
     } else {
-      const catatanElement = document.querySelector(
-        '[name="catatan_penolakan"]',
-      );
+      const catatanPenolakan = document.getElementById("catatan_penolakan");
       if (
-        catatanElement &&
-        (!catatanElement.value || catatanElement.value.trim() === "")
+        catatanPenolakan &&
+        (!catatanPenolakan.value || catatanPenolakan.value.trim() === "")
       ) {
-        markError(catatanElement, "Alasan penolakan wajib diisi");
+        markError(catatanPenolakan, "Alasan penolakan wajib diisi");
         isValid = false;
-        if (!firstErrorField) firstErrorField = catatanElement;
-      } else if (catatanElement) {
-        clearError(catatanElement);
+        if (!firstErrorField) firstErrorField = catatanPenolakan;
+      } else {
+        clearError(catatanPenolakan);
       }
     }
   }
 
-  // Validate signature
-  const signatureData2 = document.getElementById("signatureData2");
-  if (
-    !signatureData2 ||
-    !signatureData2.value ||
-    !signatureData2.value.startsWith("data:image")
-  ) {
-    const signatureSection = document.querySelector(
-      "#step3 .signature-section",
-    );
-    if (signatureSection) {
-      markError(
-        signatureSection,
-        "Tanda tangan pemberi persetujuan wajib diisi!",
-      );
-      isValid = false;
-    }
-  } else {
-    signatures.approval = signatureData2.value;
-  }
+  // Validate dates
+  validateDates();
 
-  // Only show toast if validation failed and we can show warning
+  // Only show toast if validation failed
   if (!isValid && canShowWarning()) {
-    showToast("Harap lengkapi data pada tahap ini terlebih dahulu", "warning");
+    showToast("Harap lengkapi semua data wajib pada form", "error");
 
     // Scroll to first error field
     if (firstErrorField) {
@@ -1166,86 +1117,137 @@ function validateStep3() {
   return isValid;
 }
 
-function validateStep4() {
-  let isValid = true;
-  let firstErrorField = null;
+function validateDates() {
+  let hasError = false;
 
-  const requiredFields = [
-    { name: "hasil_tahapan", label: "Hasil Tahapan Perubahan" },
-    { name: "hasil_pengujian", label: "Hasil pengujian Implementasi" },
-    { name: "tanggal_rilis", label: "Tanggal rilis ke lingkungan operasional" },
+  // Validate tanggal efektif > tanggal usulan
+  const tanggal = document.getElementById("tanggal");
+  const tglEfektif = document.getElementById("tgl_efektif");
+
+  if (tanggal && tglEfektif && tglEfektif.value) {
+    const tgl = new Date(tanggal.value);
+    const efektif = new Date(tglEfektif.value);
+
+    if (efektif <= tgl) {
+      markError(tglEfektif, "Tanggal efektif harus setelah tanggal usulan");
+      hasError = true;
+    } else {
+      clearError(tglEfektif);
+    }
+  }
+
+  // Validate hasil dibutuhkan > tanggal usulan
+  const hasilDibutuhkan = document.getElementById("hasil_dibutuhkan_tgl");
+  if (tanggal && hasilDibutuhkan && hasilDibutuhkan.value) {
+    const tgl = new Date(tanggal.value);
+    const hasil = new Date(hasilDibutuhkan.value);
+
+    if (hasil <= tgl) {
+      markError(
+        hasilDibutuhkan,
+        "Tanggal hasil dibutuhkan harus setelah tanggal usulan",
+      );
+      hasError = true;
+    } else {
+      clearError(hasilDibutuhkan);
+    }
+  }
+
+  // Validate future dates
+  const futureDateFields = [
+    { id: "tanggal_pelaksanaan", name: "tanggal_pelaksanaan" },
+    { id: "tanggal_rilis", name: "tanggal_rilis" },
   ];
 
-  requiredFields.forEach(({ name, label }) => {
-    const element = document.querySelector(`[name="${name}"]`);
-    if (element && (!element.value || element.value.trim() === "")) {
-      markError(element, `${label} wajib diisi`);
-      isValid = false;
-      if (!firstErrorField) firstErrorField = element;
-    } else if (element) {
-      clearError(element);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  futureDateFields.forEach(({ id, name }) => {
+    const field = document.getElementById(id);
+    if (field && field.value) {
+      const date = new Date(field.value);
+      if (date < today) {
+        const label =
+          name === "tanggal_pelaksanaan"
+            ? "Tanggal pelaksanaan"
+            : "Tanggal rilis";
+        markError(field, `${label} tidak boleh di masa lalu`);
+        hasError = true;
+      }
     }
   });
 
-  // Validate date
-  const tanggalRilis = document.querySelector('[name="tanggal_rilis"]');
-  if (tanggalRilis && tanggalRilis.value) {
-    const date = new Date(tanggalRilis.value);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (date < today) {
-      markError(tanggalRilis, "Tanggal rilis tidak boleh di masa lalu");
+  return !hasError;
+}
+
+function validateSignatures() {
+  let isValid = true;
+  const signatureSections = document.querySelectorAll(".signature-section");
+
+  signatureSections.forEach((section, index) => {
+    const sectionNum = index + 1;
+    const dataInput = document.getElementById(`signatureData${sectionNum}`);
+    const signaturePad = signaturePads[Object.keys(signatures)[index]];
+
+    let hasSignature = false;
+
+    if (
+      dataInput &&
+      dataInput.value &&
+      dataInput.value.startsWith("data:image")
+    ) {
+      hasSignature = true;
+    } else if (signaturePad && !signaturePad.isEmpty()) {
+      hasSignature = true;
+    }
+
+    if (!hasSignature) {
+      markError(section, "Tanda tangan wajib diisi");
       isValid = false;
-      if (!firstErrorField) firstErrorField = tanggalRilis;
+    } else {
+      clearError(section);
     }
-  }
-
-  // Validate signature
-  const signatureData3 = document.getElementById("signatureData3");
-  if (
-    !signatureData3 ||
-    !signatureData3.value ||
-    !signatureData3.value.startsWith("data:image")
-  ) {
-    const signatureSection = document.querySelector(
-      "#step4 .signature-section",
-    );
-    if (signatureSection) {
-      markError(signatureSection, "Tanda tangan pelaksana wajib diisi!");
-      isValid = false;
-    }
-  } else {
-    signatures.implementation = signatureData3.value;
-  }
-
-  // Only show toast if validation failed and we can show warning
-  if (!isValid && canShowWarning()) {
-    showToast("Harap lengkapi data pada tahap ini terlebih dahulu", "warning");
-
-    // Scroll to first error field
-    if (firstErrorField) {
-      firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
-      setTimeout(() => {
-        firstErrorField.focus();
-      }, 300);
-    }
-  }
+  });
 
   return isValid;
 }
 
+function canShowWarning() {
+  const now = Date.now();
+  if (now - lastValidationTime > 2000) {
+    lastValidationTime = now;
+    return true;
+  }
+  return false;
+}
+
 function markError(element, message) {
+  if (!element) return;
+
   element.classList.add("error");
-  let errorDiv = element.parentElement.querySelector(".error-message");
-  if (!errorDiv) {
-    errorDiv = document.createElement("div");
-    errorDiv.className = "error-message";
+
+  // Remove existing error message
+  const existingError = element.parentElement.querySelector(".error-message");
+  if (existingError) existingError.remove();
+
+  // Add new error message
+  const errorDiv = document.createElement("div");
+  errorDiv.className = "error-message";
+  errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+
+  if (
+    element.classList.contains("checkbox-group") ||
+    element.classList.contains("radio-group")
+  ) {
+    element.appendChild(errorDiv);
+  } else {
     element.parentElement.appendChild(errorDiv);
   }
-  errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
 }
 
 function clearError(element) {
+  if (!element) return;
+
   element.classList.remove("error");
   const errorDiv = element.parentElement.querySelector(".error-message");
   if (errorDiv) errorDiv.remove();
@@ -1258,7 +1260,7 @@ function generateReviewContent() {
   const reviewContent = document.getElementById("reviewContent");
   const reviewActions = document.getElementById("reviewActions");
 
-  reviewLoading.style.display = "flex";
+  reviewLoading.style.display = "block";
   reviewContent.style.display = "none";
   reviewActions.style.display = "none";
 
@@ -1268,6 +1270,9 @@ function generateReviewContent() {
     reviewLoading.style.display = "none";
     reviewContent.style.display = "block";
     reviewActions.style.display = "block";
+
+    // Scroll to review content
+    reviewContent.scrollIntoView({ behavior: "smooth", block: "start" });
   }, 500);
 }
 
@@ -1277,7 +1282,7 @@ function createReviewHTML(formData) {
     try {
       return new Date(dateStr).toLocaleDateString("id-ID", {
         day: "2-digit",
-        month: "2-digit",
+        month: "long",
         year: "numeric",
       });
     } catch {
@@ -1285,225 +1290,211 @@ function createReviewHTML(formData) {
     }
   }
 
-  function formatCheckboxes(value, name) {
+  function formatCheckboxes(value) {
     if (!value) return "-";
     const values = value.split(",");
-    const result = [];
-    document.querySelectorAll(`[name="${name}"]`).forEach((el) => {
-      if (el.type === "checkbox" && values.includes(el.value)) {
-        result.push(`✓ ${el.value}`);
-      }
-    });
-    return result.length > 0 ? result.join("<br>") : "-";
+    return values
+      .map((v) => `<span class="badge bg-primary me-1">${v}</span>`)
+      .join("");
   }
 
-  function formatRadio(value, name) {
+  function formatRadio(value) {
     if (!value) return "-";
-    const element = document.querySelector(
-      `[name="${name}"][value="${value}"]`,
-    );
-    return element ? `✓ ${element.value}` : value;
+    const color = value === "disetujui" ? "success" : "danger";
+    return `<span class="badge bg-${color}">${value}</span>`;
+  }
+
+  function formatSignatureStatus(signatureData) {
+    if (!signatureData || !signatureData.startsWith("data:image")) {
+      return '<span class="text-danger"><i class="fas fa-times-circle"></i> Belum ada</span>';
+    }
+    return '<span class="text-success"><i class="fas fa-check-circle"></i> Tersedia</span>';
   }
 
   return `
         <div class="review-summary">
             <h3><i class="fas fa-file-alt"></i> Ringkasan Usulan</h3>
-            <div class="summary-grid">
-                <div class="summary-item"><label>No. Dokumen:</label><span class="highlight">${
-                  formData.no_dokumen || "-"
-                }</span></div>
-                <div class="summary-item"><label>Status:</label><span class="status-badge review"><i class="fas fa-hourglass-half"></i> Dalam Review</span></div>
-                <div class="summary-item"><label>Dibuat oleh:</label><span>${
-                  formData.diminta_oleh || "-"
-                }</span></div>
-                <div class="summary-item"><label>Tanggal Usulan:</label><span>${formatDateDisplay(
-                  formData.tanggal,
-                )}</span></div>
+            <div class="review-grid">
+                <div class="review-item">
+                    <label>No. Dokumen:</label>
+                    <span class="highlight">${formData.no_dokumen || "-"}</span>
+                </div>
+                <div class="review-item">
+                    <label>Status:</label>
+                    <span class="status-badge review"><i class="fas fa-hourglass-half"></i> Dalam Review</span>
+                </div>
+                <div class="review-item">
+                    <label>Dibuat oleh:</label>
+                    <span>${formData.diminta_oleh || "-"}</span>
+                </div>
+                <div class="review-item">
+                    <label>Tanggal Usulan:</label>
+                    <span>${formatDateDisplay(formData.tanggal)}</span>
+                </div>
             </div>
         </div>
         
         <div class="review-details">
+            <!-- A. USULAN PERUBAHAN -->
             <div class="review-section">
                 <h4><i class="fas fa-id-card"></i> A. USULAN PERUBAHAN</h4>
                 <table class="review-table">
-                    ${createTableRows([
-                      ["No. Dokumen", formData.no_dokumen || "-"],
-                      ["Revisi", formData.revisi || "00"],
-                      ["Tgl. Efektif", formatDateDisplay(formData.tgl_efektif)],
-                      ["Tanggal Usulan", formatDateDisplay(formData.tanggal)],
-                      ["Diminta Oleh", formData.diminta_oleh || "-"],
-                      ["Jabatan", formData.jabatan || "-"],
-                      [
-                        "Deskripsi Perubahan",
-                        formData.deskripsi_perubahan || "-",
-                      ],
-                      [
-                        "Hasil Dibutuhkan Tgl",
-                        formatDateDisplay(formData.hasil_dibutuhkan_tgl),
-                      ],
-                      ["Alasan Perubahan", formData.alasan_perubahan || "-"],
-                      [
-                        "Tanda Tangan Pemohon",
-                        formData.signature_data
-                          ? '<span class="status-success"><i class="fas fa-check-circle"></i> Tersedia</span>'
-                          : '<span class="status-error"><i class="fas fa-times-circle"></i> Belum ada</span>',
-                      ],
-                    ])}
+                    <tr>
+                        <td>No. Dokumen</td>
+                        <td>${formData.no_dokumen || "-"}</td>
+                    </tr>
+                    <tr>
+                        <td>Revisi</td>
+                        <td>${formData.revisi || "00"}</td>
+                    </tr>
+                    <tr>
+                        <td>Tgl. Efektif</td>
+                        <td>${formatDateDisplay(formData.tgl_efektif)}</td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal Usulan</td>
+                        <td>${formatDateDisplay(formData.tanggal)}</td>
+                    </tr>
+                    <tr>
+                        <td>Diminta Oleh</td>
+                        <td>${formData.diminta_oleh || "-"}</td>
+                    </tr>
+                    <tr>
+                        <td>Jabatan</td>
+                        <td>${formData.jabatan || "-"}</td>
+                    </tr>
+                    <tr>
+                        <td>Deskripsi Perubahan</td>
+                        <td><div class="text-data">${formData.deskripsi_perubahan || "-"}</div></td>
+                    </tr>
+                    <tr>
+                        <td>Hasil Dibutuhkan</td>
+                        <td>${formatDateDisplay(formData.hasil_dibutuhkan_tgl)}</td>
+                    </tr>
+                    <tr>
+                        <td>Alasan Perubahan</td>
+                        <td><div class="text-data">${formData.alasan_perubahan || "-"}</div></td>
+                    </tr>
+                    <tr>
+                        <td>Tanda Tangan Pemohon</td>
+                        <td>${formatSignatureStatus(formData.signature_data)}</td>
+                    </tr>
                 </table>
             </div>
             
-            ${
-              formData.tipe_perubahan
-                ? `
-                <div class="review-section">
-                    <h4><i class="fas fa-clipboard-check"></i> B. EVALUASI DAMPAK PERUBAHAN</h4>
-                    <table class="review-table">
-                        ${createTableRows([
-                          [
-                            "Tipe Perubahan",
-                            formatCheckboxes(
-                              formData.tipe_perubahan,
-                              "tipe_perubahan",
-                            ),
-                          ],
-                          [
-                            "Prioritas Perubahan",
-                            formatRadio(formData.prioritas, "prioritas"),
-                          ],
-                          [
-                            "Dampak Lingkungan",
-                            formData.dampak_lingkungan || "-",
-                          ],
-                          [
-                            "Upaya Diperlukan",
-                            formData.upaya_diperlukan || "-",
-                          ],
-                          [
-                            "Kebutuhan Sumber Daya",
-                            formData.kebutuhan_sumber_daya || "-",
-                          ],
-                          [
-                            "Rencana Pengujian",
-                            formData.rencana_pengujian || "-",
-                          ],
-                          [
-                            "Catatan Evaluator",
-                            formData.catatan_evaluator || "-",
-                          ],
-                          [
-                            "Tanggal Evaluasi",
-                            formatDateDisplay(formData.tanggal_evaluasi),
-                          ],
-                        ])}
-                    </table>
-                </div>
-            `
-                : ""
-            }
+            <!-- B. EVALUASI DAMPAK PERUBAHAN -->
+            <div class="review-section">
+                <h4><i class="fas fa-clipboard-check"></i> B. EVALUASI DAMPAK PERUBAHAN</h4>
+                <table class="review-table">
+                    <tr>
+                        <td>Tipe Perubahan</td>
+                        <td>${formatCheckboxes(formData.tipe_perubahan)}</td>
+                    </tr>
+                    <tr>
+                        <td>Prioritas Perubahan</td>
+                        <td>${formData.prioritas ? `<span class="badge ${formData.prioritas === "Emergency" ? "bg-danger" : "bg-warning"}">${formData.prioritas}</span>` : "-"}</td>
+                    </tr>
+                    <tr>
+                        <td>Dampak Lingkungan</td>
+                        <td><div class="text-data">${formData.dampak_lingkungan || "-"}</div></td>
+                    </tr>
+                    <tr>
+                        <td>Upaya Diperlukan</td>
+                        <td><div class="text-data">${formData.upaya_diperlukan || "-"}</div></td>
+                    </tr>
+                    <tr>
+                        <td>Kebutuhan Sumber Daya</td>
+                        <td><div class="text-data">${formData.kebutuhan_sumber_daya || "-"}</div></td>
+                    </tr>
+                    <tr>
+                        <td>Rencana Pengujian</td>
+                        <td><div class="text-data">${formData.rencana_pengujian || "-"}</div></td>
+                    </tr>
+                    <tr>
+                        <td>Catatan Evaluator</td>
+                        <td>${formData.catatan_evaluator || "-"}</td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal Evaluasi</td>
+                        <td>${formatDateDisplay(formData.tanggal_evaluasi)}</td>
+                    </tr>
+                </table>
+            </div>
             
-            ${
-              formData.status_persetujuan
-                ? `
-                <div class="review-section">
-                    <h4><i class="fas fa-check-circle"></i> C. PERSETUJUAN PERUBAHAN</h4>
-                    <table class="review-table">
-                        ${createTableRows(
-                          [
-                            [
-                              "Status",
-                              formData.status_persetujuan === "disetujui"
-                                ? '<span class="status-success">Disetujui</span>'
-                                : '<span class="status-error">Ditolak</span>',
-                            ],
-                            formData.status_persetujuan === "disetujui"
-                              ? [
-                                  "Tanggal Pelaksanaan",
-                                  formatDateDisplay(
-                                    formData.tanggal_pelaksanaan,
-                                  ),
-                                ]
-                              : null,
-                            formData.status_persetujuan === "disetujui"
-                              ? ["PIC Pelaksana", formData.pic_pelaksana || "-"]
-                              : null,
-                            formData.status_persetujuan === "disetujui"
-                              ? [
-                                  "Catatan Persetujuan",
-                                  formData.catatan_persetujuan || "-",
-                                ]
-                              : [
-                                  "Alasan Penolakan",
-                                  formData.catatan_penolakan || "-",
-                                ],
-                            [
-                              "Tanggal Persetujuan",
-                              formatDateDisplay(formData.tanggal_persetujuan),
-                            ],
-                            [
-                              "Tanda Tangan Persetujuan",
-                              formData.signature_approval
-                                ? '<span class="status-success"><i class="fas fa-check-circle"></i> Tersedia</span>'
-                                : '<span class="status-error"><i class="fas fa-times-circle"></i> Belum ada</span>',
-                            ],
-                          ].filter(Boolean),
-                        )}
-                    </table>
-                </div>
-            `
-                : ""
-            }
+            <!-- C. PERSETUJUAN PERUBAHAN -->
+            <div class="review-section">
+                <h4><i class="fas fa-check-circle"></i> C. PERSETUJUAN PERUBAHAN</h4>
+                <table class="review-table">
+                    <tr>
+                        <td>Status</td>
+                        <td>${formatRadio(formData.status_persetujuan)}</td>
+                    </tr>
+                    ${
+                      formData.status_persetujuan === "disetujui"
+                        ? `
+                        <tr>
+                            <td>Tanggal Pelaksanaan</td>
+                            <td>${formatDateDisplay(formData.tanggal_pelaksanaan)}</td>
+                        </tr>
+                        <tr>
+                            <td>PIC Pelaksana</td>
+                            <td>${formData.pic_pelaksana || "-"}</td>
+                        </tr>
+                        <tr>
+                            <td>Catatan Persetujuan</td>
+                            <td>${formData.catatan_persetujuan || "-"}</td>
+                        </tr>
+                    `
+                        : `
+                        <tr>
+                            <td>Alasan Penolakan</td>
+                            <td><div class="text-data">${formData.catatan_penolakan || "-"}</div></td>
+                        </tr>
+                    `
+                    }
+                    <tr>
+                        <td>Tanggal Persetujuan</td>
+                        <td>${formatDateDisplay(formData.tanggal_persetujuan)}</td>
+                    </tr>
+                    <tr>
+                        <td>Tanda Tangan Persetujuan</td>
+                        <td>${formatSignatureStatus(formData.signature_approval)}</td>
+                    </tr>
+                </table>
+            </div>
             
-            ${
-              formData.hasil_tahapan
-                ? `
-                <div class="review-section">
-                    <h4><i class="fas fa-tools"></i> D. IMPLEMENTASI PERUBAHAN</h4>
-                    <table class="review-table">
-                        ${createTableRows([
-                          [
-                            "Hasil Tahapan Perubahan",
-                            formData.hasil_tahapan || "-",
-                          ],
-                          ["Hasil Pengujian", formData.hasil_pengujian || "-"],
-                          [
-                            "Tanggal Rilis",
-                            formatDateDisplay(formData.tanggal_rilis),
-                          ],
-                          [
-                            "Catatan Implementasi",
-                            formData.catatan_implementasi || "-",
-                          ],
-                          [
-                            "Tanggal Implementasi",
-                            formatDateDisplay(formData.tanggal_implementasi),
-                          ],
-                          [
-                            "Tanda Tangan Pelaksana",
-                            formData.signature_implementation
-                              ? '<span class="status-success"><i class="fas fa-check-circle"></i> Tersedia</span>'
-                              : '<span class="status-error"><i class="fas fa-times-circle"></i> Belum ada</span>',
-                          ],
-                        ])}
-                    </table>
-                </div>
-            `
-                : ""
-            }
+            <!-- D. IMPLEMENTASI PERUBAHAN -->
+            <div class="review-section">
+                <h4><i class="fas fa-tools"></i> D. IMPLEMENTASI PERUBAHAN</h4>
+                <table class="review-table">
+                    <tr>
+                        <td>Hasil Tahapan Perubahan</td>
+                        <td><div class="text-data">${formData.hasil_tahapan || "-"}</div></td>
+                    </tr>
+                    <tr>
+                        <td>Hasil Pengujian</td>
+                        <td><div class="text-data">${formData.hasil_pengujian || "-"}</div></td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal Rilis</td>
+                        <td>${formatDateDisplay(formData.tanggal_rilis)}</td>
+                    </tr>
+                    <tr>
+                        <td>Catatan Implementasi</td>
+                        <td>${formData.catatan_implementasi || "-"}</td>
+                    </tr>
+                    <tr>
+                        <td>Tanggal Implementasi</td>
+                        <td>${formatDateDisplay(formData.tanggal_implementasi)}</td>
+                    </tr>
+                    <tr>
+                        <td>Tanda Tangan Pelaksana</td>
+                        <td>${formatSignatureStatus(formData.signature_implementation)}</td>
+                    </tr>
+                </table>
+            </div>
         </div>
     `;
-}
-
-function createTableRows(data) {
-  return data
-    .map(
-      ([label, value]) => `
-        <tr>
-            <td width="30%">${label}</td>
-            <td width="70%">${value}</td>
-        </tr>
-    `,
-    )
-    .join("");
 }
 
 // ==================== UTILITY FUNCTIONS ====================
@@ -1511,7 +1502,7 @@ function createTableRows(data) {
 function collectFormData() {
   console.log("📝 collectFormData called");
 
-  const form = document.getElementById("completeForm");
+  const form = document.getElementById("twoStepForm");
   if (!form) {
     console.error("❌ Form not found!");
     return {};
@@ -1526,9 +1517,6 @@ function collectFormData() {
       // Handle checkbox array
       if (!data.tipe_perubahan) data.tipe_perubahan = [];
       data.tipe_perubahan.push(value);
-    } else if (key.includes("catatan")) {
-      // Preserve catatan fields exactly
-      data[key] = value;
     } else {
       data[key] = value;
     }
@@ -1546,21 +1534,18 @@ function collectFormData() {
 
   // Debug: Log all collected data
   console.log("📊 Form data collected:");
-  console.log(`  • no_dokumen: ${data.no_dokumen || "MISSING"}`);
-  console.log(`  • diminta_oleh: ${data.diminta_oleh || "MISSING"}`);
-  console.log(`  • jabatan: ${data.jabatan || "MISSING"}`);
-  console.log(
-    `  • deskripsi_perubahan: ${
-      data.deskripsi_perubahan
-        ? data.deskripsi_perubahan.substring(0, 30) + "..."
-        : "MISSING"
-    }`,
-  );
-  console.log(`  • pemohon_signature: ${data.signature_data ? "✓" : "✗"}`);
-  console.log(`  • approval_signature: ${data.signature_approval ? "✓" : "✗"}`);
-  console.log(
-    `  • implementation_signature: ${data.signature_implementation ? "✓" : "✗"}`,
-  );
+  console.log("  • Basic info:", {
+    no_dokumen: data.no_dokumen || "MISSING",
+    diminta_oleh: data.diminta_oleh || "MISSING",
+    jabatan: data.jabatan || "MISSING",
+    status: data.status_persetujuan || "MISSING",
+  });
+
+  console.log("  • Signatures:", {
+    pemohon: signatures.pemohon ? "✓" : "✗",
+    approval: signatures.approval ? "✓" : "✗",
+    implementation: signatures.implementation ? "✓" : "✗",
+  });
 
   return data;
 }
@@ -1579,8 +1564,48 @@ function formatDateDisplay(dateStr) {
   }
 }
 
+// ==================== TOAST NOTIFICATIONS ====================
+
+function showToast(message, type = "info") {
+  const toastContainer = document.getElementById("toastContainer");
+  if (!toastContainer) return;
+
+  const toastId = "toast-" + Date.now();
+  const toast = document.createElement("div");
+  toast.className = `toast align-items-center text-bg-${type === "error" ? "danger" : type === "success" ? "success" : type === "warning" ? "warning" : "primary"} border-0`;
+  toast.id = toastId;
+  toast.setAttribute("role", "alert");
+  toast.setAttribute("aria-live", "assertive");
+  toast.setAttribute("aria-atomic", "true");
+
+  toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fas fa-${type === "error" ? "exclamation-circle" : type === "success" ? "check-circle" : type === "warning" ? "exclamation-triangle" : "info-circle"} me-2"></i>
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+
+  toastContainer.appendChild(toast);
+
+  const bsToast = new bootstrap.Toast(toast, {
+    autohide: true,
+    delay: 3000,
+  });
+
+  bsToast.show();
+
+  // Remove toast after hiding
+  toast.addEventListener("hidden.bs.toast", function () {
+    toast.remove();
+  });
+}
+
 // ==================== GLOBAL EXPORTS ====================
 
 window.goToStep = goToStep;
 window.nextStep = nextStep;
 window.prevStep = prevStep;
+window.showToast = showToast;

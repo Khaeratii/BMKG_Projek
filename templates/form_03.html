@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="id">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Form Laporan Insiden - BMKG Wilayah VI Makassar</title>
 
     <!-- Font Awesome -->
@@ -11,11 +11,11 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
 
-    <!-- CSS External -->
+    <!-- External CSS -->
     <link rel="stylesheet" href="/static/css/form_03.css" />
   </head>
   <body>
-    <div class="form-complete-wrapper">
+    <div class="form-container">
       <!-- Header -->
       <header class="form-header">
         <div class="header-content">
@@ -30,602 +30,641 @@
         </div>
       </header>
 
-      <!-- Progress Steps (3 Steps) -->
+      <!-- Progress Steps (2 Steps) -->
       <div class="progress-steps">
         <div class="step active" data-step="1">
           <div class="step-number">1</div>
-          <div class="step-label">Data Insiden</div>
+          <div class="step-label">Pengisian Form</div>
         </div>
         <div class="step" data-step="2">
           <div class="step-number">2</div>
-          <div class="step-label">Tindakan & TTD</div>
-        </div>
-        <div class="step" data-step="3">
-          <div class="step-number">3</div>
-          <div class="step-label">Review & Submit</div>
+          <div class="step-label">Preview & Submit</div>
         </div>
       </div>
 
       <!-- Main Form -->
       <main class="form-main">
-        <!-- PERBAIKAN: Tambahkan action dan method pada form -->
         <form
           id="formLaporan"
           action="/api/laporan-insiden/save"
           method="POST"
           class="complete-form"
         >
-          <!-- PERBAIKAN: Tambahkan CSRF token -->
+          <!-- CSRF Token -->
           <input
             type="hidden"
             name="csrf_token"
             value="{{ csrf_token() if csrf_token else '' }}"
           />
 
-          <!-- Step 1: Data Insiden -->
+          <!-- Step 1: Pengisian Form (Split Screen) -->
           <div class="form-section active" id="step1">
             <div class="section-header">
-              <h2><i class="fas fa-id-card"></i> A. DATA INSIDEN</h2>
-              <p class="section-description">
-                Diisi oleh Pelapor - Pegawai BMKG
-              </p>
-            </div>
-
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label required">
-                  <i class="fas fa-hashtag label-icon"></i>
-                  No. Dokumen*
-                </label>
-                <input
-                  type="text"
-                  id="no_dok"
-                  name="no_dok"
-                  class="form-input"
-                  required
-                  placeholder="Masukkan nomor dokumen"
-                />
-              </div>
-
-              <!-- Ganti input no_revisi dengan select -->
-              <div class="form-group">
-                <label class="form-label">
-                  <i class="fas fa-redo label-icon"></i>
-                  No. Revisi
-                </label>
-                <select name="no_revisi" id="no_revisi" class="form-select">
-                  <option value="00">00</option>
-                  <option value="01">01</option>
-                  <option value="02">02</option>
-                  <option value="03">03</option>
-                  <option value="04">04</option>
-                  <option value="05">05</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label required">
-                  <i class="fas fa-calendar-check label-icon"></i>
-                  Tgl. Efektif*
-                </label>
-                <input
-                  type="date"
-                  id="tgl_efektif"
-                  name="tgl_efektif"
-                  class="form-input"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">
-                  <i class="fas fa-file-alt label-icon"></i>
-                  No. Permohonan
-                </label>
-                <input
-                  type="text"
-                  id="no_permohonan"
-                  name="no_permohonan"
-                  class="form-input"
-                  readonly
-                />
-              </div>
-
-              <div class="form-group">
-                <label class="form-label required">
-                  <i class="fas fa-calendar-day label-icon"></i>
-                  Tanggal Kejadian*
-                </label>
-                <input
-                  type="date"
-                  id="tanggal_kejadian"
-                  name="tanggal_kejadian"
-                  class="form-input"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label class="form-label required">
-                  <i class="fas fa-user-tie label-icon"></i>
-                  Nama Pelapor*
-                </label>
-                <input
-                  type="text"
-                  id="nama_pelapor"
-                  name="nama_pelapor"
-                  class="form-input"
-                  required
-                  placeholder="Masukkan nama lengkap pelapor"
-                />
-              </div>
-
-              <div class="form-group">
-                <label class="form-label required">
-                  <i class="fas fa-building label-icon"></i>
-                  Nama Bidang*
-                </label>
-                <input
-                  type="text"
-                  id="nama_bidang"
-                  name="nama_bidang"
-                  class="form-input"
-                  required
-                  placeholder="Masukkan nama bidang"
-                />
-              </div>
-
-              <div class="form-group full-width">
-                <label class="form-label required">
-                  <i class="fas fa-align-left label-icon"></i>
-                  Deskripsi Insiden*
-                </label>
-                <textarea
-                  id="deskripsi_insiden"
-                  name="deskripsi_insiden"
-                  class="form-textarea"
-                  rows="4"
-                  required
-                  placeholder="Jelaskan insiden yang terjadi secara detail..."
-                ></textarea>
-                <div class="form-hint">
-                  Deskripsikan kronologi kejadian insiden dengan jelas
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label required">
-                  <i class="fas fa-tag label-icon"></i>
-                  Jenis Insiden*
-                </label>
-                <select
-                  id="jenis_insiden"
-                  name="jenis_insiden"
-                  class="form-select"
-                  required
-                >
-                  <option value="">-- Pilih Jenis Insiden --</option>
-                  <option value="Keamanan Informasi">Keamanan Informasi</option>
-                  <option value="Non Keamanan Informasi">
-                    Non Keamanan Informasi
-                  </option>
-                </select>
-              </div>
-
-              <div class="form-group full-width">
-                <label class="form-label required">
-                  <i class="fas fa-search label-icon"></i>
-                  Analisa Penyebab*
-                </label>
-                <textarea
-                  id="analisa_penyebab"
-                  name="analisa_penyebab"
-                  class="form-textarea"
-                  rows="3"
-                  required
-                  placeholder="Analisa penyebab terjadinya insiden..."
-                ></textarea>
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button type="button" class="btn btn-next" data-action="next">
-                Lanjut ke Tindakan & TTD
-                <i class="fas fa-arrow-right"></i>
-              </button>
-            </div>
-          </div>
-
-          <!-- Step 2: Tindakan & Tanda Tangan -->
-          <div class="form-section" id="step2">
-            <div class="section-header">
               <h2>
-                <i class="fas fa-clipboard-check"></i> B. TINDAKAN & TANDA
-                TANGAN
+                <i class="fas fa-edit"></i> PENGISIAN FORM LAPORAN INSIDEN
               </h2>
               <p class="section-description">
-                Diisi oleh Pelapor dan Penanggung Jawab
+                Diisi oleh Pelapor - Semua data wajib diisi sebelum lanjut ke
+                review
               </p>
             </div>
 
-            <div class="form-grid">
-              <div class="form-group full-width">
-                <label class="form-label required">
-                  <i class="fas fa-tasks label-icon"></i>
-                  Tindak Lanjut SMKI*
-                </label>
-                <textarea
-                  id="tindak_smki"
-                  name="tindak_smki"
-                  class="form-textarea"
-                  rows="3"
-                  required
-                  placeholder="Tindak lanjut yang dilakukan oleh SMKI..."
-                ></textarea>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label required">
-                  <i class="fas fa-user-cog label-icon"></i>
-                  PIC Tindak Lanjut*
-                </label>
-                <input
-                  type="text"
-                  id="pic_tindak"
-                  name="pic_tindak"
-                  class="form-input"
-                  required
-                  placeholder="Nama PIC"
-                />
-              </div>
-
-              <div class="form-group full-width">
-                <label class="form-label">
-                  <i class="fas fa-hands-helping label-icon"></i>
-                  Tindak Lanjut Pihak Terkait
-                </label>
-                <textarea
-                  id="tindak_pihak"
-                  name="tindak_pihak"
-                  class="form-textarea"
-                  rows="3"
-                  placeholder="Tindak lanjut oleh pihak terkait..."
-                ></textarea>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label required">
-                  <i class="fas fa-check-circle label-icon"></i>
-                  Insiden Selesai?*
-                </label>
-                <div class="radio-group vertical">
-                  <label class="radio-label">
-                    <input type="radio" name="selesai" value="Ya" checked />
-                    <span class="radiomark"></span>
-                    Ya
-                  </label>
-                  <label class="radio-label">
-                    <input type="radio" name="selesai" value="Tidak" />
-                    <span class="radiomark"></span>
-                    Tidak
-                  </label>
+            <!-- Split Layout Container -->
+            <div class="split-layout">
+              <!-- Left Panel: Data Insiden -->
+              <div class="split-panel left-panel">
+                <div class="panel-header">
+                  <h3><i class="fas fa-id-card"></i> A. DATA INSIDEN</h3>
+                  <div class="panel-badge">Wajib Diisi</div>
                 </div>
-              </div>
 
-              <div class="form-group" id="tanggalPenyelesaianGroup">
-                <label class="form-label">
-                  <i class="fas fa-calendar-check label-icon"></i>
-                  Tanggal Penyelesaian
-                </label>
-                <input
-                  type="date"
-                  id="tanggal_penyelesaian"
-                  name="tanggal_penyelesaian"
-                  class="form-input"
-                />
-              </div>
+                <div class="form-fields">
+                  <!-- Row 1 -->
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label required">
+                        <i class="fas fa-hashtag label-icon"></i>
+                        No. Dokumen*
+                      </label>
+                      <input
+                        type="text"
+                        id="no_dok"
+                        name="no_dok"
+                        class="form-input"
+                        required
+                        placeholder="CONTOH: INS/BMKG-VI/2024/001"
+                      />
+                    </div>
 
-              <!-- Tanda Tangan Pelapor -->
-              <div class="form-group full-width">
-                <label class="form-label required">
-                  <i class="fas fa-signature label-icon"></i>
-                  Tanda Tangan Pelapor*
-                </label>
-                <div class="signature-section">
-                  <div class="signature-pad-wrapper">
-                    <canvas
-                      id="signatureCanvas1"
-                      class="signature-pad"
-                      width="600"
-                      height="200"
-                    ></canvas>
-                    <div class="signature-placeholder">
-                      <i class="fas fa-signature"></i> Gambar tanda tangan Anda
-                      di area ini
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="fas fa-redo label-icon"></i>
+                        No. Revisi
+                      </label>
+                      <select
+                        name="no_revisi"
+                        id="no_revisi"
+                        class="form-select"
+                      >
+                        <option value="00">00</option>
+                        <option value="01">01</option>
+                        <option value="02">02</option>
+                        <option value="03">03</option>
+                        <option value="04">04</option>
+                        <option value="05">05</option>
+                      </select>
                     </div>
                   </div>
 
-                  <div class="signature-actions">
-                    <button
-                      type="button"
-                      class="signature-btn btn-clear"
-                      id="clearSignatureBtn1"
-                    >
-                      <i class="fas fa-trash"></i> Hapus
-                    </button>
-                    <button
-                      type="button"
-                      class="signature-btn signature-save-btn"
-                      id="saveSignatureBtn1"
-                    >
-                      <i class="fas fa-save"></i> Simpan Tanda Tangan
-                    </button>
-                  </div>
+                  <!-- Row 2 -->
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label required">
+                        <i class="fas fa-calendar-check label-icon"></i>
+                        Tgl. Efektif*
+                      </label>
+                      <input
+                        type="date"
+                        id="tgl_efektif"
+                        name="tgl_efektif"
+                        class="form-input"
+                        required
+                      />
+                    </div>
 
-                  <!-- Preview Area -->
-                  <div
-                    id="previewSignature1"
-                    class="signature-preview-container"
-                  ></div>
-
-                  <input type="hidden" name="ttd_pelapor" id="signatureData1" />
-                  <input
-                    type="text"
-                    id="nama_ttd_pelapor"
-                    name="nama_ttd_pelapor"
-                    class="form-input"
-                    required
-                    placeholder="Nama penandatangan *"
-                    style="margin-top: 15px"
-                  />
-                </div>
-              </div>
-
-              <!-- Tanda Tangan Atasan -->
-              <div class="form-group full-width">
-                <label class="form-label">
-                  <i class="fas fa-signature label-icon"></i>
-                  Tanda Tangan Atasan
-                </label>
-                <div class="signature-section">
-                  <div class="signature-pad-wrapper">
-                    <canvas
-                      id="signatureCanvas2"
-                      class="signature-pad"
-                      width="600"
-                      height="200"
-                    ></canvas>
-                    <div class="signature-placeholder">
-                      <i class="fas fa-signature"></i> Gambar tanda tangan
-                      atasan di area ini
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="fas fa-file-alt label-icon"></i>
+                        No. Permohonan
+                      </label>
+                      <input
+                        type="text"
+                        id="no_permohonan"
+                        name="no_permohonan"
+                        class="form-input"
+                        readonly
+                      />
                     </div>
                   </div>
 
-                  <div class="signature-actions">
-                    <button
-                      type="button"
-                      class="signature-btn btn-clear"
-                      id="clearSignatureBtn2"
-                    >
-                      <i class="fas fa-trash"></i> Hapus
-                    </button>
-                    <button
-                      type="button"
-                      class="signature-btn signature-save-btn"
-                      id="saveSignatureBtn2"
-                    >
-                      <i class="fas fa-save"></i> Simpan Tanda Tangan
-                    </button>
-                  </div>
+                  <!-- Row 3 -->
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label required">
+                        <i class="fas fa-calendar-day label-icon"></i>
+                        Tanggal Kejadian*
+                      </label>
+                      <input
+                        type="date"
+                        id="tanggal_kejadian"
+                        name="tanggal_kejadian"
+                        class="form-input"
+                        required
+                      />
+                    </div>
 
-                  <!-- Preview Area -->
-                  <div
-                    id="previewSignature2"
-                    class="signature-preview-container"
-                  ></div>
-
-                  <input type="hidden" name="ttd_atasan" id="signatureData2" />
-                  <input
-                    type="text"
-                    id="nama_ttd_atasan"
-                    name="nama_ttd_atasan"
-                    class="form-input"
-                    placeholder="Nama atasan penandatangan"
-                    style="margin-top: 15px"
-                  />
-                </div>
-              </div>
-
-              <!-- Tanda Tangan SMKI -->
-              <div class="form-group full-width">
-                <label class="form-label">
-                  <i class="fas fa-signature label-icon"></i>
-                  Tanda Tangan SMKI
-                </label>
-                <div class="signature-section">
-                  <div class="signature-pad-wrapper">
-                    <canvas
-                      id="signatureCanvas3"
-                      class="signature-pad"
-                      width="600"
-                      height="200"
-                    ></canvas>
-                    <div class="signature-placeholder">
-                      <i class="fas fa-signature"></i> Gambar tanda tangan SMKI
-                      di area ini
+                    <div class="form-group">
+                      <label class="form-label required">
+                        <i class="fas fa-building label-icon"></i>
+                        Nama Bidang*
+                      </label>
+                      <input
+                        type="text"
+                        id="nama_bidang"
+                        name="nama_bidang"
+                        class="form-input"
+                        required
+                        placeholder="Contoh: Bidang Data dan Informasi"
+                      />
                     </div>
                   </div>
 
-                  <div class="signature-actions">
-                    <button
-                      type="button"
-                      class="signature-btn btn-clear"
-                      id="clearSignatureBtn3"
-                    >
-                      <i class="fas fa-trash"></i> Hapus
-                    </button>
-                    <button
-                      type="button"
-                      class="signature-btn signature-save-btn"
-                      id="saveSignatureBtn3"
-                    >
-                      <i class="fas fa-save"></i> Simpan Tanda Tangan
-                    </button>
+                  <!-- Full Width Fields -->
+                  <div class="form-group full-width">
+                    <label class="form-label required">
+                      <i class="fas fa-user-tie label-icon"></i>
+                      Nama Pelapor*
+                    </label>
+                    <input
+                      type="text"
+                      id="nama_pelapor"
+                      name="nama_pelapor"
+                      class="form-input"
+                      required
+                      placeholder="Masukkan nama lengkap pelapor"
+                    />
                   </div>
 
-                  <!-- Preview Area -->
-                  <div
-                    id="previewSignature3"
-                    class="signature-preview-container"
-                  ></div>
-
-                  <input type="hidden" name="ttd_smki" id="signatureData3" />
-                  <input
-                    type="text"
-                    id="nama_ttd_smki"
-                    name="nama_ttd_smki"
-                    class="form-input"
-                    placeholder="Nama SMKI penandatangan"
-                    style="margin-top: 15px"
-                  />
-                </div>
-              </div>
-
-              <!-- Tanda Tangan Ketua -->
-              <div class="form-group full-width">
-                <label class="form-label">
-                  <i class="fas fa-signature label-icon"></i>
-                  Tanda Tangan Ketua
-                </label>
-                <div class="signature-section">
-                  <div class="signature-pad-wrapper">
-                    <canvas
-                      id="signatureCanvas4"
-                      class="signature-pad"
-                      width="600"
-                      height="200"
-                    ></canvas>
-                    <div class="signature-placeholder">
-                      <i class="fas fa-signature"></i> Gambar tanda tangan Ketua
-                      di area ini
+                  <div class="form-group full-width">
+                    <label class="form-label required">
+                      <i class="fas fa-align-left label-icon"></i>
+                      Deskripsi Insiden*
+                    </label>
+                    <textarea
+                      id="deskripsi_insiden"
+                      name="deskripsi_insiden"
+                      class="form-textarea"
+                      rows="4"
+                      required
+                      placeholder="Jelaskan kronologi kejadian insiden secara detail..."
+                    ></textarea>
+                    <div class="form-hint">
+                      <i class="fas fa-info-circle"></i> Deskripsikan dengan
+                      jelas apa yang terjadi, waktu, dan lokasi
                     </div>
                   </div>
 
-                  <div class="signature-actions">
-                    <button
-                      type="button"
-                      class="signature-btn btn-clear"
-                      id="clearSignatureBtn4"
+                  <div class="form-group full-width">
+                    <label class="form-label required">
+                      <i class="fas fa-tag label-icon"></i>
+                      Jenis Insiden*
+                    </label>
+                    <select
+                      id="jenis_insiden"
+                      name="jenis_insiden"
+                      class="form-select"
+                      required
                     >
-                      <i class="fas fa-trash"></i> Hapus
-                    </button>
-                    <button
-                      type="button"
-                      class="signature-btn signature-save-btn"
-                      id="saveSignatureBtn4"
-                    >
-                      <i class="fas fa-save"></i> Simpan Tanda Tangan
-                    </button>
+                      <option value="">-- Pilih Jenis Insiden --</option>
+                      <option value="Keamanan Informasi">
+                        Keamanan Informasi
+                      </option>
+                      <option value="Non Keamanan Informasi">
+                        Non Keamanan Informasi
+                      </option>
+                    </select>
                   </div>
 
-                  <!-- Preview Area -->
-                  <div
-                    id="previewSignature4"
-                    class="signature-preview-container"
-                  ></div>
-
-                  <input type="hidden" name="ttd_ketua" id="signatureData4" />
-                  <input
-                    type="text"
-                    id="nama_ttd_ketua"
-                    name="nama_ttd_ketua"
-                    class="form-input"
-                    placeholder="Nama Ketua penandatangan"
-                    style="margin-top: 15px"
-                  />
+                  <div class="form-group full-width">
+                    <label class="form-label required">
+                      <i class="fas fa-search label-icon"></i>
+                      Analisa Penyebab*
+                    </label>
+                    <textarea
+                      id="analisa_penyebab"
+                      name="analisa_penyebab"
+                      class="form-textarea"
+                      rows="3"
+                      required
+                      placeholder="Analisa awal penyebab terjadinya insiden..."
+                    ></textarea>
+                  </div>
                 </div>
               </div>
 
-              <!-- Tanda Tangan SMKI 2 -->
-              <div class="form-group full-width">
-                <label class="form-label">
-                  <i class="fas fa-signature label-icon"></i>
-                  Tanda Tangan SMKI 2
-                </label>
-                <div class="signature-section">
-                  <div class="signature-pad-wrapper">
-                    <canvas
-                      id="signatureCanvas5"
-                      class="signature-pad"
-                      width="600"
-                      height="200"
-                    ></canvas>
-                    <div class="signature-placeholder">
-                      <i class="fas fa-signature"></i> Gambar tanda tangan SMKI
-                      2 di area ini
+              <!-- Right Panel: Tindakan & Tanda Tangan -->
+              <div class="split-panel right-panel">
+                <div class="panel-header">
+                  <h3>
+                    <i class="fas fa-clipboard-check"></i> B. TINDAKAN & TANDA
+                    TANGAN
+                  </h3>
+                  <div class="panel-badge">Wajib Diisi</div>
+                </div>
+
+                <div class="form-fields">
+                  <!-- Tindakan Section -->
+                  <div class="section-subheader">
+                    <h4><i class="fas fa-tasks"></i> Tindakan Penanganan</h4>
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label class="form-label required">
+                      <i class="fas fa-tools label-icon"></i>
+                      Tindak Lanjut SMKI*
+                    </label>
+                    <textarea
+                      id="tindak_smki"
+                      name="tindak_smki"
+                      class="form-textarea"
+                      rows="3"
+                      required
+                      placeholder="Tindakan yang telah dilakukan oleh SMKI..."
+                    ></textarea>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label required">
+                        <i class="fas fa-user-cog label-icon"></i>
+                        PIC Tindak Lanjut*
+                      </label>
+                      <input
+                        type="text"
+                        id="pic_tindak"
+                        name="pic_tindak"
+                        class="form-input"
+                        required
+                        placeholder="Nama PIC"
+                      />
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label required">
+                        <i class="fas fa-check-circle label-icon"></i>
+                        Insiden Selesai?*
+                      </label>
+                      <div class="radio-group">
+                        <label class="radio-label">
+                          <input
+                            type="radio"
+                            name="selesai"
+                            value="Ya"
+                            checked
+                          />
+                          <span class="radiomark"></span>
+                          Ya
+                        </label>
+                        <label class="radio-label">
+                          <input type="radio" name="selesai" value="Tidak" />
+                          <span class="radiomark"></span>
+                          Tidak
+                        </label>
+                      </div>
                     </div>
                   </div>
 
-                  <div class="signature-actions">
-                    <button
-                      type="button"
-                      class="signature-btn btn-clear"
-                      id="clearSignatureBtn5"
-                    >
-                      <i class="fas fa-trash"></i> Hapus
-                    </button>
-                    <button
-                      type="button"
-                      class="signature-btn signature-save-btn"
-                      id="saveSignatureBtn5"
-                    >
-                      <i class="fas fa-save"></i> Simpan Tanda Tangan
-                    </button>
+                  <div class="form-group full-width">
+                    <label class="form-label">
+                      <i class="fas fa-hands-helping label-icon"></i>
+                      Tindak Lanjut Pihak Terkait
+                    </label>
+                    <textarea
+                      id="tindak_pihak"
+                      name="tindak_pihak"
+                      class="form-textarea"
+                      rows="2"
+                      placeholder="Tindak lanjut oleh pihak terkait lain..."
+                    ></textarea>
                   </div>
 
-                  <!-- Preview Area -->
-                  <div
-                    id="previewSignature5"
-                    class="signature-preview-container"
-                  ></div>
+                  <div class="form-group" id="tanggalPenyelesaianGroup">
+                    <label class="form-label">
+                      <i class="fas fa-calendar-check label-icon"></i>
+                      Tanggal Penyelesaian
+                    </label>
+                    <input
+                      type="date"
+                      id="tanggal_penyelesaian"
+                      name="tanggal_penyelesaian"
+                      class="form-input"
+                    />
+                  </div>
 
-                  <input type="hidden" name="ttd_smki2" id="signatureData5" />
-                  <input
-                    type="text"
-                    id="nama_ttd_smki2"
-                    name="nama_ttd_smki2"
-                    class="form-input"
-                    placeholder="Nama SMKI 2 penandatangan"
-                    style="margin-top: 15px"
-                  />
+                  <!-- Tanda Tangan Section -->
+                  <div class="section-subheader">
+                    <h4><i class="fas fa-signature"></i> Tanda Tangan</h4>
+                  </div>
+
+                  <!-- Tanda Tangan 1: Pelapor -->
+                  <div class="signature-item">
+                    <div class="signature-header">
+                      <h5>
+                        <i class="fas fa-user-circle"></i> Tanda Tangan Pelapor*
+                      </h5>
+                      <span class="signature-required">Wajib</span>
+                    </div>
+                    <div class="signature-section">
+                      <div class="signature-pad-wrapper">
+                        <canvas
+                          id="signatureCanvas1"
+                          class="signature-pad"
+                          width="400"
+                          height="150"
+                        ></canvas>
+                        <div class="signature-placeholder">
+                          <i class="fas fa-signature"></i> Gambar tanda tangan
+                          Anda di area ini
+                        </div>
+                      </div>
+                      <div class="signature-actions">
+                        <button
+                          type="button"
+                          class="signature-btn btn-clear"
+                          id="clearSignatureBtn1"
+                        >
+                          <i class="fas fa-trash"></i> Hapus
+                        </button>
+                        <button
+                          type="button"
+                          class="signature-btn signature-save-btn"
+                          id="saveSignatureBtn1"
+                        >
+                          <i class="fas fa-save"></i> Simpan
+                        </button>
+                      </div>
+                      <div
+                        id="previewSignature1"
+                        class="signature-preview-container"
+                      ></div>
+                      <input
+                        type="hidden"
+                        name="ttd_pelapor"
+                        id="signatureData1"
+                      />
+                      <input
+                        type="text"
+                        id="nama_ttd_pelapor"
+                        name="nama_ttd_pelapor"
+                        class="form-input"
+                        required
+                        placeholder="Nama lengkap pelapor *"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Tanda Tangan 2: Atasan -->
+                  <div class="signature-item">
+                    <div class="signature-header">
+                      <h5>
+                        <i class="fas fa-user-tie"></i> Tanda Tangan Atasan*
+                      </h5>
+                      <span class="signature-required">Wajib</span>
+                    </div>
+                    <div class="signature-section">
+                      <div class="signature-pad-wrapper">
+                        <canvas
+                          id="signatureCanvas2"
+                          class="signature-pad"
+                          width="400"
+                          height="150"
+                        ></canvas>
+                        <div class="signature-placeholder">
+                          <i class="fas fa-signature"></i> Gambar tanda tangan
+                          atasan
+                        </div>
+                      </div>
+                      <div class="signature-actions">
+                        <button
+                          type="button"
+                          class="signature-btn btn-clear"
+                          id="clearSignatureBtn2"
+                        >
+                          <i class="fas fa-trash"></i> Hapus
+                        </button>
+                        <button
+                          type="button"
+                          class="signature-btn signature-save-btn"
+                          id="saveSignatureBtn2"
+                        >
+                          <i class="fas fa-save"></i> Simpan
+                        </button>
+                      </div>
+                      <div
+                        id="previewSignature2"
+                        class="signature-preview-container"
+                      ></div>
+                      <input
+                        type="hidden"
+                        name="ttd_atasan"
+                        id="signatureData2"
+                      />
+                      <input
+                        type="text"
+                        id="nama_ttd_atasan"
+                        name="nama_ttd_atasan"
+                        class="form-input"
+                        required
+                        placeholder="Nama atasan penandatangan *"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Tanda Tangan 3: SMKI -->
+                  <div class="signature-item">
+                    <div class="signature-header">
+                      <h5>
+                        <i class="fas fa-user-shield"></i> Tanda Tangan SMKI*
+                      </h5>
+                      <span class="signature-required">Wajib</span>
+                    </div>
+                    <div class="signature-section">
+                      <div class="signature-pad-wrapper">
+                        <canvas
+                          id="signatureCanvas3"
+                          class="signature-pad"
+                          width="400"
+                          height="150"
+                        ></canvas>
+                        <div class="signature-placeholder">
+                          <i class="fas fa-signature"></i> Gambar tanda tangan
+                          SMKI
+                        </div>
+                      </div>
+                      <div class="signature-actions">
+                        <button
+                          type="button"
+                          class="signature-btn btn-clear"
+                          id="clearSignatureBtn3"
+                        >
+                          <i class="fas fa-trash"></i> Hapus
+                        </button>
+                        <button
+                          type="button"
+                          class="signature-btn signature-save-btn"
+                          id="saveSignatureBtn3"
+                        >
+                          <i class="fas fa-save"></i> Simpan
+                        </button>
+                      </div>
+                      <div
+                        id="previewSignature3"
+                        class="signature-preview-container"
+                      ></div>
+                      <input
+                        type="hidden"
+                        name="ttd_smki"
+                        id="signatureData3"
+                      />
+                      <input
+                        type="text"
+                        id="nama_ttd_smki"
+                        name="nama_ttd_smki"
+                        class="form-input"
+                        required
+                        placeholder="Nama SMKI penandatangan *"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Tanda Tangan 4: Ketua -->
+                  <div class="signature-item">
+                    <div class="signature-header">
+                      <h5>
+                        <i class="fas fa-user-graduate"></i> Tanda Tangan Ketua
+                      </h5>
+                      <span class="signature-optional">Opsional</span>
+                    </div>
+                    <div class="signature-section">
+                      <div class="signature-pad-wrapper">
+                        <canvas
+                          id="signatureCanvas4"
+                          class="signature-pad"
+                          width="400"
+                          height="150"
+                        ></canvas>
+                        <div class="signature-placeholder">
+                          <i class="fas fa-signature"></i> Gambar tanda tangan
+                          Ketua
+                        </div>
+                      </div>
+                      <div class="signature-actions">
+                        <button
+                          type="button"
+                          class="signature-btn btn-clear"
+                          id="clearSignatureBtn4"
+                        >
+                          <i class="fas fa-trash"></i> Hapus
+                        </button>
+                        <button
+                          type="button"
+                          class="signature-btn signature-save-btn"
+                          id="saveSignatureBtn4"
+                        >
+                          <i class="fas fa-save"></i> Simpan
+                        </button>
+                      </div>
+                      <div
+                        id="previewSignature4"
+                        class="signature-preview-container"
+                      ></div>
+                      <input
+                        type="hidden"
+                        name="ttd_ketua"
+                        id="signatureData4"
+                      />
+                      <input
+                        type="text"
+                        id="nama_ttd_ketua"
+                        name="nama_ttd_ketua"
+                        class="form-input"
+                        placeholder="Nama Ketua penandatangan"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Tanda Tangan 5: SMKI 2 -->
+                  <div class="signature-item">
+                    <div class="signature-header">
+                      <h5>
+                        <i class="fas fa-user-shield"></i> Tanda Tangan SMKI 2
+                      </h5>
+                      <span class="signature-optional">Opsional</span>
+                    </div>
+                    <div class="signature-section">
+                      <div class="signature-pad-wrapper">
+                        <canvas
+                          id="signatureCanvas5"
+                          class="signature-pad"
+                          width="400"
+                          height="150"
+                        ></canvas>
+                        <div class="signature-placeholder">
+                          <i class="fas fa-signature"></i> Gambar tanda tangan
+                          SMKI 2
+                        </div>
+                      </div>
+                      <div class="signature-actions">
+                        <button
+                          type="button"
+                          class="signature-btn btn-clear"
+                          id="clearSignatureBtn5"
+                        >
+                          <i class="fas fa-trash"></i> Hapus
+                        </button>
+                        <button
+                          type="button"
+                          class="signature-btn signature-save-btn"
+                          id="saveSignatureBtn5"
+                        >
+                          <i class="fas fa-save"></i> Simpan
+                        </button>
+                      </div>
+                      <div
+                        id="previewSignature5"
+                        class="signature-preview-container"
+                      ></div>
+                      <input
+                        type="hidden"
+                        name="ttd_smki2"
+                        id="signatureData5"
+                      />
+                      <input
+                        type="text"
+                        id="nama_ttd_smki2"
+                        name="nama_ttd_smki2"
+                        class="form-input"
+                        placeholder="Nama SMKI 2 penandatangan"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
+            <!-- Step 1 Actions -->
             <div class="form-actions">
-              <button type="button" class="btn btn-prev" data-action="prev">
-                <i class="fas fa-arrow-left"></i>
-                Kembali ke Data Insiden
-              </button>
-              <button type="button" class="btn btn-next" data-action="next">
-                Lanjut ke Review & Submit
-                <i class="fas fa-arrow-right"></i>
+              <button type="button" class="btn btn-review" id="reviewButton">
+                Preview & Submit <i class="fas fa-arrow-right"></i>
               </button>
             </div>
           </div>
 
-          <!-- Step 3: Review & Submit -->
-          <div class="form-section" id="step3">
+          <!-- Step 2: Review & Submit -->
+          <div class="form-section" id="step2">
             <div class="section-header">
-              <h2><i class="fas fa-search"></i> C. REVIEW & SUBMIT</h2>
-              <p class="section-description">Review data sebelum submit</p>
+              <h2><i class="fas fa-search"></i> REVIEW & SUBMIT LAPORAN</h2>
+              <p class="section-description">
+                Periksa semua data sebelum submit. Data tidak dapat diubah
+                setelah submit.
+              </p>
             </div>
 
             <div class="review-container">
               <!-- Loading State -->
               <div class="review-loading" id="reviewLoading">
                 <i class="fas fa-spinner fa-spin"></i>
-                <p>Mempersiapkan review...</p>
+                <p>Mempersiapkan review laporan...</p>
               </div>
 
               <!-- Review Content -->
@@ -634,6 +673,7 @@
                 id="reviewContent"
                 style="display: none"
               >
+                <!-- Summary Card -->
                 <div class="review-summary">
                   <h3>
                     <i class="fas fa-file-alt"></i> Ringkasan Laporan Insiden
@@ -641,39 +681,39 @@
                   <div class="summary-grid">
                     <div class="summary-item">
                       <label>Nomor Dokumen</label>
-                      <span id="reviewNoDok">-</span>
+                      <span id="reviewNoDok" class="highlight">-</span>
                     </div>
                     <div class="summary-item">
                       <label>Nomor Permohonan</label>
                       <span id="reviewNoPermohonan">-</span>
                     </div>
                     <div class="summary-item">
-                      <label>Tanggal Efektif</label>
-                      <span id="reviewTglEfektif">-</span>
+                      <label>Status Insiden</label>
+                      <span class="status-badge" id="reviewStatus">-</span>
                     </div>
                     <div class="summary-item">
                       <label>Pelapor</label>
                       <span id="reviewPelapor">-</span>
                     </div>
                     <div class="summary-item">
-                      <label>Tanggal Kejadian</label>
-                      <span id="reviewTanggalKejadian">-</span>
+                      <label>Tanggal Efektif</label>
+                      <span id="reviewTglEfektif">-</span>
                     </div>
                     <div class="summary-item">
-                      <label>Status Insiden</label>
-                      <span class="status-badge" id="reviewStatus">-</span>
+                      <label>Tanggal Kejadian</label>
+                      <span id="reviewTanggalKejadian">-</span>
                     </div>
                   </div>
                 </div>
 
-                <!-- Data Insiden -->
+                <!-- Data Insiden Review -->
                 <div class="review-section">
                   <h4><i class="fas fa-info-circle"></i> Data Insiden</h4>
                   <div class="review-table">
                     <table>
                       <tr>
-                        <th>Field</th>
-                        <th>Value</th>
+                        <th width="30%">Field</th>
+                        <th width="70%">Value</th>
                       </tr>
                       <tr>
                         <td>No. Revisi</td>
@@ -703,14 +743,14 @@
                   </div>
                 </div>
 
-                <!-- Tindakan -->
+                <!-- Tindakan Review -->
                 <div class="review-section">
-                  <h4><i class="fas fa-tasks"></i> Tindakan</h4>
+                  <h4><i class="fas fa-tasks"></i> Tindakan Penanganan</h4>
                   <div class="review-table">
                     <table>
                       <tr>
-                        <th>Field</th>
-                        <th>Value</th>
+                        <th width="30%">Field</th>
+                        <th width="70%">Value</th>
                       </tr>
                       <tr>
                         <td>Tindak Lanjut SMKI</td>
@@ -736,15 +776,15 @@
                   </div>
                 </div>
 
-                <!-- Status Tanda Tangan -->
+                <!-- Tanda Tangan Review -->
                 <div class="review-section">
                   <h4><i class="fas fa-signature"></i> Status Tanda Tangan</h4>
                   <div class="review-table">
                     <table>
                       <tr>
-                        <th>Pihak</th>
-                        <th>Status</th>
-                        <th>Nama Penandatangan</th>
+                        <th width="25%">Pihak</th>
+                        <th width="25%">Status</th>
+                        <th width="50%">Nama Penandatangan</th>
                       </tr>
                       <tr>
                         <td>Pelapor</td>
@@ -774,15 +814,6 @@
                         <td id="reviewNamaTTDSMKI">-</td>
                       </tr>
                       <tr>
-                        <td>SMKI 2</td>
-                        <td>
-                          <span class="status-badge" id="reviewStatusTTDSMKI2"
-                            >Belum</span
-                          >
-                        </td>
-                        <td id="reviewNamaTTDSMKI2">-</td>
-                      </tr>
-                      <tr>
                         <td>Ketua</td>
                         <td>
                           <span class="status-badge" id="reviewStatusTTDKetua"
@@ -791,74 +822,79 @@
                         </td>
                         <td id="reviewNamaTTDKetua">-</td>
                       </tr>
+                      <tr>
+                        <td>SMKI 2</td>
+                        <td>
+                          <span class="status-badge" id="reviewStatusTTDSMKI2"
+                            >Belum</span
+                          >
+                        </td>
+                        <td id="reviewNamaTTDSMKI2">-</td>
+                      </tr>
                     </table>
                   </div>
                 </div>
-              </div>
 
-              <!-- Review Actions -->
-              <div
-                class="review-actions"
-                id="reviewActions"
-                style="display: none"
-              >
-                <div class="action-section">
-                  <h4><i class="fas fa-paper-plane"></i> Submit Laporan</h4>
-                  <div class="submit-options">
-                    <div class="form-check">
-                      <input
-                        type="checkbox"
-                        id="confirmReview"
-                        class="form-check-input"
-                      />
-                      <label for="confirmReview" class="form-check-label">
-                        Saya telah memeriksa semua data dan menyatakan data
-                        benar
-                      </label>
-                    </div>
+                <!-- Submit Actions -->
+                <div class="review-actions" id="reviewActions">
+                  <div class="action-section">
+                    <h4><i class="fas fa-paper-plane"></i> Submit Laporan</h4>
+                    <div class="submit-options">
+                      <div class="form-check">
+                        <input
+                          type="checkbox"
+                          id="confirmReview"
+                          class="form-check-input"
+                        />
+                        <label for="confirmReview" class="form-check-label">
+                          Saya telah memeriksa semua data dan menyatakan data
+                          lengkap dan benar
+                        </label>
+                      </div>
 
-                    <div class="submit-buttons">
-                      <!-- PERBAIKAN: Ganti type menjadi submit -->
-                      <button
-                        type="submit"
-                        class="btn btn-submit"
-                        id="finalSubmitBtn"
-                        disabled
-                      >
-                        <i class="fas fa-paper-plane"></i>
-                        Submit Laporan Insiden
-                      </button>
-                    </div>
+                      <div class="submit-buttons">
+                        <button
+                          type="button"
+                          class="btn btn-back"
+                          id="backToFormButton"
+                        >
+                          <i class="fas fa-arrow-left"></i>
+                          Kembali ke Form
+                        </button>
+                        <button
+                          type="submit"
+                          class="btn btn-submit"
+                          id="finalSubmitBtn"
+                          disabled
+                        >
+                          <i class="fas fa-paper-plane"></i>
+                          Submit Laporan
+                        </button>
+                      </div>
 
-                    <!-- PERBAIKAN: Tambahkan loading state -->
-                    <div
-                      class="submit-loading"
-                      id="submitLoading"
-                      style="display: none"
-                    >
-                      <i class="fas fa-spinner fa-spin"></i>
-                      <span>Menyimpan laporan ke database...</span>
-                    </div>
-
-                    <!-- PERBAIKAN: Tambahkan error display -->
-                    <div
-                      class="submit-error"
-                      id="submitError"
-                      style="display: none"
-                    >
-                      <i class="fas fa-exclamation-circle"></i>
-                      <span id="errorMessage"></span>
+                      <!-- Submit Feedback -->
+                      <div class="submit-feedback">
+                        <div
+                          class="submit-loading"
+                          id="submitLoading"
+                          style="display: none"
+                        >
+                          <i class="fas fa-spinner fa-spin"></i>
+                          <span>Menyimpan laporan ke database...</span>
+                        </div>
+                        <div
+                          class="submit-error"
+                          id="submitError"
+                          style="display: none"
+                        >
+                          <i class="fas fa-exclamation-circle"></i>
+                          <span id="errorMessage"></span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div class="form-actions">
-              <button type="button" class="btn btn-prev" data-action="prev">
-                <i class="fas fa-arrow-left"></i>
-                Kembali ke Tindakan & TTD
-              </button>
             </div>
           </div>
         </form>
@@ -875,191 +911,7 @@
     <!-- JavaScript Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 
-    <!-- JavaScript External -->
+    <!-- External JavaScript -->
     <script src="/static/js/form_03.js"></script>
-    <script src="/static/js/signature.js"></script>
-
-    <!-- PERBAIKAN: Script minimal untuk inisialisasi -->
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        console.log("✅ Form 03 HTML loaded");
-
-        function genNoPermohonan() {
-          const now = new Date();
-          const y = now.getFullYear();
-          const m = String(now.getMonth() + 1).padStart(2, "0");
-          const d = String(now.getDate()).padStart(2, "0");
-          const h = String(now.getHours()).padStart(2, "0");
-          const min = String(now.getMinutes()).padStart(2, "0");
-          return `${y}-${m}-${d} ${h}.${min}`;
-        }
-
-        // Setup notification system
-        const notificationToast = document.getElementById("notificationToast");
-        const closeToastBtn = document.getElementById("closeToast");
-
-        if (notificationToast) {
-          notificationToast.style.display = "none";
-
-          if (closeToastBtn) {
-            closeToastBtn.addEventListener("click", function () {
-              notificationToast.style.display = "none";
-            });
-          }
-
-          // Global notification function
-          window.showNotification = function (message, type = "info") {
-            const toastMessage = document.getElementById("toastMessage");
-            const icon = notificationToast.querySelector("i");
-
-            if (toastMessage) toastMessage.textContent = message;
-
-            // Set type dan icon
-            notificationToast.className = `notification ${type}`;
-            if (icon) {
-              switch (type) {
-                case "success":
-                  icon.className = "fas fa-check-circle";
-                  break;
-                case "error":
-                  icon.className = "fas fa-exclamation-circle";
-                  break;
-                case "warning":
-                  icon.className = "fas fa-exclamation-triangle";
-                  break;
-                default:
-                  icon.className = "fas fa-info-circle";
-              }
-            }
-
-            // Show notification
-            notificationToast.style.display = "flex";
-
-            // Auto hide
-            setTimeout(() => {
-              notificationToast.style.display = "none";
-            }, 5000);
-          };
-        }
-
-        // Auto-generate nomor permohonan jika kosong
-        // Auto-generate nomor permohonan jika kosong
-        const noPermohonanField = document.getElementById("no_permohonan");
-        if (noPermohonanField && !noPermohonanField.value) {
-          noPermohonanField.value = genNoPermohonan();
-        }
-
-        // Setup radio button untuk tanggal penyelesaian
-        const selesaiRadios = document.querySelectorAll(
-          'input[name="selesai"]',
-        );
-        const tanggalPenyelesaianGroup = document.getElementById(
-          "tanggalPenyelesaianGroup",
-        );
-
-        if (selesaiRadios.length > 0 && tanggalPenyelesaianGroup) {
-          selesaiRadios.forEach((radio) => {
-            radio.addEventListener("change", function () {
-              tanggalPenyelesaianGroup.style.display =
-                this.value === "Ya" ? "block" : "none";
-            });
-          });
-
-          // Set initial state
-          const checkedRadio = document.querySelector(
-            'input[name="selesai"]:checked',
-          );
-          if (checkedRadio) {
-            tanggalPenyelesaianGroup.style.display =
-              checkedRadio.value === "Ya" ? "block" : "none";
-          }
-        }
-      });
-    </script>
-
-    <!-- PERBAIKAN: CSS untuk button states -->
-    <style>
-      .btn-submit:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        background-color: #6c757d !important;
-      }
-
-      .btn-submit.success {
-        background-color: #28a745 !important;
-      }
-
-      .submit-loading {
-        margin-top: 15px;
-        padding: 12px;
-        border-radius: 5px;
-        background-color: #f8f9fa;
-        border: 1px solid #dee2e6;
-        text-align: center;
-        color: #6c757d;
-      }
-
-      .submit-error {
-        margin-top: 15px;
-        padding: 12px;
-        border-radius: 5px;
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
-        color: #721c24;
-        text-align: center;
-      }
-
-      .submit-error i {
-        margin-right: 8px;
-      }
-
-      .notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 5px;
-        background-color: #007bff;
-        color: white;
-        display: flex;
-        align-items: center;
-        z-index: 9999;
-        max-width: 400px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        display: none;
-      }
-
-      .notification.success {
-        background-color: #28a745;
-      }
-
-      .notification.error {
-        background-color: #dc3545;
-      }
-
-      .notification.warning {
-        background-color: #ffc107;
-        color: #212529;
-      }
-
-      .notification i {
-        margin-right: 10px;
-        font-size: 1.2em;
-      }
-
-      .notification-close {
-        margin-left: 15px;
-        background: none;
-        border: none;
-        color: inherit;
-        font-size: 1.2em;
-        cursor: pointer;
-        opacity: 0.8;
-      }
-
-      .notification-close:hover {
-        opacity: 1;
-      }
-    </style>
   </body>
 </html>
