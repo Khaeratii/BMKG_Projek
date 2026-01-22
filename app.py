@@ -84,7 +84,7 @@ for folder in [UPLOAD_FOLDER, DATA_FOLDER, OUTPUT_DIR, TEMPLATE_DIR, LOCAL_TEMP_
 
 # Template files
 TEMPLATE_USULAN_PERUBAHAN = os.path.join(TEMPLATE_DIR, 'usulan_perubahan_template.docx')
-TEMPLATE_SURAT_PERNYATAAN = os.path.join(TEMPLATE_DIR, 'surat_pernyataan_template.docx')
+TEMPLATE_SURAT_PERNYATAAN = os.path.join(TEMPLATE_DIR, 'surat_pernyataan.docx')
 TEMPLATE_LAPORAN_INSIDEN = os.path.join(TEMPLATE_DIR, 'laporan_insiden_template.docx')
 LOGO_PATH = os.path.join('static', 'images', 'logo_bmkg.png')
 

@@ -920,7 +920,6 @@ textarea.form-control:focus {
   padding: 12px 24px;
   font-size: 15px;
   font-weight: 700 !important;
-  text-transform: uppercase;
   border-radius: var(--radius-lg);
   cursor: pointer;
   transition: all 0.3s ease;
