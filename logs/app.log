@@ -6882,3 +6882,78 @@ OSError: [Errno 22] Invalid argument
 2026-01-22 13:45:00,781 | INFO | 127.0.0.1 - - [22/Jan/2026 13:45:00] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
 2026-01-22 13:45:00,796 | INFO | 127.0.0.1 - - [22/Jan/2026 13:45:00] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
 2026-01-22 13:45:00,796 | INFO | 127.0.0.1 - - [22/Jan/2026 13:45:00] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-22 13:57:42,776 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.9.7.114:5000
+2026-01-22 13:57:42,776 | INFO | [33mPress CTRL+C to quit[0m
+2026-01-22 13:57:42,785 | INFO |  * Restarting with stat
+2026-01-22 13:57:44,013 | WARNING |  * Debugger is active!
+2026-01-22 13:57:44,027 | INFO |  * Debugger PIN: 220-703-075
+2026-01-22 13:57:46,841 | INFO | 127.0.0.1 - - [22/Jan/2026 13:57:46] "GET /usulan-perubahan/baru HTTP/1.1" 200 -
+2026-01-22 13:57:47,140 | INFO | 127.0.0.1 - - [22/Jan/2026 13:57:47] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2026-01-22 13:57:47,194 | INFO | 127.0.0.1 - - [22/Jan/2026 13:57:47] "[36mGET /static/css/form.css HTTP/1.1[0m" 304 -
+2026-01-22 13:57:47,218 | INFO | 127.0.0.1 - - [22/Jan/2026 13:57:47] "[36mGET /static/js/form.js HTTP/1.1[0m" 304 -
+2026-01-22 13:57:47,234 | INFO | 127.0.0.1 - - [22/Jan/2026 13:57:47] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2026-01-22 13:58:14,674 | INFO | 127.0.0.1 - - [22/Jan/2026 13:58:14] "GET /dashboard HTTP/1.1" 200 -
+2026-01-22 13:58:14,706 | INFO | 127.0.0.1 - - [22/Jan/2026 13:58:14] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-22 13:58:14,721 | INFO | 127.0.0.1 - - [22/Jan/2026 13:58:14] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-22 13:58:14,721 | INFO | 127.0.0.1 - - [22/Jan/2026 13:58:14] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-22 13:58:14,728 | INFO | 127.0.0.1 - - [22/Jan/2026 13:58:14] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-22 13:58:14,742 | INFO | 127.0.0.1 - - [22/Jan/2026 13:58:14] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-22 14:29:51,959 | INFO | 127.0.0.1 - - [22/Jan/2026 14:29:51] "GET /usulan-perubahan/baru HTTP/1.1" 200 -
+2026-01-22 14:29:52,070 | INFO | 127.0.0.1 - - [22/Jan/2026 14:29:52] "[36mGET /static/css/form.css HTTP/1.1[0m" 304 -
+2026-01-22 14:29:52,072 | INFO | 127.0.0.1 - - [22/Jan/2026 14:29:52] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2026-01-22 14:29:52,078 | INFO | 127.0.0.1 - - [22/Jan/2026 14:29:52] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2026-01-22 14:29:52,128 | INFO | 127.0.0.1 - - [22/Jan/2026 14:29:52] "GET /static/js/form.js HTTP/1.1" 200 -
+2026-01-22 14:29:59,170 | INFO | 127.0.0.1 - - [22/Jan/2026 14:29:59] "GET /dashboard HTTP/1.1" 200 -
+2026-01-22 14:29:59,251 | INFO | 127.0.0.1 - - [22/Jan/2026 14:29:59] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-22 14:29:59,251 | INFO | 127.0.0.1 - - [22/Jan/2026 14:29:59] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-22 14:29:59,261 | INFO | 127.0.0.1 - - [22/Jan/2026 14:29:59] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-22 14:29:59,271 | INFO | 127.0.0.1 - - [22/Jan/2026 14:29:59] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-22 14:29:59,273 | INFO | 127.0.0.1 - - [22/Jan/2026 14:29:59] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-22 14:30:37,949 | INFO | 127.0.0.1 - - [22/Jan/2026 14:30:37] "GET /usulan-perubahan/baru HTTP/1.1" 200 -
+2026-01-22 14:30:38,054 | INFO | 127.0.0.1 - - [22/Jan/2026 14:30:38] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2026-01-22 14:30:38,054 | INFO | 127.0.0.1 - - [22/Jan/2026 14:30:38] "[36mGET /static/css/form.css HTTP/1.1[0m" 304 -
+2026-01-22 14:30:38,058 | INFO | 127.0.0.1 - - [22/Jan/2026 14:30:38] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2026-01-22 14:30:38,125 | INFO | 127.0.0.1 - - [22/Jan/2026 14:30:38] "GET /static/js/form.js HTTP/1.1" 200 -
+2026-01-22 14:30:43,967 | INFO | 127.0.0.1 - - [22/Jan/2026 14:30:43] "GET /dashboard HTTP/1.1" 200 -
+2026-01-22 14:30:44,075 | INFO | 127.0.0.1 - - [22/Jan/2026 14:30:44] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-22 14:30:44,079 | INFO | 127.0.0.1 - - [22/Jan/2026 14:30:44] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-22 14:30:44,082 | INFO | 127.0.0.1 - - [22/Jan/2026 14:30:44] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-22 14:30:44,089 | INFO | 127.0.0.1 - - [22/Jan/2026 14:30:44] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-22 14:30:44,091 | INFO | 127.0.0.1 - - [22/Jan/2026 14:30:44] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-22 14:31:15,480 | INFO | 127.0.0.1 - - [22/Jan/2026 14:31:15] "GET /dashboard HTTP/1.1" 200 -
+2026-01-22 14:31:15,507 | INFO | 127.0.0.1 - - [22/Jan/2026 14:31:15] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-22 14:31:15,509 | INFO | 127.0.0.1 - - [22/Jan/2026 14:31:15] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-22 14:31:15,512 | INFO | 127.0.0.1 - - [22/Jan/2026 14:31:15] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-22 14:31:15,515 | INFO | 127.0.0.1 - - [22/Jan/2026 14:31:15] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-22 14:31:15,526 | INFO | 127.0.0.1 - - [22/Jan/2026 14:31:15] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-22 14:31:17,742 | INFO | 127.0.0.1 - - [22/Jan/2026 14:31:17] "GET /usulan-perubahan/baru HTTP/1.1" 200 -
+2026-01-22 14:31:17,784 | INFO | 127.0.0.1 - - [22/Jan/2026 14:31:17] "[36mGET /static/css/form.css HTTP/1.1[0m" 304 -
+2026-01-22 14:31:17,790 | INFO | 127.0.0.1 - - [22/Jan/2026 14:31:17] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2026-01-22 14:31:17,794 | INFO | 127.0.0.1 - - [22/Jan/2026 14:31:17] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2026-01-22 14:31:17,853 | INFO | 127.0.0.1 - - [22/Jan/2026 14:31:17] "GET /static/js/form.js HTTP/1.1" 200 -
+2026-01-22 14:32:26,728 | INFO | 127.0.0.1 - - [22/Jan/2026 14:32:26] "POST /api/usulan-perubahan/submit HTTP/1.1" 200 -
+2026-01-22 14:32:28,381 | INFO | 127.0.0.1 - - [22/Jan/2026 14:32:28] "GET /dashboard HTTP/1.1" 200 -
+2026-01-22 14:32:28,448 | INFO | 127.0.0.1 - - [22/Jan/2026 14:32:28] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-22 14:32:28,454 | INFO | 127.0.0.1 - - [22/Jan/2026 14:32:28] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-22 14:32:28,459 | INFO | 127.0.0.1 - - [22/Jan/2026 14:32:28] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-22 14:32:28,459 | INFO | 127.0.0.1 - - [22/Jan/2026 14:32:28] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-22 14:32:28,467 | INFO | 127.0.0.1 - - [22/Jan/2026 14:32:28] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-22 14:32:41,960 | INFO | 127.0.0.1 - - [22/Jan/2026 14:32:41] "GET /usulan-perubahan/generate/7 HTTP/1.1" 200 -
+2026-01-22 14:33:45,602 | INFO | 127.0.0.1 - - [22/Jan/2026 14:33:45] "GET /usulan-perubahan/baru HTTP/1.1" 200 -
+2026-01-22 14:33:45,661 | INFO | 127.0.0.1 - - [22/Jan/2026 14:33:45] "[36mGET /static/css/form.css HTTP/1.1[0m" 304 -
+2026-01-22 14:33:45,668 | INFO | 127.0.0.1 - - [22/Jan/2026 14:33:45] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2026-01-22 14:33:45,673 | INFO | 127.0.0.1 - - [22/Jan/2026 14:33:45] "[36mGET /static/js/form.js HTTP/1.1[0m" 304 -
+2026-01-22 14:33:45,674 | INFO | 127.0.0.1 - - [22/Jan/2026 14:33:45] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2026-01-22 14:35:34,225 | INFO | 127.0.0.1 - - [22/Jan/2026 14:35:34] "GET /usulan-perubahan/baru HTTP/1.1" 200 -
+2026-01-22 14:35:34,257 | INFO | 127.0.0.1 - - [22/Jan/2026 14:35:34] "[36mGET /static/css/form.css HTTP/1.1[0m" 304 -
+2026-01-22 14:35:34,262 | INFO | 127.0.0.1 - - [22/Jan/2026 14:35:34] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2026-01-22 14:35:34,266 | INFO | 127.0.0.1 - - [22/Jan/2026 14:35:34] "[36mGET /static/js/form.js HTTP/1.1[0m" 304 -
+2026-01-22 14:35:34,269 | INFO | 127.0.0.1 - - [22/Jan/2026 14:35:34] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2026-01-22 14:37:07,445 | INFO | 127.0.0.1 - - [22/Jan/2026 14:37:07] "GET /usulan-perubahan/baru HTTP/1.1" 200 -
+2026-01-22 14:37:07,473 | INFO | 127.0.0.1 - - [22/Jan/2026 14:37:07] "[36mGET /static/css/form.css HTTP/1.1[0m" 304 -
+2026-01-22 14:37:07,478 | INFO | 127.0.0.1 - - [22/Jan/2026 14:37:07] "[36mGET /static/js/form.js HTTP/1.1[0m" 304 -
+2026-01-22 14:37:07,482 | INFO | 127.0.0.1 - - [22/Jan/2026 14:37:07] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2026-01-22 14:37:07,484 | INFO | 127.0.0.1 - - [22/Jan/2026 14:37:07] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
