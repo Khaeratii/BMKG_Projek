@@ -1,7 +1,7 @@
 /**
  * Two Step Form - BMKG Wilayah IV
  * JavaScript untuk form 2 tahap (Form & Review)
- * Versi: 2.0 - Two Step Implementation
+ * Versi: 2.1 - Updated Signature Handling
  */
 
 // ==================== GLOBAL VARIABLES ====================
@@ -14,6 +14,8 @@ const signatures = {
 };
 let lastValidationTime = 0;
 let signaturePads = {};
+const SIGNATURE_WIDTH = 400; // Lebar maksimal signature
+const SIGNATURE_HEIGHT = 150; // Tinggi signature
 
 // ==================== INITIALIZATION ====================
 
@@ -241,50 +243,62 @@ function initializeSignaturePad(sectionNum, type) {
     return;
   }
 
-  // Initialize Signature Pad
+  // Clear canvas context untuk pastikan transparan
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Initialize Signature Pad dengan background transparan
   const signaturePad = new SignaturePad(canvas, {
-    backgroundColor: "rgb(255, 255, 255)",
-    penColor: "rgb(0, 0, 0)",
-    minWidth: 1,
-    maxWidth: 3,
-    throttle: 16,
+    backgroundColor: "rgba(255, 255, 255, 0)", // Transparan
+    penColor: "rgb(0, 0, 0)", // Warna tanda tangan hitam
+    minWidth: 0.5,
+    maxWidth: 2.5, // Lebih tipis
     velocityFilterWeight: 0.7,
+    throttle: 5, // Smooth drawing
   });
 
   // Store reference
   signaturePads[type] = signaturePad;
 
-  // Set canvas size
+  // Set canvas size yang lebih proporsional
   function resizeCanvas() {
     const container = canvas.parentElement;
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
+    // Hitung ukuran yang proporsional
+    const containerWidth = container.offsetWidth;
+    const canvasWidth = Math.min(containerWidth, SIGNATURE_WIDTH);
+    const canvasHeight = SIGNATURE_HEIGHT;
+
     // Set canvas size
-    canvas.width = container.offsetWidth * ratio;
-    canvas.height = 200 * ratio;
-    canvas.getContext("2d").scale(ratio, ratio);
+    canvas.width = canvasWidth * ratio;
+    canvas.height = canvasHeight * ratio;
+    canvas.style.width = `${canvasWidth}px`;
+    canvas.style.height = `${canvasHeight}px`;
 
-    // Clear and redraw
-    signaturePad.clear();
+    const context = canvas.getContext("2d");
+    context.scale(ratio, ratio);
 
-    // If we have saved data, redraw it
-    if (signatures[type]) {
-      signaturePad.fromDataURL(signatures[type]);
-    }
+    // Clear dengan background transparan
+    context.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Hide placeholder if signature exists
-    const placeholder = canvas.parentElement.querySelector(
-      ".signature-placeholder",
-    );
-    if (placeholder) {
-      placeholder.style.display = signaturePad.isEmpty() ? "block" : "none";
-    }
+    // Redraw existing signature if any
+    setTimeout(() => {
+      if (signatures[type]) {
+        signaturePad.fromDataURL(signatures[type]);
+      } else {
+        signaturePad.clear();
+      }
+
+      // Update placeholder visibility
+      updatePlaceholderVisibility(sectionNum, signaturePad);
+    }, 100);
   }
 
   resizeCanvas();
   window.addEventListener("resize", resizeCanvas);
 
-  // Hide placeholder when drawing starts
+  // Event listeners untuk drawing
   canvas.addEventListener("touchstart", () => {
     const placeholder = canvas.parentElement.querySelector(
       ".signature-placeholder",
@@ -314,12 +328,7 @@ function initializeSignaturePad(sectionNum, type) {
       signaturePad.clear();
       updateSignatureData(sectionNum, type);
       updateSignatureVisualFeedback(canvasId, type, false);
-
-      // Show placeholder
-      const placeholder = canvas.parentElement.querySelector(
-        ".signature-placeholder",
-      );
-      if (placeholder) placeholder.style.display = "block";
+      updatePlaceholderVisibility(sectionNum, signaturePad);
     });
   }
 
@@ -331,21 +340,28 @@ function initializeSignaturePad(sectionNum, type) {
         signaturePad.fromData(data);
         updateSignatureData(sectionNum, type);
         updateSignatureVisualFeedback(canvasId, type, !signaturePad.isEmpty());
-
-        if (signaturePad.isEmpty()) {
-          const placeholder = canvas.parentElement.querySelector(
-            ".signature-placeholder",
-          );
-          if (placeholder) placeholder.style.display = "block";
-        }
+        updatePlaceholderVisibility(sectionNum, signaturePad);
       }
     });
   }
 
   // Load existing signature if any
   if (signatures[type]) {
-    signaturePad.fromDataURL(signatures[type]);
-    updateSignatureVisualFeedback(canvasId, type, true);
+    setTimeout(() => {
+      signaturePad.fromDataURL(signatures[type]);
+      updatePlaceholderVisibility(sectionNum, signaturePad);
+    }, 100);
+  } else {
+    updatePlaceholderVisibility(sectionNum, signaturePad);
+  }
+}
+
+function updatePlaceholderVisibility(sectionNum, signaturePad) {
+  const placeholder = document
+    .querySelector(`#signatureCanvas${sectionNum}`)
+    .parentElement.querySelector(".signature-placeholder");
+  if (placeholder) {
+    placeholder.style.display = signaturePad.isEmpty() ? "block" : "none";
   }
 }
 
@@ -359,13 +375,86 @@ function updateSignatureData(sectionNum, type) {
   if (!signaturePad || !dataInput) return;
 
   if (!signaturePad.isEmpty()) {
-    const dataUrl = signaturePad.toDataURL("image/png");
+    // Optimize signature untuk tidak terlalu lebar
+    const dataUrl = optimizeSignature(signaturePad);
     signatures[type] = dataUrl;
     dataInput.value = dataUrl;
   } else {
     signatures[type] = null;
     dataInput.value = "";
   }
+}
+
+function optimizeSignature(signaturePad) {
+  // Buat canvas temporary untuk cropping
+  const tempCanvas = document.createElement("canvas");
+  const tempCtx = tempCanvas.getContext("2d");
+
+  // Get original canvas
+  const originalCanvas = signaturePad.canvas;
+  const originalCtx = originalCanvas.getContext("2d");
+
+  // Get image data untuk menemukan batas tanda tangan
+  const imageData = originalCtx.getImageData(
+    0,
+    0,
+    originalCanvas.width,
+    originalCanvas.height,
+  );
+  const data = imageData.data;
+
+  let minX = originalCanvas.width;
+  let minY = originalCanvas.height;
+  let maxX = 0;
+  let maxY = 0;
+
+  // Cari batas non-transparan
+  for (let y = 0; y < originalCanvas.height; y++) {
+    for (let x = 0; x < originalCanvas.width; x++) {
+      const alpha = data[(y * originalCanvas.width + x) * 4 + 3];
+      if (alpha > 0) {
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x);
+        maxY = Math.max(maxY, y);
+      }
+    }
+  }
+
+  // Tambahkan padding
+  const padding = 10;
+  minX = Math.max(0, minX - padding);
+  minY = Math.max(0, minY - padding);
+  maxX = Math.min(originalCanvas.width, maxX + padding);
+  maxY = Math.min(originalCanvas.height, maxY + padding);
+
+  const width = maxX - minX;
+  const height = maxY - minY;
+
+  if (width === 0 || height === 0) {
+    return signaturePad.toDataURL("image/png");
+  }
+
+  // Set ukuran temp canvas proporsional
+  const maxWidth = 300; // Lebar maksimal
+  const ratio = Math.min(1, maxWidth / width);
+  tempCanvas.width = width * ratio;
+  tempCanvas.height = height * ratio;
+
+  // Draw hanya bagian yang diperlukan
+  tempCtx.drawImage(
+    originalCanvas,
+    minX,
+    minY,
+    width,
+    height,
+    0,
+    0,
+    tempCanvas.width,
+    tempCanvas.height,
+  );
+
+  return tempCanvas.toDataURL("image/png");
 }
 
 function updateSignatureVisualFeedback(canvasId, type, isValid) {
@@ -523,25 +612,91 @@ function handleFileSelect(fileInput, type, canvasId) {
     const uploadArea = document.getElementById(`uploadArea${sectionNum}`);
     const dataInput = document.getElementById(`signatureData${sectionNum}`);
 
-    if (previewImg) previewImg.src = event.target.result;
-    if (previewContainer) previewContainer.classList.add("active");
-    if (uploadArea) uploadArea.style.display = "none";
+    // Optimize uploaded signature
+    const img = new Image();
+    img.onload = function () {
+      const optimizedUrl = optimizeUploadedSignature(img);
 
-    // Clear corresponding canvas
-    const signaturePad = signaturePads[type];
-    if (signaturePad) {
-      signaturePad.clear();
-    }
+      if (previewImg) {
+        previewImg.src = optimizedUrl;
+        previewImg.style.maxWidth = "300px"; // Batasi lebar preview
+        previewImg.style.maxHeight = "150px";
+      }
 
-    signatures[type] = event.target.result;
-    if (dataInput) dataInput.value = event.target.result;
+      if (previewContainer) previewContainer.classList.add("active");
+      if (uploadArea) uploadArea.style.display = "none";
 
-    // Update visual feedback
-    updateSignatureVisualFeedback(canvasId, type, true);
-    showToast(`Tanda tangan ${type} berhasil diupload`, "success");
+      // Clear corresponding canvas
+      const signaturePad = signaturePads[type];
+      if (signaturePad) {
+        signaturePad.clear();
+      }
+
+      signatures[type] = optimizedUrl;
+      if (dataInput) dataInput.value = optimizedUrl;
+
+      // Update visual feedback
+      updateSignatureVisualFeedback(canvasId, type, true);
+      showToast(`Tanda tangan ${type} berhasil diupload`, "success");
+    };
+    img.src = event.target.result;
   };
 
   reader.readAsDataURL(file);
+}
+
+function optimizeUploadedSignature(img) {
+  // Buat canvas untuk processing
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  // Set ukuran maksimal
+  const maxWidth = 300;
+  const maxHeight = 150;
+
+  // Hitung rasio scaling
+  let width = img.width;
+  let height = img.height;
+
+  if (width > maxWidth) {
+    height = height * (maxWidth / width);
+    width = maxWidth;
+  }
+
+  if (height > maxHeight) {
+    width = width * (maxHeight / height);
+    height = maxHeight;
+  }
+
+  // Set canvas size
+  canvas.width = width;
+  canvas.height = height;
+
+  // Buat background transparan
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw image
+  ctx.drawImage(img, 0, 0, width, height);
+
+  // Proses untuk membuat background transparan (remove white background)
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+
+  for (let i = 0; i < data.length; i += 4) {
+    // Deteksi warna putih atau hampir putih, ubah ke transparan
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+
+    // Jika warna mendekati putih, ubah alpha ke 0
+    if (r > 240 && g > 240 && b > 240) {
+      data[i + 3] = 0; // Set alpha ke 0 (transparan)
+    }
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+
+  return canvas.toDataURL("image/png");
 }
 
 function removeUploadedSignature(type, canvasId) {

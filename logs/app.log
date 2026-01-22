@@ -6684,3 +6684,68 @@ OSError: [Errno 22] Invalid argument
 2026-01-22 12:16:18,642 | INFO | 127.0.0.1 - - [22/Jan/2026 12:16:18] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
 2026-01-22 12:16:18,648 | INFO | 127.0.0.1 - - [22/Jan/2026 12:16:18] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
 2026-01-22 12:16:18,649 | INFO | 127.0.0.1 - - [22/Jan/2026 12:16:18] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-22 12:23:53,466 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.9.7.114:5000
+2026-01-22 12:23:53,466 | INFO | [33mPress CTRL+C to quit[0m
+2026-01-22 12:23:53,478 | INFO |  * Restarting with stat
+2026-01-22 12:23:54,987 | WARNING |  * Debugger is active!
+2026-01-22 12:23:54,993 | INFO |  * Debugger PIN: 412-121-598
+2026-01-22 12:24:08,957 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:08] "[32mGET / HTTP/1.1[0m" 302 -
+2026-01-22 12:24:08,960 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:08] "[32mGET / HTTP/1.1[0m" 302 -
+2026-01-22 12:24:09,028 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:09] "GET /dashboard HTTP/1.1" 200 -
+2026-01-22 12:24:09,083 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:09] "GET /dashboard HTTP/1.1" 200 -
+2026-01-22 12:24:09,334 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:09] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-22 12:24:09,346 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:09] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-22 12:24:09,387 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:09] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-22 12:24:09,394 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:09] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-22 12:24:09,417 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:09] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-22 12:24:09,422 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:09] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-22 12:24:09,424 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:09] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-22 12:24:09,431 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:09] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-22 12:24:09,472 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:09] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-22 12:24:09,496 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:09] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-22 12:24:13,567 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:13] "GET /laporan-insiden HTTP/1.1" 200 -
+2026-01-22 12:24:13,603 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:13] "[36mGET /static/css/form_03.css HTTP/1.1[0m" 304 -
+2026-01-22 12:24:13,658 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:13] "GET /static/js/form_03.js HTTP/1.1" 200 -
+2026-01-22 12:24:39,670 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:39] "GET /dashboard HTTP/1.1" 200 -
+2026-01-22 12:24:39,715 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:39] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-22 12:24:39,719 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:39] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-22 12:24:39,728 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:39] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-22 12:24:39,730 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:39] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-22 12:24:39,733 | INFO | 127.0.0.1 - - [22/Jan/2026 12:24:39] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-22 13:03:24,540 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.9.7.114:5000
+2026-01-22 13:03:24,540 | INFO | [33mPress CTRL+C to quit[0m
+2026-01-22 13:03:24,540 | INFO |  * Restarting with stat
+2026-01-22 13:03:26,102 | WARNING |  * Debugger is active!
+2026-01-22 13:03:26,113 | INFO |  * Debugger PIN: 220-703-075
+2026-01-22 13:03:29,160 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:29] "[32mGET / HTTP/1.1[0m" 302 -
+2026-01-22 13:03:29,220 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:29] "GET /dashboard HTTP/1.1" 200 -
+2026-01-22 13:03:29,256 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:29] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-22 13:03:29,263 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:29] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-22 13:03:29,265 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:29] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-22 13:03:29,267 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:29] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-22 13:03:29,268 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:29] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-22 13:03:33,218 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:33] "GET /dashboard HTTP/1.1" 200 -
+2026-01-22 13:03:33,240 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:33] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-22 13:03:33,244 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:33] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-22 13:03:33,246 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:33] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-22 13:03:33,254 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:33] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-22 13:03:33,255 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:33] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-22 13:03:34,518 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:34] "GET /usulan-perubahan/baru HTTP/1.1" 200 -
+2026-01-22 13:03:34,649 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:34] "[36mGET /static/css/form.css HTTP/1.1[0m" 304 -
+2026-01-22 13:03:34,651 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:34] "[36mGET /static/css/toast.css HTTP/1.1[0m" 304 -
+2026-01-22 13:03:34,692 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:34] "[36mGET /static/js/toast.js HTTP/1.1[0m" 304 -
+2026-01-22 13:03:34,715 | INFO | 127.0.0.1 - - [22/Jan/2026 13:03:34] "GET /static/js/form.js HTTP/1.1" 200 -
+2026-01-22 13:05:20,654 | INFO | 127.0.0.1 - - [22/Jan/2026 13:05:20] "POST /api/usulan-perubahan/submit HTTP/1.1" 200 -
+2026-01-22 13:05:22,222 | INFO | 127.0.0.1 - - [22/Jan/2026 13:05:22] "GET /dashboard HTTP/1.1" 200 -
+2026-01-22 13:05:22,271 | INFO | 127.0.0.1 - - [22/Jan/2026 13:05:22] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2026-01-22 13:05:22,271 | INFO | 127.0.0.1 - - [22/Jan/2026 13:05:22] "[36mGET /static/css/dashboard_pegawai.css HTTP/1.1[0m" 304 -
+2026-01-22 13:05:22,271 | INFO | 127.0.0.1 - - [22/Jan/2026 13:05:22] "[36mGET /static/css/dashboard.css HTTP/1.1[0m" 304 -
+2026-01-22 13:05:22,289 | INFO | 127.0.0.1 - - [22/Jan/2026 13:05:22] "[36mGET /static/js/dashboard.js HTTP/1.1[0m" 304 -
+2026-01-22 13:05:22,292 | INFO | 127.0.0.1 - - [22/Jan/2026 13:05:22] "[36mGET /static/images/logo_bmkg.png HTTP/1.1[0m" 304 -
+2026-01-22 13:05:33,672 | INFO | 127.0.0.1 - - [22/Jan/2026 13:05:33] "GET /usulan-perubahan/generate/6 HTTP/1.1" 200 -
