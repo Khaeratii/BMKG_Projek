@@ -73,7 +73,7 @@ extra_css %}
           <li>
             <a href="{{ url_for('surat_pernyataan_home') }}">
               <i class="fas fa-plus-circle"></i>
-              Buat Surat Pernyataan
+              Buat Non-Disclosure Agreement
             </a>
           </li>
           <li>
@@ -104,7 +104,7 @@ extra_css %}
             <i class="fas fa-exchange-alt"></i> Buat Usulan Baru
           </a>
           <a href="{{ url_for('surat_pernyataan_home') }}" class="btn-primary">
-            <i class="fas fa-file-contract"></i> Buat Surat Pernyataan
+            <i class="fas fa-file-contract"></i> Buat Non-Disclosure Agreement
           </a>
           <a href="{{ url_for('laporan_insiden_form') }}" class="btn-primary">
             <i class="fas fa-exclamation-triangle"></i> Buat Laporan Insiden
@@ -138,7 +138,7 @@ extra_css %}
           </div>
           <div class="stat-content">
             <h3 class="stat-value">{{ surat_stats.total }}</h3>
-            <p class="stat-label">Surat Pernyataan</p>
+            <p class="stat-label">Non-Disclosure Agreement</p>
           </div>
         </div>
 
@@ -208,7 +208,7 @@ extra_css %}
               data-tab="surat"
               onclick="filterDocuments('surat')"
             >
-              Surat Pernyataan
+              Non-Disclosure Agreement
             </button>
             <button
               class="tab-btn"
@@ -300,11 +300,11 @@ extra_css %}
             {% endif %}
           </div>
 
-          <!-- Surat Pernyataan -->
+          <!-- Non-Disclosure Agreement -->
           <div class="documents-section active" id="suratSection">
             <h4 class="section-title">
               <i class="fas fa-file-contract"></i>
-              Surat Pernyataan
+              Non-Disclosure Agreement
               <span class="section-count">{{ surat_stats.total or 0 }}</span>
             </h4>
 
@@ -354,12 +354,12 @@ extra_css %}
             {% else %}
             <div class="empty-section">
               <i class="fas fa-file-contract"></i>
-              <p>Belum ada surat pernyataan</p>
+              <p>Belum ada Non-Disclosure Agreement</p>
               <a
                 href="{{ url_for('surat_pernyataan_home') }}"
                 class="btn-primary btn-sm"
               >
-                <i class="fas fa-plus"></i> Buat Surat Pernyataan
+                <i class="fas fa-plus"></i> Buat Non-Disclosure Agreement
               </a>
             </div>
             {% endif %}
@@ -457,7 +457,7 @@ extra_css %}
     return false;
   }
 
-  // ==================== FUNGSI SURAT PERNYATAAN ====================
+  // ==================== FUNGSI Non-Disclosure Agreement ====================
 
   // ==================== FUNGSI LAPORAN INSIDEN ====================
   /**
@@ -475,7 +475,8 @@ extra_css %}
     const confirmMessage =
       {
         usulan: "Apakah Anda yakin ingin menghapus usulan perubahan ini?",
-        surat: "Apakah Anda yakin ingin menghapus surat pernyataan ini?",
+        surat:
+          "Apakah Anda yakin ingin menghapus Non-Disclosure Agreement ini?",
         insiden: "Apakah Anda yakin ingin menghapus laporan insiden ini?",
       }[type] || "Apakah Anda yakin ingin menghapus dokumen ini?";
 
@@ -650,7 +651,7 @@ extra_css %}
   function getLabelByType(type) {
     return {
       usulan: "Usulan Perubahan",
-      surat: "Surat Pernyataan",
+      surat: "Non-Disclosure Agreement",
       insiden: "Laporan Insiden",
     }[type];
   }
