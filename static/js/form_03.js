@@ -10,15 +10,15 @@ let signaturePads = {};
 let signaturesSaved = {};
 
 // Generate nomor permohonan
+// Generate nomor permohonan
 function generateNomorPermohonan() {
   const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  const hour = String(now.getHours()).padStart(2, "0");
-  const minute = String(now.getMinutes()).padStart(2, "0");
-  const second = String(now.getSeconds()).padStart(2, "0");
-  return `INS/${year}${month}${day}/${hour}${minute}${second}`;
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  const h = String(now.getHours()).padStart(2, "0");
+  const min = String(now.getMinutes()).padStart(2, "0");
+  return `${y}-${m}-${d} ${h}.${min}`;
 }
 
 // Initialize form
